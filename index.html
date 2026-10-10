@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SQL 드릴 — 쿼리 테스트 연습</title>
+<meta name="description" content="데이터 분석 채용 전형의 SQL 쿼리 테스트를 실제와 같은 조건으로 연습합니다. 브라우저에서 바로 실행되고 여러 데이터셋으로 채점합니다.">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--warn:#B5742E;--code:#F3F4F6;
+      --rail:270px}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --warn:#D9A062;--code:#23282D;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);overflow:hidden;
+     font:14px/1.65 "Malgun Gothic",system-ui,sans-serif;
+     display:grid;grid-template-rows:auto 1fr}
+
+/* 상단 */
+#top{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--panel);
+     border-bottom:1px solid var(--line);flex-wrap:wrap}
+#top .ttl{font-weight:700;white-space:nowrap}
+#top .sub{color:var(--muted);font-size:12px;white-space:nowrap}
+#top a{color:var(--accent);text-decoration:none;font-size:13px;white-space:nowrap}
+#top a:hover{text-decoration:underline}
+.sp{margin-left:auto}
+select,button{font:inherit}
+select{background:var(--panel);color:var(--fg);border:1px solid var(--line);
+       border-radius:8px;padding:6px 9px;font-size:12.5px}
+#burger{border:1px solid var(--line);background:var(--panel);color:var(--fg);
+        border-radius:8px;padding:6px 11px;cursor:pointer;font-size:12.5px}
+
+/* 3단 */
+#main{display:grid;grid-template-columns:var(--rail) 400px 1fr;min-height:0}
+body.norail #main{grid-template-columns:0 400px 1fr}
+body.norail #rail{display:none}
+@media(max-width:1100px){#main{grid-template-columns:var(--rail) 1fr}
+  body.norail #main{grid-template-columns:0 1fr}
+  #work{display:none}}
+@media(max-width:760px){#main{grid-template-columns:1fr;overflow-y:auto}
+  body{overflow:auto;height:auto}
+  #rail{display:none}#prob{border-right:0}#work{display:flex;height:80vh}}
+
+#rail{border-right:1px solid var(--line);overflow-y:auto;background:var(--panel);
+      padding:10px 8px 40px}
+#rail h3{font-size:11px;color:var(--muted);margin:12px 6px 5px;letter-spacing:.5px}
+.ti{display:block;width:100%;text-align:left;border:0;background:none;color:var(--fg);
+    border-radius:7px;padding:6px 9px;cursor:pointer;font-size:12.8px;line-height:1.45}
+.ti:hover{background:var(--code)}
+.ti.on{background:var(--accent);color:#fff;font-weight:600}
+.ti .lv{color:var(--muted);font-size:10.5px}
+.ti.on .lv{color:#dbe7fb}
+.ti.done::after{content:"✓";color:var(--ok);font-weight:700;float:right}
+.ti.on.done::after{color:#fff}
+
+#prob{border-right:1px solid var(--line);overflow-y:auto;padding:14px 16px 50px;min-width:0}
+#prob h2{font-size:16.5px;margin:0 0 3px}
+.lvl{font-size:11.5px;color:var(--muted);margin:0 0 10px}
+.prompt{background:var(--panel);border:1px solid var(--line);border-radius:9px;
+        padding:11px 13px;white-space:pre-wrap;word-break:keep-all;font-size:13.2px}
+.spec{font-size:12.3px;color:var(--muted);margin:9px 0 0;word-break:break-all}
+.spec code{background:var(--code);padding:2px 5px;border-radius:4px;color:var(--fg)}
+.sec{margin-top:16px}.sec h3{font-size:11.5px;margin:0 0 6px;color:var(--muted)}
+.lt{border-collapse:collapse;margin:0 0 9px;font-size:12px}
+.lt th,.lt td{border:1px solid var(--line);padding:2px 8px;white-space:nowrap}
+.lt th{background:var(--code);font-size:11.5px}
+.tname{font-family:Consolas,monospace;font-weight:700;font-size:12.5px;margin:8px 0 3px}
+.tnote{font-size:11.5px;color:var(--muted)}.tnote ul{margin:3px 0 0;padding-left:15px}
+.arrow{color:var(--muted);margin:2px 0 5px;font-size:12px}
+
+#work{display:flex;flex-direction:column;padding:14px 16px;gap:9px;min-width:0;overflow:hidden}
+textarea{flex:1 1 55%;min-height:180px;resize:none;background:var(--panel);color:var(--fg);
+         border:1px solid var(--line);border-radius:9px;padding:12px;
+         font:13.5px/1.6 Consolas,"D2Coding",monospace;tab-size:2}
+textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.bar{display:flex;gap:8px;align-items:center;flex:0 0 auto;flex-wrap:wrap}
+.go{border:0;border-radius:8px;padding:9px 18px;font-weight:700;cursor:pointer;font-size:14px}
+.go:disabled{opacity:.45;cursor:default}
+.run{background:var(--code);color:var(--fg);border:1px solid var(--line)}
+.sub{background:var(--accent);color:#fff}
+.hint{color:var(--muted);font-size:11.7px;margin-left:auto;text-align:right}
+#out{flex:1 1 45%;min-height:160px;overflow:auto;background:var(--panel);
+     border:1px solid var(--line);border-radius:9px;padding:12px;font-size:12.5px}
+table.r{border-collapse:collapse;font-size:12.3px;font-variant-numeric:tabular-nums}
+table.r th,table.r td{border:1px solid var(--line);padding:3px 9px;white-space:nowrap}
+table.r th{background:var(--code);font-size:11.5px;color:var(--muted)}
+.ok{color:var(--ok);font-weight:700}.bad{color:var(--bad);font-weight:700}
+.wt{color:var(--warn);font-weight:700}
+.msg{margin:3px 0}
+.ds{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0 2px}
+.ds span{font-size:11.5px;border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.ds .p{color:var(--ok);border-color:var(--ok)}
+.ds .f{color:var(--bad);border-color:var(--bad)}
+
+#boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+      background:var(--bg);z-index:50;flex-direction:column;gap:10px;color:var(--muted);
+      font-size:14px;padding:20px;text-align:center}
+.spin{width:22px;height:22px;border:2px solid var(--line);border-top-color:var(--accent);
+      border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.spin{animation:none}}
+</style>
+</head>
+<body class="">
+
+<div id="top">
+  <button id="burger" title="문제 목록 (Ctrl+B)">☰</button>
+  <span class="ttl">SQL 드릴</span>
+  <span class="sub" id="dbinfo"></span>
+  <span class="sp"></span>
+  <select id="eng">
+    <option value="mysql">MySQL 문법</option>
+    <option value="sqlite">SQLite 문법</option>
+  </select>
+  <a href="./guide.html" target="_blank">문항 해설 →</a>
+</div>
+
+<div id="main">
+  <nav id="rail"></nav>
+  <section id="prob"></section>
+  <section id="work">
+    <textarea id="sql" spellcheck="false" placeholder="여기에 쿼리를 쓰세요&#10;Ctrl+Enter 실행 · Ctrl+S 제출"></textarea>
+    <div class="bar">
+      <button class="go run" id="brun">실행</button>
+      <button class="go sub" id="bsub">제출</button>
+      <span class="hint">실행은 결과만 봅니다 · 제출하면 채점합니다</span>
+    </div>
+    <div id="out">문제를 고르고 쿼리를 실행해 보세요.</div>
+  </section>
+</div>
+
+<div id="boot"><div class="spin"></div><div id="bootmsg">SQLite 엔진을 불러오는 중…</div></div>
+
+<script src="./sql-wasm.js"></script>
+<script src="./sqlmy.js"></script>
+<script>
+"use strict";
+var $ = function (id) { return document.getElementById(id); };
+var esc = function (s) {
+  return String(s).replace(/[&<>]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
+  });
+};
+
+var SQL = null, DB = null;
+var TASKS = [], SCHEMA = [], EX = {}, EXPECT = {}, DS = { ddl: {}, sets: [] };
+var cur = null, solved = {};
+try { solved = JSON.parse(localStorage.getItem("sqldrill-solved") || "{}"); } catch (e) {}
+function saveSolved() {
+  try { localStorage.setItem("sqldrill-solved", JSON.stringify(solved)); } catch (e) {}
+}
+
+/* ── 채점 정규화 ────────────────────────────────────────────────
+   예전에 2자리로 반올림해 비교했더니 ROUND 를 빼먹은 답도 통과했다.
+   실제 시험은 값을 그대로 보므로 여기서도 그대로 본다.
+   엔진 간 부동소수 차이(300.00 vs 300.0)만 흡수한다. */
+function norm(v) {
+  if (v === null || v === undefined) return "∅";
+  var s = String(v).trim();
+  if (s === "" || s === "None") return "∅";
+  var f = Number(s);
+  if (!Number.isNaN(f) && Number.isFinite(f)) return String(Number(f.toPrecision(9)));
+  return s;
+}
+function rowKey(r) { return r.map(norm).join("\u0001"); }
+
+/* 정수 나눗셈 경고 — 연습이 시험보다 느슨하면 안 된다 */
+function lintIntDiv(sql) {
+  var body = sql.replace(/'[^']*'/g, "''");
+  if (body.indexOf("/") < 0) return null;
+  if (/\d+\.\d|CAST\s*\(|CONVERT\s*\(|DECIMAL|AVG\s*\(/i.test(body)) return null;
+  return "나눗셈에 소수가 없습니다. 지금은 통과해도 시험 환경에서는 정수 나눗셈이 되어 "
+       + "0 이 나올 수 있습니다. 100.0 * A / B 처럼 소수를 섞으세요.";
+}
+
+/* ── 추가 데이터셋용 임시 DB ─────────────────────────────────── */
+function buildDataset(spec) {
+  var db = new SQL.Database();
+  Object.keys(DS.ddl).forEach(function (t) {
+    db.run("CREATE TABLE " + t + " (" + DS.ddl[t] + ")");
+    var d = spec.tables[t];
+    if (!d || !d.rows.length) return;
+    var st = db.prepare("INSERT INTO " + t + " (" + d.cols.join(",") + ") VALUES ("
+                        + d.cols.map(function () { return "?"; }).join(",") + ")");
+    d.rows.forEach(function (r) { st.run(r); });
+    st.free();
+  });
+  SQLMy.install(db);
+  return db;
+}
+
+/* ── 채점 ───────────────────────────────────────────────────── */
+function grade(task, got) {
+  var exp = EXPECT[task.id].main;
+  var want = task.columns.split(",").map(function (s) { return s.trim(); });
+  var msgs = [], diffs = [];
+  if (got.cols.map(function (c) { return c.toLowerCase(); }).join("|")
+      !== want.map(function (c) { return c.toLowerCase(); }).join("|")) {
+    msgs.push("컬럼 이름 또는 순서가 다릅니다 — 요구: " + want.join(", ")
+              + " / 제출: " + (got.cols.join(", ") || "(없음)"));
+  }
+  if (got.rows.length !== exp.rows.length) {
+    msgs.push("행 수가 다릅니다 — 정답 " + exp.rows.length + "행 / 제출 " + got.rows.length + "행");
+  }
+  var lim = Math.min(got.rows.length, exp.rows.length);
+  for (var i = 0; i < lim; i++) {
+    var g = got.rows[i].map(norm), e = exp.rows[i].map(norm);
+    if (g.join("|") !== e.join("|")) diffs.push({ row: i + 1, expected: e, got: g });
+  }
+  if (diffs.length) {
+    msgs.push("값이 다른 행이 " + diffs.length + "개 있습니다 (정렬 순서도 채점 대상입니다)");
+  }
+  return { passed: !msgs.length, messages: msgs, diffs: diffs.slice(0, 5),
+           expectedRows: exp.rows.length };
+}
+
+/* 추가 데이터셋은 순서를 빼고 집합으로 비교한다.
+   동점이 많은 데이터는 정렬이 흔들려 같은 정답끼리도 순서가 달라진다. */
+function checkDatasets(task, sql) {
+  var out = [];
+  DS.sets.forEach(function (s) {
+    var exp = EXPECT[task.id][s.name];
+    if (!exp || exp.error) return;
+    var db = null;
+    try {
+      db = buildDataset(s);
+      var got = SQLMy.run(db, sql);
+      if (got.cols.length !== exp.cols.length) {
+        out.push({ name: s.name, ok: false,
+          why: "컬럼 개수가 다릅니다 — 정답 " + exp.cols.length + "개 / 제출 " + got.cols.length + "개" });
+      } else if (got.rows.length !== exp.rows.length) {
+        out.push({ name: s.name, ok: false,
+          why: "행 수가 다릅니다 — 정답 " + exp.rows.length + "행 / 제출 " + got.rows.length + "행" });
+      } else {
+        var a = got.rows.map(rowKey).sort(), b = exp.rows.map(rowKey).sort();
+        if (a.join("\u0002") !== b.join("\u0002")) {
+          var miss = b.filter(function (x) { return a.indexOf(x) < 0; });
+          var why = "결과 집합이 다릅니다";
+          if (miss.length) why += " — 빠진 행 [" + miss[0].split("\u0001").join(" | ") + "]";
+          out.push({ name: s.name, ok: false, why: why });
+        } else out.push({ name: s.name, ok: true });
+      }
+    } catch (e) {
+      out.push({ name: s.name, ok: false, why: "쿼리 오류: " + String(e.message || e).split("\n")[0].slice(0, 90) });
+    } finally { if (db) db.close(); }
+  });
+  return out;
+}
+
+/* ── 화면 ───────────────────────────────────────────────────── */
+function ltable(cols, rows) {
+  var h = '<table class="lt"><tr>';
+  cols.forEach(function (c) { h += "<th>" + esc(c) + "</th>"; });
+  h += "</tr>";
+  rows.forEach(function (r) {
+    h += "<tr>";
+    r.forEach(function (v) { h += "<td>" + esc(v) + "</td>"; });
+    h += "</tr>";
+  });
+  return h + "</table>";
+}
+function schemaBlock(use) {
+  var list = (use && use.length)
+    ? SCHEMA.filter(function (t) { return use.indexOf(t.name) >= 0; }) : SCHEMA;
+  var h = '<div class="sec"><h3>테이블</h3>';
+  list.forEach(function (t) {
+    h += '<div class="tname">' + esc(t.name) + "</div>"
+       + ltable(["Column Name", "Type"], t.cols)
+       + '<div class="tnote"><ul>'
+       + t.notes.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("")
+       + "</ul></div>";
+  });
+  return h + "</div>";
+}
+function exampleBlock(id) {
+  var e = EX[String(id)];
+  if (!e) return "";
+  var h = '<div class="sec"><h3>예시</h3><div style="color:var(--muted);font-size:12px">입력</div>';
+  Object.keys(e.input).forEach(function (n) {
+    h += '<div class="tname">' + esc(n) + "</div>" + ltable(e.input[n].cols, e.input[n].rows);
+  });
+  return h + '<div class="arrow">↓ 출력</div>' + ltable(e.output.cols, e.output.rows) + "</div>";
+}
+
+function drawRail() {
+  var byLevel = { "쉬움": [], "보통": [], "어려움": [] };
+  TASKS.forEach(function (t) { (byLevel[t.level] || byLevel["보통"]).push(t); });
+  var h = "";
+  Object.keys(byLevel).forEach(function (lv) {
+    if (!byLevel[lv].length) return;
+    h += "<h3>" + lv + "</h3>";
+    byLevel[lv].forEach(function (t) {
+      h += '<button class="ti' + (cur && cur.id === t.id ? " on" : "")
+         + (solved[t.id] ? " done" : "") + '" data-id="' + t.id + '">Q'
+         + t.id + ". " + esc(t.title) + ' <span class="lv">' + t.minutes + "분</span></button>";
+    });
+  });
+  $("rail").innerHTML = h;
+  Array.prototype.forEach.call($("rail").querySelectorAll(".ti"), function (b) {
+    b.onclick = function () { pick(+b.getAttribute("data-id")); };
+  });
+}
+
+function pick(id) {
+  cur = TASKS.filter(function (t) { return t.id === id; })[0];
+  $("prob").innerHTML = "<h2>Q" + cur.id + ". " + esc(cur.title) + "</h2>"
+    + '<div class="lvl">난이도 ' + esc(cur.level) + " · 권장 " + cur.minutes + "분</div>"
+    + '<div class="prompt">' + esc(cur.prompt) + "</div>"
+    + '<div class="spec">출력 컬럼 <code>' + esc(cur.columns)
+    + "</code> · 정렬 <code>" + esc(cur.order_note) + "</code></div>"
+    + exampleBlock(cur.id) + schemaBlock(cur.tables);
+  try { $("sql").value = localStorage.getItem("sqldrill-q" + id) || ""; } catch (e) { $("sql").value = ""; }
+  $("out").textContent = "실행하면 결과가 여기 표시됩니다.";
+  $("prob").scrollTop = 0;
+  drawRail();
+  if (window.innerWidth > 760) $("sql").focus();
+  if (location.hash !== "#q" + id) history.replaceState(null, "", "#q" + id);
+}
+
+function resultTable(d, label) {
+  var h = '<div style="color:var(--muted);margin-bottom:6px">' + label + " — "
+        + d.rows.length + "행</div>";
+  if (!d.cols.length) return h;
+  h += '<table class="r"><tr>';
+  d.cols.forEach(function (c) { h += "<th>" + esc(c) + "</th>"; });
+  h += "</tr>";
+  d.rows.slice(0, 40).forEach(function (r) {
+    h += "<tr>";
+    r.forEach(function (v) { h += "<td>" + esc(v === null ? "∅" : v) + "</td>"; });
+    h += "</tr>";
+  });
+  h += "</table>";
+  if (d.rows.length > 40) h += '<div style="color:var(--muted);margin-top:5px">… '
+    + (d.rows.length - 40) + "행 더</div>";
+  return h;
+}
+
+function userSQL() {
+  var raw = $("sql").value;
+  try { localStorage.setItem("sqldrill-q" + cur.id, raw); } catch (e) {}
+  return $("eng").value === "sqlite"
+    ? raw.split("\n").filter(function (l) { return l.trim().slice(0, 2) !== "--"; }).join("\n").trim()
+    : raw;
+}
+
+function doRun() {
+  if (!cur) return;
+  var sql = userSQL(), d;
+  try {
+    d = $("eng").value === "sqlite"
+      ? (function () { var st = DB.prepare(sql), c = null, rs = [];
+          try { while (st.step()) { if (!c) c = st.getColumnNames();
+            rs.push(st.get().map(function (v) { return v === null ? null : String(v); })); }
+            if (!c) c = st.getColumnNames(); } finally { st.free(); }
+          return { cols: c || [], rows: rs }; })()
+      : SQLMy.run(DB, sql);
+  } catch (e) {
+    $("out").innerHTML = '<div class="bad">쿼리 오류</div><pre style="white-space:pre-wrap;margin:6px 0 0">'
+      + esc(String(e.message || e)) + "</pre>";
+    return;
+  }
+  var want = cur.columns.split(",").map(function (s) { return s.trim().toLowerCase(); });
+  var h = resultTable(d, "내 결과");
+  if (d.cols.map(function (c) { return c.toLowerCase(); }).join("|") !== want.join("|")) {
+    h = '<div class="bad msg">컬럼 이름/개수가 요구사항과 다릅니다 — 요구: ' + esc(cur.columns) + "</div>" + h;
+  }
+  var lint = lintIntDiv(sql);
+  if (lint) h = '<div class="wt msg">' + esc(lint) + "</div>" + h;
+  $("out").innerHTML = h;
+}
+
+function doSubmit() {
+  if (!cur) return;
+  var sql = userSQL(), got;
+  $("out").textContent = "채점 중…";
+  try {
+    got = $("eng").value === "sqlite"
+      ? (function () { var st = DB.prepare(sql), c = null, rs = [];
+          try { while (st.step()) { if (!c) c = st.getColumnNames();
+            rs.push(st.get().map(function (v) { return v === null ? null : String(v); })); }
+            if (!c) c = st.getColumnNames(); } finally { st.free(); }
+          return { cols: c || [], rows: rs }; })()
+      : SQLMy.run(DB, sql);
+  } catch (e) {
+    $("out").innerHTML = '<div class="bad">쿼리 오류</div><pre style="white-space:pre-wrap;margin:6px 0 0">'
+      + esc(String(e.message || e)) + "</pre>";
+    return;
+  }
+  var res = grade(cur, got);
+  var sets = [];
+  if (res.passed) {
+    sets = checkDatasets(cur, sql);
+    if (sets.some(function (s) { return !s.ok; })) {
+      res.passed = false;
+      res.messages.push("추가 데이터셋에서 실패: " + sets.filter(function (s) { return !s.ok; })
+        .map(function (s) { return s.name + "(" + s.why + ")"; }).join(", "));
+    }
+  }
+
+  var h = "";
+  if (res.passed) {
+    solved[cur.id] = 1; saveSolved(); drawRail();
+    h += '<div class="ok">통과 — 본 데이터와 추가 데이터셋 ' + sets.length + "개를 모두 맞혔습니다.</div>";
+  } else {
+    h += '<div class="bad">불일치</div>';
+    res.messages.forEach(function (m) { h += '<div class="msg">· ' + esc(m) + "</div>"; });
+  }
+  if (sets.length) {
+    h += '<div class="ds">';
+    sets.forEach(function (s) {
+      h += '<span class="' + (s.ok ? "p" : "f") + '">' + esc(s.name) + (s.ok ? " ✓" : " ✗") + "</span>";
+    });
+    h += "</div>";
+  }
+  var lint = lintIntDiv(sql);
+  if (lint) h += '<div class="wt msg">' + esc(lint) + "</div>";
+  if (res.diffs.length) {
+    h += '<div style="margin-top:8px;color:var(--muted)">틀린 행 (앞 '
+       + res.diffs.length + "개)</div>";
+    res.diffs.forEach(function (d) {
+      h += '<div class="msg" style="font-family:Consolas,monospace;font-size:12px">'
+         + d.row + "행 · 정답 [" + esc(d.expected.join(" | ")) + "]<br>"
+         + '<span style="padding-left:' + (String(d.row).length + 2) + 'ch">제출 ['
+         + esc(d.got.join(" | ")) + "]</span></div>";
+    });
+  }
+  h += "<hr style='border:0;border-top:1px solid var(--line);margin:10px 0'>"
+     + resultTable(got, "내 결과") ;
+  $("out").innerHTML = h;
+}
+
+/* ── 부팅 ───────────────────────────────────────────────────── */
+function boot() {
+  $("bootmsg").textContent = "문제와 데이터를 불러오는 중…";
+  Promise.all([
+    initSqlJs({ locateFile: function (f) { return "./" + f; } }),
+    fetch("./data/tasks.json").then(function (r) { return r.json(); }),
+    fetch("./data/schema.json").then(function (r) { return r.json(); }),
+    fetch("./data/examples.json").then(function (r) { return r.json(); }),
+    fetch("./data/expected.json").then(function (r) { return r.json(); }),
+    fetch("./data/datasets.json").then(function (r) { return r.json(); }),
+    fetch("./data/practice.sqlite").then(function (r) { return r.arrayBuffer(); })
+  ]).then(function (a) {
+    SQL = a[0]; TASKS = a[1]; SCHEMA = a[2]; EX = a[3]; EXPECT = a[4]; DS = a[5];
+    DB = new SQL.Database(new Uint8Array(a[6]));
+    SQLMy.install(DB);
+    $("dbinfo").textContent = TASKS.length + "문항 · 데이터셋 " + (DS.sets.length + 1) + "개로 채점";
+    drawRail();
+    var want = parseInt((location.hash || "").replace("#q", ""), 10);
+    pick(TASKS.some(function (t) { return t.id === want; }) ? want : TASKS[0].id);
+    $("boot").style.display = "none";
+  }).catch(function (e) {
+    $("boot").innerHTML = '<div class="bad">불러오지 못했습니다</div><div style="max-width:420px">'
+      + esc(String(e.message || e)) + "</div>";
+  });
+}
+
+$("brun").onclick = doRun;
+$("bsub").onclick = doSubmit;
+$("burger").onclick = function () { document.body.classList.toggle("norail"); };
+$("eng").onchange = function () {
+  try { localStorage.setItem("sqldrill-eng", $("eng").value); } catch (e) {}
+};
+try { var sv = localStorage.getItem("sqldrill-eng"); if (sv) $("eng").value = sv; } catch (e) {}
+document.addEventListener("keydown", function (e) {
+  if (e.ctrlKey && e.key === "Enter") { e.preventDefault(); doRun(); }
+  if (e.ctrlKey && (e.key === "s" || e.key === "S")) { e.preventDefault(); doSubmit(); }
+  if (e.ctrlKey && (e.key === "b" || e.key === "B")) { e.preventDefault(); $("burger").click(); }
+});
+boot();
+</script>
+</body>
+</html>

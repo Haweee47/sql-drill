@@ -1,0 +1,1100 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SQL 문항 해설</title><style>
+/* ── 해설 버전 전환 ───────────────────────────────────────────── */
+.modebar{position:sticky;top:0;z-index:9;background:var(--bg);
+         padding:10px 0 12px;margin:0 0 4px;border-bottom:1px solid var(--line);
+         display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.modebar b{font-size:12.5px;color:var(--muted);margin-right:2px}
+.modebar button{border:1px solid var(--line);background:var(--panel);color:var(--fg);
+                border-radius:999px;padding:6px 15px;font:inherit;font-size:13px;
+                cursor:pointer}
+.modebar button:hover{background:var(--code)}
+.modebar button.on{background:var(--accent);color:#fff;border-color:var(--accent);
+                   font-weight:700}
+.vtag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.3px;
+      padding:2px 9px;border-radius:999px;margin:0 0 8px}
+.vtag.e{background:#E7F2E9;color:#0F7B4F}
+.vtag.d{background:#E8EEFA;color:#1B64DA}
+@media(prefers-color-scheme:dark){.vtag.e{background:#1C2E24;color:#4CC38A}
+  .vtag.d{background:#1B2434;color:#6AA3F5}}
+.ver{margin-bottom:6px}
+.ver.easy{border-left:3px solid var(--ok);padding-left:14px}
+.ver.deep{border-left:3px solid var(--accent);padding-left:14px}
+body.mode-easy .ver.deep{display:none}
+body.mode-easy .vtag{display:none}
+body.mode-deep .ver.easy{display:none}
+body.mode-deep .vtag{display:none}
+body.mode-easy .ver.easy,body.mode-deep .ver.deep{border-left:0;padding-left:0}
+body.mode-both .ver{margin-bottom:22px}
+
+/* 쉬운 해설 안의 작은 표 */
+.ver.easy .oneline{font-size:16px;line-height:1.7;margin:0 0 12px}
+table.e{border-collapse:collapse;margin:4px 0 8px;font-size:13.5px}
+table.e th,table.e td{border:1px solid var(--line);padding:4px 11px;text-align:left}
+table.e th{background:var(--code);font-size:12.5px;color:var(--muted);font-weight:600}
+table.e td.x{color:var(--bad)}
+.ver.easy p.note{font-size:13.5px;color:var(--muted);margin:4px 0 10px;
+                 word-break:keep-all}
+.ver.easy h4{font-size:13px;color:var(--muted);margin:14px 0 5px}
+.ver.easy ol,.ver.easy ul{margin:0;padding-left:21px}
+.ver.easy li{margin-bottom:5px}
+.ver.easy .wt{background:var(--warn);border-radius:9px;padding:10px 14px 10px 0}
+.ver.easy .wt ul{padding-left:30px}
+
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--bad:#C0392B;--ok:#0F7B4F;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--bad:#E57373;--ok:#4CC38A;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:15px/1.75 "Malgun Gothic",system-ui,sans-serif;
+     display:grid;grid-template-columns:210px 1fr}
+@media(max-width:760px){body{grid-template-columns:1fr}
+  aside{position:static!important;height:auto!important;border-right:0!important;
+        border-bottom:1px solid var(--line)}}
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--panel);
+      border-right:1px solid var(--line);padding:16px 12px}
+aside a{display:block;color:var(--fg);text-decoration:none;font-size:13px;
+        padding:4px 8px;border-radius:6px}
+aside a:hover{background:var(--code)}
+aside .lv{color:var(--muted);font-size:11px}
+aside h3{font-size:12px;color:var(--muted);margin:14px 0 6px;letter-spacing:.6px}
+main{max-width:860px;padding:28px 24px 80px;min-width:0}
+h1{font-size:25px;margin:0 0 6px;letter-spacing:-.5px}
+h2{font-size:19px;margin:38px 0 10px;padding-top:10px;border-top:1px solid var(--line);
+   letter-spacing:-.3px}
+h2 .n{color:var(--accent)}
+h2 .lv{font-size:12px;color:var(--muted);font-weight:400;margin-left:6px}
+.lead{color:var(--muted);margin:0 0 20px}
+.asks{background:var(--panel);border-left:3px solid var(--accent);padding:10px 14px;
+      border-radius:0 8px 8px 0;margin:0 0 14px}
+h4{font-size:13px;color:var(--muted);margin:18px 0 6px;letter-spacing:.5px}
+ol,ul{margin:0 0 10px;padding-left:20px}
+li{margin-bottom:5px}
+pre{background:var(--code);border:1px solid var(--line);border-radius:9px;
+    padding:13px 15px;overflow-x:auto;font:12.8px/1.6 Consolas,"D2Coding",monospace;
+    margin:0 0 12px}
+code{background:var(--code);padding:1px 5px;border-radius:4px;
+     font:12.5px Consolas,monospace}
+pre code{background:none;padding:0;font-size:inherit}
+.trap{background:var(--warn);border:1px solid var(--line);border-radius:9px;
+      padding:11px 15px;margin:0 0 12px}
+.trap ul{margin:0;padding-left:18px}
+.trap li{margin-bottom:7px}
+.var{font-size:13.5px;color:var(--muted);border-left:2px solid var(--line);
+     padding-left:12px;margin:0}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:0 0 16px}
+th,td{border-bottom:1px solid var(--line);padding:7px 9px;text-align:left;
+      vertical-align:top}
+th{color:var(--muted);font-size:12px;letter-spacing:.4px}
+td:first-child{white-space:nowrap;font-weight:600}
+td:nth-child(2){font-family:Consolas,monospace;font-size:12.5px;color:var(--accent)}
+.chk{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+.chk li{margin-bottom:6px}
+.top{display:inline-block;margin-top:10px;font-size:12.5px;color:var(--muted);
+     text-decoration:none}
+h3{font-size:17px;margin:30px 0 8px;padding-top:14px;border-top:1px dashed var(--line)}
+h3 .grp{font-size:11px;color:var(--muted);background:var(--code);padding:2px 8px;
+        border-radius:10px;margin-left:8px;vertical-align:middle;font-weight:400}
+h5{font-size:12px;color:var(--muted);margin:14px 0 5px;letter-spacing:.4px}
+pre.sig{background:var(--panel);border-left:3px solid var(--accent);font-weight:600}
+table.args td:first-child{font-family:Consolas,monospace;color:var(--accent);
+     font-size:12.5px;white-space:normal}
+table.args td:nth-child(2){font-family:inherit;color:inherit;font-size:13px}
+table.res{font-size:12.3px;margin:0 0 12px;width:auto}
+table.res th,table.res td{border:1px solid var(--line);padding:3px 9px;white-space:nowrap}
+table.res th{background:var(--code)}
+.fnav{font-size:12.5px;line-height:2;margin:0 0 8px}
+.arrow{color:var(--muted);font-size:15px;margin:0 0 8px;padding-left:14px}
+.fnav a{color:var(--accent);text-decoration:none}
+td a{color:var(--accent);text-decoration:none;border-bottom:1px dotted var(--accent)}
+</style></head><body>
+<aside>
+  <a href="./index.html" style="font-weight:700;color:var(--accent)">← 드릴로</a>
+  <h3>빠른 이동</h3>
+  <a href="#map">패턴 지도</a><a href="#check">제출 전 체크</a><a href="#funcs"><b>함수 레퍼런스</b></a>
+  <h3>문항</h3><a href="#q1">Q1. 월별 신규 가입자와 결제 전환율 <span class="lv">쉬움</span></a><a href="#q2">Q2. 채널별 퍼널 전환율 <span class="lv">쉬움</span></a><a href="#q3">Q3. 월별 매출 · 누적 · 전월 대비 <span class="lv">보통</span></a><a href="#q4">Q4. 가입 코호트별 월간 리텐션 <span class="lv">어려움</span></a><a href="#q5">Q5. 월별 매출 분해 (신규/기존/복귀) <span class="lv">어려움</span></a><a href="#q6">Q6. 채널별 첫 결제까지 일수의 중앙값 <span class="lv">어려움</span></a><a href="#q7">Q7. 월별 플랜 업그레이드 / 다운그레이드 <span class="lv">보통</span></a><a href="#q8">Q8. 3개월 이상 연속 결제한 유저 <span class="lv">어려움</span></a><a href="#q9">Q9. 채널별 결제 전환과 LTV <span class="lv">보통</span></a><a href="#q10">Q10. 채널별 ARPPU와 순위 변동 <span class="lv">어려움</span></a><a href="#q11">Q11. 5일 이동평균 (부분 구간) <span class="lv">보통</span></a><a href="#q12">Q12. 종목별 5일·20일 이동평균 <span class="lv">보통</span></a><a href="#q13">Q13. 골든크로스 발생일 <span class="lv">어려움</span></a><a href="#q14">Q14. 전 유저 결제 요약 (NULL 처리) <span class="lv">보통</span></a><a href="#q15">Q15. 채널별 pro 비중 (0 나누기) <span class="lv">보통</span></a><a href="#q16">Q16. 퍼널 단계별 유저 수와 단계 전환율 <span class="lv">쉬움</span></a><a href="#q17">Q17. 코호트별 D7 리텐션율 <span class="lv">보통</span></a><a href="#q18">Q18. 유저별 최장 연속 거래일수 <span class="lv">어려움</span></a><a href="#q19">Q19. A/B 테스트 그룹 집계 (상위 1% 제외) <span class="lv">보통</span></a><a href="#q20">Q20. 3일 이상 연속 상승 구간 모두 찾기 <span class="lv">어려움</span></a><a href="#q21">Q21. 채널별 ARPU 와 ARPPU <span class="lv">보통</span></a><a href="#q22">Q22. 한 번도 결제하지 않은 유저 수 <span class="lv">쉬움</span></a><a href="#q23">Q23. 유저별 결제 요약 (NULL 표시와 정렬 분리) <span class="lv">보통</span></a>
+</aside>
+<main id="top">
+  <h1>SQL 문항 해설</h1>
+  <p class="lead">정답보다 <b>왜 그렇게 푸는지</b>와 <b>어디서 틀리는지</b>를 보세요.
+     같은 유형이 다시 나왔을 때 바로 꺼내 쓰는 게 목적입니다.</p>
+  <div class="modebar">
+    <b>해설 버전</b>
+    <button data-m="easy">쉽게</button>
+    <button data-m="deep">자세히</button>
+    <button data-m="both">나란히 비교</button>
+  </div>
+
+  <h2 id="map">패턴 지도</h2>
+  <p class="lead">문제에 이 표현이 나오면 이 기법을 꺼냅니다. 해설보다 이 표를 먼저 외우세요.</p>
+  <table><tr><th>문제에 이렇게 나오면</th><th>이 기법</th><th>주의</th></tr><tr><td>“직전 / 이전 / 전월 / 전일”</td><td><a href="#f-lag">LAG()</a></td><td>날짜 뺄셈으로 직전 행을 찾지 말 것. 주말·결측에서 깨진다</td></tr><tr><td>“최근 N개 / N일 이동평균”</td><td><a href="#f-islands">ROWS BETWEEN (N-1) PRECEDING AND CURRENT ROW</a></td><td>RANGE 아님. 날짜 조인 아님. 당일 포함이라 N-1</td></tr><tr><td>“누적 / 러닝토탈”</td><td><a href="#f-over">SUM(x) OVER (ORDER BY ...)</a></td><td>ORDER BY 만 붙이면 자동으로 누적</td></tr><tr><td>“전체 대비 비중”</td><td><a href="#f-over">SUM(x) OVER ()</a></td><td>괄호를 비우면 전체 합</td></tr><tr><td>“그룹별 1등 / 최신 1건”</td><td><a href="#f-rownum">ROW_NUMBER() = 1 을 서브쿼리 밖에서</a></td><td>WHERE 에서 윈도우 함수 못 씀</td></tr><tr><td>“공동 순위 / 동점”</td><td><a href="#f-rownum">RANK (건너뜀) vs DENSE_RANK (안 건너뜀)</a></td><td>1등만 한 명이면 ROW_NUMBER</td></tr><tr><td>“연속 N개월 / 끊기지 않고”</td><td><a href="#f-rownum">gaps and islands : 일련번호 − ROW_NUMBER()</a></td><td>같은 값이 나오는 구간이 연속 구간</td></tr><tr><td>“코호트 / 가입 후 N개월”</td><td>TIMESTAMPDIFF(MONTH, 코호트월, 활동월)</td><td>분모는 코호트 전체. LEFT JOIN 필수</td></tr><tr><td>“신규 / 기존 / 복귀”</td><td><a href="#f-over">MIN() OVER 로 첫 달, LAG 로 직전 달</a></td><td>세 분류가 겹치지도 비지도 않게</td></tr><tr><td>“중앙값”</td><td><a href="#f-rownum">ROW_NUMBER + COUNT, 짝수면 가운데 둘 평균</a></td><td>MySQL 에 MEDIAN 없음</td></tr><tr><td>“퍼널 / 단계별 전환”</td><td><a href="#f-aggover">COUNT(DISTINCT CASE WHEN step THEN user END)</a></td><td>가로로 펼치는 조건부 집계</td></tr><tr><td>“~가 없는 것도 포함”</td><td><a href="#f-aggover">LEFT JOIN + COALESCE</a></td><td>INNER 쓰면 분모가 깎인다</td></tr><tr><td>“비율 / 전환율 / 퍼센트”</td><td><a href="#f-nullfn">ROUND(100.0 * A / NULLIF(B,0), 2)</a></td><td>×100, 소수, 0 방어 — 셋 다</td></tr></table>
+
+  <h2 id="check">제출 전 체크</h2>
+  <div class="chk"><ul><li>출력 컬럼 이름과 순서가 문제와 똑같은가</li><li>ORDER BY 를 넣었는가 (빠지면 로직이 맞아도 0점)</li><li>ROUND 자릿수가 문제와 같은가</li><li>LEFT JOIN 인가 INNER 인가 — 빠지는 행이 없는가</li><li>나눗셈에 100.0 또는 1.0 을 섞었는가</li><li>분모가 0 이 될 수 있으면 NULLIF 를 썼는가</li><li>조인으로 행이 불어나 COUNT 가 부풀지 않는가 (DISTINCT)</li><li>빈 그룹·NULL·동점에서도 답이 맞는가</li></ul></div>
+  <h2 id="funcs">함수 레퍼런스</h2><p class="lead">패턴 지도의 함수 이름을 누르면 여기로 옵니다. 인자와 생략 시 동작, 그리고 실제 실행 결과입니다.</p><p class="fnav"><a href="#f-over">OVER 절</a> · <a href="#f-lag">LAG / LEAD</a> · <a href="#f-rownum">ROW_NUMBER / RANK / DENSE_RANK</a> · <a href="#f-aggover">SUM / AVG / COUNT + OVER</a> · <a href="#f-frame">프레임 (ROWS / RANGE)</a> · <a href="#f-firstval">FIRST_VALUE / LAST_VALUE / NTH_VALUE</a> · <a href="#f-countcase">COUNT / 조건부 집계</a> · <a href="#f-nullfn">COALESCE / NULLIF / IFNULL</a> · <a href="#f-datefn">날짜 함수</a> · <a href="#f-median">중앙값 만들기 (MEDIAN 대체)</a> · <a href="#f-islands">연속 구간 (gaps and islands)</a> · <a href="#f-dedupe">그룹별 1건만 남기기</a> · <a href="#f-nulldeep">NULL 심화 — 집계·정렬·IN·타입</a></p>
+<h3 id="f-over">OVER 절 <span class="grp">기본</span></h3>
+<pre class="sig"><code>함수(인자) OVER ( [PARTITION BY ...] [ORDER BY ...] [프레임] )</code></pre>
+<table class="args"><tr><th>인자</th><th>설명</th><th>생략하면</th></tr><tr><td>PARTITION BY</td><td>그룹을 나눈다. 그룹이 바뀌면 계산이 초기화된다.</td><td>생략 → 전체가 한 덩어리</td></tr><tr><td>ORDER BY</td><td>그룹 안에서의 순서. 순위·LAG·누적에는 필수.</td><td>생략 → 순서 없음. 순위 함수는 에러</td></tr><tr><td>프레임</td><td>ORDER BY 가 있을 때 계산 범위.</td><td>생략 → 아래 '기본 프레임' 참고</td></tr></table>
+<h5>입력 테이블</h5><table class="res"><tr><th>g</th><th>v</th></tr><tr><td>A</td><td>10</td></tr><tr><td>A</td><td>20</td></tr><tr><td>B</td><td>30</td></tr><tr><td>B</td><td>40</td></tr></table><div class="arrow">↓</div><h5>쿼리</h5>
+<pre><code>SELECT v,
+  SUM(v) OVER ()                       AS 전체합,
+  SUM(v) OVER (ORDER BY v)             AS 누적합,
+  SUM(v) OVER (PARTITION BY g)         AS 그룹합
+FROM (SELECT 'A' g, 10 v UNION ALL SELECT 'A',20
+      UNION ALL SELECT 'B',30 UNION ALL SELECT 'B',40) t
+ORDER BY v</code></pre>
+<h5>결과</h5><table class="res"><tr><th>v</th><th>전체합</th><th>누적합</th><th>그룹합</th></tr><tr><td>10</td><td>100</td><td>10</td><td>30</td></tr><tr><td>20</td><td>100</td><td>30</td><td>30</td></tr><tr><td>30</td><td>100</td><td>60</td><td>70</td></tr><tr><td>40</td><td>100</td><td>100</td><td>70</td></tr></table>
+<h5>실수 포인트</h5><div class="trap"><ul><li><b>기본 프레임이 핵심이다.</b> ORDER BY 가 없으면 파티션 전체, 있으면 <code>RANGE UNBOUNDED PRECEDING ~ CURRENT ROW</code>(누적)가 된다.</li><li>전체 합을 원하면 <b>ORDER BY 를 빼야</b> 한다. 붙이는 순간 누적이 된다.</li><li><code>OVER ()</code> 처럼 괄호를 비우면 테이블 전체 기준.</li><li>같은 OVER 를 여러 번 쓰면 <code>WINDOW w AS (...)</code> 로 이름을 붙일 수 있다.</li></ul></div>
+<a class="top" href="#funcs">↑ 함수 목록</a>
+<h3 id="f-lag">LAG / LEAD <span class="grp">값 접근</span></h3>
+<pre class="sig"><code>LAG(expr [, offset [, default]]) OVER ( [PARTITION BY ...] ORDER BY ... )</code></pre>
+<table class="args"><tr><th>인자</th><th>설명</th><th>생략하면</th></tr><tr><td>expr</td><td>가져올 값. 컬럼, 식, 집계 결과 모두 가능.</td><td>필수</td></tr><tr><td>offset</td><td>몇 행 떨어진 값인가. <b>상수여야 한다</b>(컬럼 불가).</td><td>생략 → <b>1</b></td></tr><tr><td>default</td><td>범위를 벗어났을 때 돌려줄 값.</td><td>생략 → <b>NULL</b></td></tr><tr><td>PARTITION BY</td><td>그룹별로 따로 본다. 그룹 첫 행의 LAG 는 NULL.</td><td>생략 → <b>전체를 한 줄로 이어 본다</b>(그룹 경계를 넘어감)</td></tr><tr><td>ORDER BY</td><td>'직전'을 정의하는 기준.</td><td><b>사실상 필수</b>. 없으면 결과가 들쭉날쭉</td></tr></table>
+<h5>입력 테이블</h5><table class="res"><tr><th>u</th><th>d</th><th>v</th></tr><tr><td>A</td><td>1</td><td>100</td></tr><tr><td>A</td><td>2</td><td>130</td></tr><tr><td>B</td><td>1</td><td>500</td></tr><tr><td>B</td><td>2</td><td>520</td></tr></table><div class="arrow">↓</div><h5>쿼리</h5>
+<pre><code>SELECT u, d, v,
+  LAG(v) OVER (PARTITION BY u ORDER BY d)    AS 전행_정상,
+  LAG(v) OVER (ORDER BY u, d)                AS 전행_파티션없음,
+  LAG(v, 2)    OVER (PARTITION BY u ORDER BY d) AS 두행전,
+  LAG(v, 1, 0) OVER (PARTITION BY u ORDER BY d) AS 없으면0,
+  LEAD(v)      OVER (PARTITION BY u ORDER BY d) AS 다음행
+FROM (SELECT 'A' AS u, 1 AS d, 100 AS v UNION ALL SELECT 'A',2,130
+      UNION ALL SELECT 'B',1,500 UNION ALL SELECT 'B',2,520) t
+ORDER BY u, d</code></pre>
+<h5>결과</h5><table class="res"><tr><th>u</th><th>d</th><th>v</th><th>전행_정상</th><th>전행_파티션없음</th><th>두행전</th><th>없으면0</th><th>다음행</th></tr><tr><td>A</td><td>1</td><td>100</td><td>NULL</td><td>NULL</td><td>NULL</td><td>0</td><td>130</td></tr><tr><td>A</td><td>2</td><td>130</td><td>100</td><td>100</td><td>NULL</td><td>100</td><td>NULL</td></tr><tr><td>B</td><td>1</td><td>500</td><td>NULL</td><td>130</td><td>NULL</td><td>0</td><td>520</td></tr><tr><td>B</td><td>2</td><td>520</td><td>500</td><td>500</td><td>NULL</td><td>500</td><td>NULL</td></tr></table>
+<h5>실수 포인트</h5><div class="trap"><ul><li><b>ORDER BY 가 없으면 의미가 없다.</b> MySQL 은 에러를 내지 않고 아무 순서나 쓰므로 결과가 들쭉날쭉해진다. 반드시 넣는다.</li><li><b>PARTITION BY 를 빼먹으면 다른 그룹의 마지막 행을 끌어온다.</b> 위 결과에서 B그룹 첫 행을 보라. 정상은 NULL 인데, 파티션이 없으면 A그룹의 130 이 넘어온다. 유저별·종목별 비교에서 가장 흔한 버그.</li><li><code>default</code> 를 0 으로 주면 증감 계산에서 첫 행이 <b>전체 증가</b>로 잡힌다. 보통은 NULL 로 두는 게 맞다.</li><li>날짜 간격이 불규칙해도 LAG 는 <b>'직전 행'</b>을 준다. '직전 날짜'가 아니다. 주말·휴일이 있는 데이터에서는 이게 장점이다.</li><li>offset 에 컬럼을 넣을 수 없다. 상수만 된다.</li></ul></div>
+<a class="top" href="#funcs">↑ 함수 목록</a>
+<h3 id="f-rownum">ROW_NUMBER / RANK / DENSE_RANK <span class="grp">순위</span></h3>
+<pre class="sig"><code>ROW_NUMBER() OVER ( [PARTITION BY ...] ORDER BY ... )   -- 괄호 안 인자 없음</code></pre>
+<table class="args"><tr><th>인자</th><th>설명</th><th>생략하면</th></tr><tr><td>(인자 없음)</td><td>세 함수 모두 괄호 안이 비어 있다.</td><td>—</td></tr><tr><td>ORDER BY</td><td>순위의 기준.</td><td><b>필수</b>. 없으면 에러</td></tr><tr><td>PARTITION BY</td><td>그룹별로 순위를 다시 매긴다.</td><td>생략 → 전체 통합 순위</td></tr></table>
+<h5>입력 테이블</h5><table class="res"><tr><th>nm</th><th>score</th></tr><tr><td>A</td><td>90</td></tr><tr><td>B</td><td>80</td></tr><tr><td>C</td><td>80</td></tr><tr><td>D</td><td>70</td></tr></table><div class="arrow">↓</div><h5>쿼리</h5>
+<pre><code>SELECT nm, score,
+  ROW_NUMBER() OVER (ORDER BY score DESC) AS row_num,
+  RANK()       OVER (ORDER BY score DESC) AS rnk,
+  DENSE_RANK() OVER (ORDER BY score DESC) AS dense,
+  NTILE(2)     OVER (ORDER BY score DESC) AS 절반,
+  ROUND(PERCENT_RANK() OVER (ORDER BY score DESC),2) AS pct,
+  ROUND(CUME_DIST()    OVER (ORDER BY score DESC),2) AS cume
+FROM (SELECT 'A' AS nm, 90 AS score UNION ALL SELECT 'B',80
+      UNION ALL SELECT 'C',80 UNION ALL SELECT 'D',70) t
+ORDER BY score DESC, nm</code></pre>
+<h5>결과</h5><table class="res"><tr><th>nm</th><th>score</th><th>row_num</th><th>rnk</th><th>dense</th><th>절반</th><th>pct</th><th>cume</th></tr><tr><td>A</td><td>90</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0.0</td><td>0.25</td></tr><tr><td>B</td><td>80</td><td>3</td><td>2</td><td>2</td><td>2</td><td>0.33</td><td>0.75</td></tr><tr><td>C</td><td>80</td><td>2</td><td>2</td><td>2</td><td>1</td><td>0.33</td><td>0.75</td></tr><tr><td>D</td><td>70</td><td>4</td><td>4</td><td>3</td><td>2</td><td>1.0</td><td>1.0</td></tr></table>
+<h5>실수 포인트</h5><div class="trap"><ul><li><b>동점 처리가 전부 다르다.</b> ROW_NUMBER 1,2,3,4 / RANK 1,2,2,4 / DENSE_RANK 1,2,2,3.</li><li>“1등 <b>한 명만</b>” → ROW_NUMBER = 1. “공동 1등 <b>전부</b>” → RANK = 1.</li><li>ROW_NUMBER 는 동점일 때 <b>누가 먼저일지 보장되지 않는다.</b> 재현성이 필요하면 <code>ORDER BY score DESC, id</code> 처럼 타이브레이커를 넣는다.</li><li><b>WHERE 에서 쓸 수 없다.</b> 서브쿼리로 감싸고 바깥 WHERE 에서 거른다.</li><li><code>NTILE(n)</code> 의 n 은 상수. 행이 n 으로 안 나뉘면 앞쪽 묶음이 1개씩 더 가진다.</li><li><code>PERCENT_RANK</code> = (rank−1)/(행수−1), 0 부터 시작. <code>CUME_DIST</code> = 나 이하 비율, 0 보다 크고 1 이하.</li></ul></div>
+<a class="top" href="#funcs">↑ 함수 목록</a>
+<h3 id="f-aggover">SUM / AVG / COUNT + OVER <span class="grp">집계</span></h3>
+<pre class="sig"><code>SUM(expr) OVER ( [PARTITION BY ...] [ORDER BY ...] [프레임] )</code></pre>
+<table class="args"><tr><th>인자</th><th>설명</th><th>생략하면</th></tr><tr><td>expr</td><td>집계 대상. <code>COUNT(*)</code> 는 행 수, <code>COUNT(컬럼)</code> 은 NULL 제외.</td><td>필수</td></tr><tr><td>ORDER BY</td><td>붙이면 <b>누적</b>이 된다.</td><td>생략 → 파티션 전체 합</td></tr><tr><td>프레임</td><td>범위를 직접 지정.</td><td>아래 frame 항목 참고</td></tr></table>
+<h5>입력 테이블</h5><table class="res"><tr><th>d</th><th>v</th></tr><tr><td>1</td><td>10</td></tr><tr><td>2</td><td>20</td></tr><tr><td>3</td><td>30</td></tr><tr><td>4</td><td>40</td></tr></table><div class="arrow">↓</div><h5>쿼리</h5>
+<pre><code>SELECT d, v,
+  SUM(v)   OVER ()                                               AS 전체,
+  SUM(v)   OVER (ORDER BY d)                                     AS 누적,
+  AVG(v)   OVER (ORDER BY d ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS 최근2평균,
+  COUNT(*) OVER (ORDER BY d)                                     AS 누적행수,
+  ROUND(100.0*v/SUM(v) OVER (),1)                                AS 비중
+FROM (SELECT 1 d, 10 v UNION ALL SELECT 2,20
+      UNION ALL SELECT 3,30 UNION ALL SELECT 4,40) t
+ORDER BY d</code></pre>
+<h5>결과</h5><table class="res"><tr><th>d</th><th>v</th><th>전체</th><th>누적</th><th>최근2평균</th><th>누적행수</th><th>비중</th></tr><tr><td>1</td><td>10</td><td>100</td><td>10</td><td>10.0</td><td>1</td><td>10.0</td></tr><tr><td>2</td><td>20</td><td>100</td><td>30</td><td>15.0</td><td>2</td><td>20.0</td></tr><tr><td>3</td><td>30</td><td>100</td><td>60</td><td>25.0</td><td>3</td><td>30.0</td></tr><tr><td>4</td><td>40</td><td>100</td><td>100</td><td>35.0</td><td>4</td><td>40.0</td></tr></table>
+<h5>실수 포인트</h5><div class="trap"><ul><li><b>AVG 는 정수 컬럼이어도 소수를 돌려준다.</b> MySQL 은 원본 스케일+4자리 DECIMAL. 그래서 ROUND 를 따로 해야 한다.</li><li><code>SUM(x)/COUNT(*)</code> 로 평균을 직접 만들면 <b>엔진에 따라 정수 나눗셈</b>이 된다. AVG 를 쓰거나 <code>*1.0</code>.</li><li>집계 함수는 <b>NULL 을 무시</b>한다. AVG 의 분모에서도 빠진다.</li><li><code>SUM</code> 은 대상 행이 없으면 0 이 아니라 <b>NULL</b> 을 반환한다. LEFT JOIN 뒤에는 COALESCE 로 감싼다.</li><li><b>집계 위에 윈도우를 겹칠 수 있다.</b> <code>MAX(SUM(x)) OVER (PARTITION BY a)</code> — GROUP BY 가 먼저 적용된다.</li></ul></div>
+<a class="top" href="#funcs">↑ 함수 목록</a>
+<h3 id="f-frame">프레임 (ROWS / RANGE) <span class="grp">기본</span></h3>
+<pre class="sig"><code>ROWS BETWEEN &lt;시작&gt; AND &lt;끝&gt;     /     RANGE BETWEEN &lt;시작&gt; AND &lt;끝&gt;</code></pre>
+<table class="args"><tr><th>인자</th><th>설명</th><th>생략하면</th></tr><tr><td>UNBOUNDED PRECEDING</td><td>파티션 맨 처음</td><td></td></tr><tr><td>n PRECEDING</td><td>ROWS: n행 앞 / RANGE: 값이 n 작은 지점</td><td></td></tr><tr><td>CURRENT ROW</td><td>현재 행(ROWS) 또는 현재 값(RANGE)</td><td></td></tr><tr><td>n FOLLOWING</td><td>n행 뒤</td><td></td></tr><tr><td>UNBOUNDED FOLLOWING</td><td>파티션 맨 끝</td><td></td></tr></table>
+<h5>입력 테이블</h5><table class="res"><tr><th>v</th></tr><tr><td>10</td></tr><tr><td>20</td></tr><tr><td>20</td></tr><tr><td>30</td></tr></table><div class="arrow">↓</div><h5>쿼리</h5>
+<pre><code>SELECT v,
+  COUNT(*) OVER (ORDER BY v ROWS  BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS rows_누적,
+  COUNT(*) OVER (ORDER BY v RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS range_누적,
+  AVG(v)   OVER (ORDER BY v ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)          AS 최근3평균
+FROM (SELECT 10 v UNION ALL SELECT 20 UNION ALL
+      SELECT 20 UNION ALL SELECT 30) t
+ORDER BY v</code></pre>
+<h5>결과</h5><table class="res"><tr><th>v</th><th>rows_누적</th><th>range_누적</th><th>최근3평균</th></tr><tr><td>10</td><td>1</td><td>1</td><td>10.0</td></tr><tr><td>20</td><td>2</td><td>3</td><td>15.0</td></tr><tr><td>20</td><td>3</td><td>3</td><td>16.666666666666668</td></tr><tr><td>30</td><td>4</td><td>4</td><td>23.333333333333332</td></tr></table>
+<h5>실수 포인트</h5><div class="trap"><ul><li><b>ROWS 는 행을 세고, RANGE 는 값을 센다.</b> 동점이 있으면 결과가 갈린다. 위 예제에서 20 이 두 개라 rows_누적과 range_누적이 달라진다.</li><li><b>개수가 중요한 계산(이동평균, 최근 N건)은 반드시 ROWS.</b></li><li><b>N일 이동평균의 프레임은 (N−1) PRECEDING</b> 이다. 당일이 포함되기 때문. 5일 → 4 PRECEDING, 20일 → 19 PRECEDING.</li><li>앞 행이 모자라면 <b>윈도우가 알아서 줄어든다.</b> 부분 구간을 CASE 로 처리하려 하면 오히려 틀린다.</li><li><code>GROUPS</code> 프레임과 <code>EXCLUDE</code> 절은 <b>MySQL 8 이 지원하지 않는다</b>.</li></ul></div>
+<a class="top" href="#funcs">↑ 함수 목록</a>
+<h3 id="f-firstval">FIRST_VALUE / LAST_VALUE / NTH_VALUE <span class="grp">값 접근</span></h3>
+<pre class="sig"><code>FIRST_VALUE(expr) OVER ( [PARTITION BY ...] ORDER BY ... [프레임] )      NTH_VALUE(expr, n) OVER ( ... )</code></pre>
+<table class="args"><tr><th>인자</th><th>설명</th><th>생략하면</th></tr><tr><td>expr</td><td>가져올 값</td><td>필수</td></tr><tr><td>n</td><td><code>NTH_VALUE</code> 전용. 프레임 시작에서 n 번째. 상수.</td><td>필수</td></tr><tr><td>프레임</td><td><b>이 함수들은 프레임의 영향을 크게 받는다.</b></td><td>기본값 주의</td></tr></table>
+<h5>입력 테이블</h5><table class="res"><tr><th>d</th><th>v</th></tr><tr><td>1</td><td>10</td></tr><tr><td>2</td><td>20</td></tr><tr><td>3</td><td>30</td></tr></table><div class="arrow">↓</div><h5>쿼리</h5>
+<pre><code>SELECT d, v,
+  FIRST_VALUE(v) OVER (ORDER BY d) AS 첫값,
+  LAST_VALUE(v)  OVER (ORDER BY d) AS 마지막값_함정,
+  LAST_VALUE(v)  OVER (ORDER BY d
+     ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS 마지막값_정답,
+  FIRST_VALUE(v) OVER (ORDER BY d DESC) AS 마지막값_쉬운법
+FROM (SELECT 1 d, 10 v UNION ALL SELECT 2,20
+      UNION ALL SELECT 3,30) t
+ORDER BY d</code></pre>
+<h5>결과</h5><table class="res"><tr><th>d</th><th>v</th><th>첫값</th><th>마지막값_함정</th><th>마지막값_정답</th><th>마지막값_쉬운법</th></tr><tr><td>1</td><td>10</td><td>10</td><td>10</td><td>30</td><td>30</td></tr><tr><td>2</td><td>20</td><td>10</td><td>20</td><td>30</td><td>30</td></tr><tr><td>3</td><td>30</td><td>10</td><td>30</td><td>30</td><td>30</td></tr></table>
+<h5>실수 포인트</h5><div class="trap"><ul><li><b>LAST_VALUE 함정.</b> ORDER BY 만 쓰면 프레임이 '처음~현재'라서 LAST_VALUE 가 <b>항상 현재 행</b>이 된다. 위 예제의 '마지막값_함정' 열을 보라.</li><li>제대로 쓰려면 프레임을 <code>UNBOUNDED FOLLOWING</code> 까지 열어야 한다.</li><li><b>더 쉬운 방법은 ORDER BY 를 뒤집고 FIRST_VALUE 를 쓰는 것.</b> FIRST_VALUE 는 프레임 시작이 늘 맨 앞이라 이 문제가 없다.</li><li>MySQL 8 은 <code>IGNORE NULLS</code> 를 지원하지 않는다. NULL 을 건너뛰려면 서브쿼리에서 미리 걸러야 한다.</li></ul></div>
+<a class="top" href="#funcs">↑ 함수 목록</a>
+<h3 id="f-countcase">COUNT / 조건부 집계 <span class="grp">집계</span></h3>
+<pre class="sig"><code>COUNT(*)   COUNT(expr)   COUNT(DISTINCT expr)   COUNT(CASE WHEN ... THEN x END)</code></pre>
+<table class="args"><tr><th>인자</th><th>설명</th><th>생략하면</th></tr><tr><td>COUNT(*)</td><td>모든 행. NULL 도 센다.</td><td></td></tr><tr><td>COUNT(expr)</td><td><b>NULL 을 제외</b>하고 센다.</td><td></td></tr><tr><td>COUNT(DISTINCT expr)</td><td>중복 제거 후 센다. 조인으로 행이 불어났을 때 필수.</td><td></td></tr></table>
+<h5>입력 테이블</h5><table class="res"><tr><th>v</th></tr><tr><td>10</td></tr><tr><td>20</td></tr><tr><td>20</td></tr><tr><td>NULL</td></tr></table><div class="arrow">↓</div><h5>쿼리</h5>
+<pre><code>SELECT
+  COUNT(*)                                   AS 전체행,
+  COUNT(v)                                   AS NULL제외,
+  COUNT(DISTINCT v)                          AS 중복제거,
+  SUM(CASE WHEN v &gt;= 20 THEN 1 ELSE 0 END)   AS 조건건수_SUM,
+  COUNT(CASE WHEN v &gt;= 20 THEN 1 END)        AS 조건건수_COUNT,
+  COUNT(CASE WHEN v &gt;= 20 THEN 1 ELSE 0 END) AS 잘못된_ELSE0
+FROM (SELECT 10 v UNION ALL SELECT 20 UNION ALL
+      SELECT 20 UNION ALL SELECT NULL) t</code></pre>
+<h5>결과</h5><table class="res"><tr><th>전체행</th><th>NULL제외</th><th>중복제거</th><th>조건건수_SUM</th><th>조건건수_COUNT</th><th>잘못된_ELSE0</th></tr><tr><td>4</td><td>3</td><td>2</td><td>2</td><td>2</td><td>4</td></tr></table>
+<h5>실수 포인트</h5><div class="trap"><ul><li><b>COUNT(*) 와 COUNT(컬럼) 의 차이로 분모 두 개를 만들 수 있다.</b> LEFT JOIN 후 <code>COUNT(*)</code>=전체, <code>COUNT(상대컬럼)</code>=매칭된 것.</li><li><b><code>COUNT(CASE ... ELSE 0 END)</code> 는 틀린다.</b> 0 도 값이라 전부 세어진다. COUNT 와 쓸 때는 <b>ELSE 를 아예 쓰지 않는다</b>.</li><li><code>SUM(CASE ... THEN 1 ELSE 0 END)</code> 는 ELSE 0 이 <b>맞다</b>. COUNT 냐 SUM 이냐에 따라 ELSE 유무가 반대다.</li><li>조인으로 행이 불어난 상태에서 <code>COUNT(DISTINCT user_id)</code> 를 안 쓰면 인원이 부풀려진다.</li></ul></div>
+<a class="top" href="#funcs">↑ 함수 목록</a>
+<h3 id="f-nullfn">COALESCE / NULLIF / IFNULL <span class="grp">NULL</span></h3>
+<pre class="sig"><code>COALESCE(a, b, c, ...)      NULLIF(a, b)      IFNULL(a, b)</code></pre>
+<table class="args"><tr><th>인자</th><th>설명</th><th>생략하면</th></tr><tr><td>COALESCE</td><td>첫 번째 비-NULL 을 반환. 인자 수 제한 없음. <b>표준 SQL</b>.</td><td></td></tr><tr><td>NULLIF(a,b)</td><td>a = b 이면 NULL, 아니면 a. <b>0 나누기 방어용</b>.</td><td></td></tr><tr><td>IFNULL(a,b)</td><td>COALESCE 의 2인자 버전. <b>MySQL 전용</b>.</td><td></td></tr></table>
+<h5>쿼리</h5>
+<pre><code>SELECT
+  COALESCE(NULL, NULL, 3, 4) AS 첫비NULL,
+  NULLIF(10, 10)             AS 같으면NULL,
+  NULLIF(10, 5)              AS 다르면그대로,
+  100 / NULLIF(0, 0)         AS 안전한나눗셈,
+  COALESCE(NULL, 0)          AS NULL을0으로</code></pre>
+<h5>결과</h5><table class="res"><tr><th>첫비NULL</th><th>같으면NULL</th><th>다르면그대로</th><th>안전한나눗셈</th><th>NULL을0으로</th></tr><tr><td>3</td><td>NULL</td><td>10</td><td>NULL</td><td>0</td></tr></table>
+<h5>실수 포인트</h5><div class="trap"><ul><li><b>0 나누기 방어는 <code>NULLIF(분모, 0)</code>.</b> <code>IFNULL(분모, 0)</code> 은 정반대로 0 나누기를 <b>만든다</b>.</li><li><b>타입 함정.</b> COALESCE 의 반환 타입은 인자들의 공통 타입이다. 숫자 컬럼에 <code>'없음'</code> 같은 문자를 넣으면 <b>컬럼 전체가 문자열</b>이 되어 정렬이 사전순으로 깨진다 ('9' &gt; '20').</li><li>MySQL 은 이 변환을 <b>조용히</b> 한다. 에러가 안 나서 결과만 틀린다.</li><li>표시만 문자로 하고 <b>정렬은 원본 컬럼</b>으로 하면 된다.</li><li><code>NULL = NULL</code> 은 TRUE 가 아니라 NULL. 판정은 <code>IS NULL</code>.</li><li>MySQL 에 NVL 은 없다(Oracle 전용).</li></ul></div>
+<a class="top" href="#funcs">↑ 함수 목록</a>
+<h3 id="f-datefn">날짜 함수 <span class="grp">날짜</span></h3>
+<pre class="sig"><code>DATE_FORMAT(d, fmt)   DATEDIFF(끝, 시작)   TIMESTAMPDIFF(단위, 시작, 끝)</code></pre>
+<table class="args"><tr><th>인자</th><th>설명</th><th>생략하면</th></tr><tr><td>DATE_FORMAT(d, fmt)</td><td><code>%Y</code>4자리년 <code>%m</code>월 <code>%d</code>일 <code>%H</code>시 <code>%i</code>분 <code>%s</code>초</td><td>문자열을 반환</td></tr><tr><td>DATEDIFF(a, b)</td><td>a − b 를 <b>일수</b>로. <b>끝이 먼저</b>.</td><td></td></tr><tr><td>TIMESTAMPDIFF(u, a, b)</td><td>b − a 를 단위 u 로. <b>시작이 먼저</b>. u = SECOND/MINUTE/HOUR/DAY/WEEK/MONTH/YEAR</td><td></td></tr><tr><td>PERIOD_DIFF(p1, p2)</td><td>YYYYMM 형식 두 개의 개월 차.</td><td></td></tr></table>
+<h5>쿼리</h5>
+<pre><code>SELECT
+  DATE_FORMAT(DATE '2026-03-15','%Y-%m')      AS 연월,
+  DATE_FORMAT(DATE '2026-03-15','%Y-%m-01')   AS 월첫날,
+  DATEDIFF(DATE '2026-03-15', DATE '2026-03-01')        AS 일수_끝먼저,
+  TIMESTAMPDIFF(DAY, DATE '2026-03-01', DATE '2026-03-15') AS 일수_시작먼저,
+  TIMESTAMPDIFF(MONTH, DATE '2026-01-15', DATE '2026-03-15') AS 개월수,
+  DATE_ADD(DATE '2026-03-15', INTERVAL 30 DAY) AS 더하기,
+  LAST_DAY(DATE '2026-02-10')                  AS 그달마지막날</code></pre>
+<h5>결과</h5><table class="res"><tr><th>연월</th><th>월첫날</th><th>일수_끝먼저</th><th>일수_시작먼저</th><th>개월수</th><th>더하기</th><th>그달마지막날</th></tr><tr><td>2026-03</td><td>2026-03-01</td><td>14</td><td>14</td><td>2</td><td>2026-04-14 00:00:00</td><td>2026-02-28 00:00:00</td></tr></table>
+<h5>실수 포인트</h5><div class="trap"><ul><li><b>DATEDIFF 와 TIMESTAMPDIFF 는 인자 순서가 반대다.</b> 시험장에서 가장 많이 헷갈리는 지점. 외우지 말고 적어 두라.</li><li><code>INTERVAL</code> 뒤에는 <b>따옴표가 없다</b>. <code>INTERVAL 30 DAY</code> 이지 <code>INTERVAL '30' DAY</code> 가 아니다.</li><li><b>월 단위로 묶을 때는 <code>'%Y-%m-01'</code>(월 첫날)로 만들어 정렬</b>하고, 출력만 <code>'%Y-%m'</code> 으로 한다. 문자열 정렬은 10월이 1월 뒤로 가기도 한다.</li><li><b>'직전 거래일'을 날짜 뺄셈으로 찾으면 안 된다.</b> 주말·공휴일이 비어 있으면 매칭이 통째로 실패한다. LAG 를 쓴다.</li></ul></div>
+<a class="top" href="#funcs">↑ 함수 목록</a>
+<h3 id="f-median">중앙값 만들기 (MEDIAN 대체) <span class="grp">응용</span></h3>
+<pre class="sig"><code>ROW_NUMBER() + COUNT() OVER 조합</code></pre>
+<table class="args"><tr><th>인자</th><th>설명</th><th>생략하면</th></tr><tr><td>왜 필요한가</td><td>MySQL 8 에는 MEDIAN 도 PERCENTILE_CONT 도 없다.</td><td></td></tr></table>
+<h5>입력 테이블</h5><table class="res"><tr><th>g</th><th>v</th></tr><tr><td>A</td><td>10</td></tr><tr><td>A</td><td>20</td></tr><tr><td>A</td><td>30</td></tr><tr><td>A</td><td>40</td></tr><tr><td>B</td><td>5</td></tr><tr><td>B</td><td>7</td></tr><tr><td>B</td><td>100</td></tr></table><div class="arrow">↓</div><h5>쿼리</h5>
+<pre><code>WITH r AS (
+  SELECT g, v,
+         ROW_NUMBER() OVER (PARTITION BY g ORDER BY v) AS rn,
+         COUNT(*)     OVER (PARTITION BY g)            AS cnt
+  FROM (SELECT 'A' g, 10 v UNION ALL SELECT 'A',20 UNION ALL
+        SELECT 'A',30 UNION ALL SELECT 'A',40 UNION ALL
+        SELECT 'B',5  UNION ALL SELECT 'B',7 UNION ALL SELECT 'B',100) t
+)
+SELECT g, MAX(cnt) AS n, AVG(v) AS median
+FROM r
+WHERE rn IN (FLOOR((cnt+1)/2), FLOOR((cnt+2)/2))
+GROUP BY g ORDER BY g</code></pre>
+<h5>결과</h5><table class="res"><tr><th>g</th><th>n</th><th>median</th></tr><tr><td>A</td><td>4</td><td>25.0</td></tr><tr><td>B</td><td>3</td><td>7.0</td></tr></table>
+<h5>실수 포인트</h5><div class="trap"><ul><li><b>두 자리를 잡는 게 핵심.</b> <code>FLOOR((cnt+1)/2)</code> 와 <code>FLOOR((cnt+2)/2)</code> 는 홀수면 같은 값, 짝수면 가운데 두 개가 된다.</li><li>그래서 <b>AVG 로 감싸면 홀짝을 분기할 필요가 없다.</b></li><li>A 그룹(4개, 짝수)은 20·30 의 평균 25, B 그룹(3개, 홀수)은 7 이 나온다.</li><li>인원수는 <code>COUNT(*)</code> 가 아니라 <code>MAX(cnt)</code>. WHERE 로 이미 1~2행만 남았기 때문.</li></ul></div>
+<a class="top" href="#funcs">↑ 함수 목록</a>
+<h3 id="f-islands">연속 구간 (gaps and islands) <span class="grp">응용</span></h3>
+<pre class="sig"><code>일련번호 − ROW_NUMBER() → 같은 값이 연속 구간</code></pre>
+<table class="args"><tr><th>인자</th><th>설명</th><th>생략하면</th></tr><tr><td>일련번호</td><td>날짜·월을 정수로 바꾼 값. <code>TIMESTAMPDIFF(MONTH, 기준일, m)</code> 또는 <code>DATEDIFF</code></td><td></td></tr><tr><td>ROW_NUMBER()</td><td>그룹 안에서 순서대로 1,2,3…</td><td></td></tr></table>
+<h5>입력 테이블</h5><table class="res"><tr><th>u</th><th>m</th></tr><tr><td>1</td><td>1</td></tr><tr><td>1</td><td>2</td></tr><tr><td>1</td><td>3</td></tr><tr><td>1</td><td>6</td></tr><tr><td>2</td><td>1</td></tr><tr><td>2</td><td>3</td></tr></table><div class="arrow">↓</div><h5>쿼리</h5>
+<pre><code>WITH s AS (
+  SELECT u, m, m - ROW_NUMBER() OVER (PARTITION BY u ORDER BY m) AS grp
+  FROM (SELECT 1 u, 1 m UNION ALL SELECT 1,2 UNION ALL SELECT 1,3
+        UNION ALL SELECT 1,6 UNION ALL
+        SELECT 2,1 UNION ALL SELECT 2,3) t
+)
+SELECT u, grp, MIN(m) AS 시작, MAX(m) AS 끝, COUNT(*) AS 연속길이
+FROM s GROUP BY u, grp ORDER BY u, 시작</code></pre>
+<h5>결과</h5><table class="res"><tr><th>u</th><th>grp</th><th>시작</th><th>끝</th><th>연속길이</th></tr><tr><td>1</td><td>0</td><td>1</td><td>3</td><td>3</td></tr><tr><td>1</td><td>2</td><td>6</td><td>6</td><td>1</td></tr><tr><td>2</td><td>0</td><td>1</td><td>1</td><td>1</td></tr><tr><td>2</td><td>1</td><td>3</td><td>3</td><td>1</td></tr></table>
+<h5>실수 포인트</h5><div class="trap"><ul><li><b>원리.</b> 연속이면 일련번호와 행번호가 같은 보폭으로 늘어 차이가 고정된다. 끊기면 차이가 점프한다.<br><code>1,2,3 → 1,2,3 빼면 0,0,0</code> (같은 구간)<br><code>1,3 → 1,2 빼면 0,1</code> (다른 구간)</li><li><b>중복 제거를 먼저</b> 해야 한다. 같은 달에 두 번 결제한 행이 남아 있으면 깨진다.</li><li>마지막에 유저 수를 셀 때 <code>COUNT(DISTINCT user_id)</code>. 한 유저가 연속 구간을 여러 개 가질 수 있다.</li><li>일 단위면 <code>DATEDIFF(d, '기준일')</code> 을 일련번호로 쓴다.</li></ul></div>
+<a class="top" href="#funcs">↑ 함수 목록</a>
+<h3 id="f-dedupe">그룹별 1건만 남기기 <span class="grp">응용</span></h3>
+<pre class="sig"><code>ROW_NUMBER() OVER (PARTITION BY 키 ORDER BY 정렬) = 1</code></pre>
+<table class="args"><tr><th>인자</th><th>설명</th><th>생략하면</th></tr><tr><td>PARTITION BY</td><td>무엇 기준으로 1건인가 (유저별, 종목별...)</td><td></td></tr><tr><td>ORDER BY</td><td>어느 것을 남길 것인가 (최신이면 DESC)</td><td></td></tr></table>
+<h5>입력 테이블</h5><table class="res"><tr><th>u</th><th>d</th><th>v</th></tr><tr><td>1</td><td>1</td><td>old</td></tr><tr><td>1</td><td>3</td><td>new</td></tr><tr><td>2</td><td>2</td><td>only</td></tr></table><div class="arrow">↓</div><h5>쿼리</h5>
+<pre><code>SELECT u, d, v FROM (
+  SELECT u, d, v, ROW_NUMBER() OVER (PARTITION BY u ORDER BY d DESC) AS rn
+  FROM (SELECT 1 u, 1 d, 'old' v UNION ALL SELECT 1,3,'new'
+        UNION ALL SELECT 2,2,'only') t
+) x WHERE rn = 1 ORDER BY u</code></pre>
+<h5>결과</h5><table class="res"><tr><th>u</th><th>d</th><th>v</th></tr><tr><td>1</td><td>3</td><td>new</td></tr><tr><td>2</td><td>2</td><td>only</td></tr></table>
+<h5>실수 포인트</h5><div class="trap"><ul><li><b>WHERE 에서 윈도우 함수를 쓸 수 없으므로</b> 반드시 서브쿼리나 CTE 로 감싼다. MySQL 에는 QUALIFY 가 없다.</li><li>동점이 있으면 어느 행이 남을지 보장되지 않는다. <code>ORDER BY d DESC, id</code> 처럼 타이브레이커를 넣으면 결과가 고정된다.</li><li>“공동 1등 모두”가 필요하면 ROW_NUMBER 대신 <code>RANK() = 1</code>.</li></ul></div>
+<a class="top" href="#funcs">↑ 함수 목록</a>
+<h3 id="f-nulldeep">NULL 심화 — 집계·정렬·IN·타입 <span class="grp">NULL</span></h3>
+<pre class="sig"><code>COALESCE(a,b,...)  ·  NULLIF(a,b)  ·  IFNULL(a,b)  ·  x IS [NOT] NULL</code></pre>
+<table class="args"><tr><th>인자</th><th>설명</th><th>생략하면</th></tr><tr><td>COALESCE(a,b,c,…)</td><td>앞에서부터 처음 만나는 <b>NULL 아닌</b> 값. 인자 수 제한 없음. <b>표준 SQL — 어느 DB 에서나 된다.</b> 이것만 쓰면 된다.</td><td></td></tr><tr><td>NULLIF(a,b)</td><td>a 와 b 가 <b>같으면 NULL</b>, 다르면 a. 이름이 헷갈리지만 'a 가 b 면 NULL 로 만들어라' 는 뜻이다. 0 나누기 방어 전용.</td><td></td></tr><tr><td>IFNULL(a,b)</td><td>COALESCE 의 2인자 버전. <b>MySQL·SQLite 전용.</b> PostgreSQL·MS SQL 에 없다. 쓸 이유가 없다.</td><td></td></tr><tr><td>NVL / ISNULL</td><td>NVL 은 Oracle 전용. ISNULL 은 <b>MS SQL 에서는 ISNULL(a,b) 2인자 대체</b>, <b>MySQL 에서는 ISNULL(x) 1인자 참/거짓</b> — 이름만 같고 다른 함수다. 둘 다 쓰지 마라.</td><td></td></tr><tr><td>x IS NULL / IS NOT NULL</td><td>NULL 판정은 <b>이것뿐이다.</b> <code>x = NULL</code> 은 참이 아니라 NULL 이라 WHERE 에서 항상 걸러진다.</td><td></td></tr></table>
+<h5>쿼리</h5>
+<pre><code>-- 1) 집계 함수의 빈 입력 반환값 (틀리면 Q14 처럼 행 수가 어긋난다)
+SELECT COUNT(*)  AS cnt_star,   -- 0
+       COUNT(x)  AS cnt_col,    -- 0
+       SUM(x)    AS sum_x,      -- NULL  ← 0 이 아니다
+       AVG(x)    AS avg_x,      -- NULL
+       MAX(x)    AS max_x       -- NULL
+FROM (SELECT 1 AS x) WHERE 1 = 0;
+
+-- 2) AVG 의 분모는 '행 수' 가 아니라 'NULL 아닌 값의 수' 다
+--    x = 10, NULL, 20  →  AVG = 15,  SUM/COUNT(*) = 10
+SELECT AVG(x)                  AS avg_x,
+       SUM(x) * 1.0 / COUNT(*) AS sum_over_rows,
+       COUNT(x)                AS non_null_cnt
+FROM t;
+
+-- 3) NOT IN 에 NULL 이 하나라도 있으면 결과가 전부 사라진다
+SELECT 5 WHERE 5 NOT IN (1, 2, NULL);   -- 0행
+SELECT 5 WHERE 5 IN (5, NULL);          -- 1행 (IN 은 괜찮다)
+
+-- 4) 0 나누기 방어
+SELECT 100.0 / NULLIF(0, 0);            -- NULL (안전)</code></pre>
+<h5>결과</h5>
+<h5>실수 포인트</h5><div class="trap"><ul><li><b>철자를 틀리면 그냥 문법 오류다.</b> C-O-A-L-E-S-C-E. COALECSE, COALEASE, COALSCE 다 틀린 철자다. 시험장에서 빨간 줄이 안 뜨니 눈으로 확인해야 한다.</li><li><b>집계 함수의 빈 입력 반환값 — 이게 가장 자주 틀리는 부분이다.</b><br><code>COUNT</code> 는 <b>0</b>, <code>SUM·AVG·MAX·MIN</code> 은 <b>NULL</b>. 그래서 LEFT JOIN 뒤에 금액을 0 으로 보이고 싶으면 <code>COALESCE(SUM(amount), 0)</code> 이 필요하다. <b>COALESCE 를 SUM 안에 넣을지 밖에 씌울지는 '그룹이 빌 수 있는가' 로 갈린다.</b><br><code>LEFT JOIN + GROUP BY 왼쪽테이블</code> 이면 그룹마다 최소 한 행(NULL 행)이 남으므로 <code>SUM(COALESCE(amount,0))</code> 도 0 이 나온다.<br>하지만 <b>그룹 자체가 비는 경우</b> — 상관 서브쿼리 <code>(SELECT SUM(amount) FROM payments WHERE user_id=u.user_id)</code> 나 INNER JOIN 뒤 — 는 행이 0개라 <b>SUM 이 NULL</b> 이고 안쪽 COALESCE 는 실행될 기회조차 없다.<br><b>밖에 씌우는 쪽이 항상 안전하다</b>: <code>COALESCE(SUM(amount), 0)</code>.</li><li><b>AVG 는 NULL 을 분모에서도 뺀다.</b> 값이 10, NULL, 20 이면 AVG 는 (10+20)/2 = <b>15</b> 이지 (10+20)/3 = 10 이 아니다. '결제 안 한 사람을 0 으로 치고 평균' 을 원하면 <code>AVG(COALESCE(amount, 0))</code> 처럼 <b>먼저 채워야</b> 한다. ARPU 와 ARPPU 가 갈리는 지점이 정확히 여기다.</li><li><b>NOT IN + NULL = 전멸.</b> 서브쿼리 결과에 NULL 이 하나라도 섞이면 <code>WHERE id NOT IN (SELECT ...)</code> 가 <b>0행</b>을 돌려준다. <code>5 NOT IN (1,2,NULL)</code> 은 '5≠1 AND 5≠2 AND 5≠NULL' 이고 마지막이 NULL 이라 전체가 NULL(거짓 취급)이 된다. <b>NOT IN 대신 NOT EXISTS 나 LEFT JOIN … IS NULL 을 써라.</b> <code>IN</code> 은 반대로 멀쩡하다 (하나만 맞으면 참).<br><b>NOT EXISTS 는 NULL 에 면역이다.</b> <code>NOT EXISTS (SELECT 1 FROM p WHERE p.user_id = u.user_id)</code> 에서 p.user_id 가 NULL 인 행은 비교가 NULL → 매칭 실패 → 자동으로 무시된다. <code>IS NOT NULL</code> 을 따로 안 써도 맞는 답이 나온다. 그래서 '존재하지 않는 것 찾기' 는 NOT EXISTS 를 기본값으로 삼아라.</li><li><b>정렬에서 NULL 의 위치 — 엔진마다 다르다.</b> 실제로 돌려 본 결과:<br><code>MySQL·SQLite</code> : NULL 을 가장 작은 값으로 본다 → <b>ASC 면 맨 앞, DESC 면 맨 뒤</b><br><code>PostgreSQL·DuckDB</code> : 기본이 NULLS LAST → <b>ASC 에서도 맨 뒤</b><br>그래서 <b>정렬 컬럼에 NULL 이 있을 수 있으면 직접 정해 줘라</b>: <code>ORDER BY (금액 IS NULL), 금액 DESC</code> — <code>IS NULL</code> 은 0/1 이라 이걸 첫 키로 쓰면 NULL 을 뒤로 밀 수 있다. MySQL 의 <code>ORDER BY 금액 IS NULL, 금액</code> 도 같은 뜻이다 (<code>NULLS LAST</code> 문법은 MySQL 에 없다).</li><li><b>타입 승격 함정 — 형님이 말한 '데이터 타입 문제' 가 이것이다.</b> COALESCE 의 반환 타입은 <b>인자들의 공통 타입</b>이다. <code>COALESCE(금액, '없음')</code> 처럼 숫자에 문자를 섞으면 <b>컬럼 전체가 문자열</b>이 되고, 그 뒤 정렬이 사전순으로 깨진다 (<code>'9' &gt; '20'</code>). MySQL·SQLite 는 이 변환을 <b>오류 없이 조용히</b> 하고, PostgreSQL·DuckDB 는 오류를 낸다. 해결: <b>보여 주는 값과 정렬하는 값을 분리</b>해서 <code>SELECT COALESCE(CAST(금액 AS CHAR), '없음') … ORDER BY (금액 IS NULL), 금액</code>.</li><li><b>0 과 NULL 은 다른 뜻이다.</b> 0 은 '거래했고 금액이 0', NULL 은 '거래 기록이 없음' 이다. LEFT JOIN 뒤에 어느 쪽으로 채울지는 비즈니스 판단이고, 문제에 명시돼 있다. A/B 테스트의 분모처럼 <b>'참가했지만 행동 안 함' 을 0 으로 세야 하는 경우</b>가 많으니 문제를 다시 읽어라.</li><li><b>0 으로 나눈 결과도 엔진마다 다르다.</b> 실측: <code>SQLite·MySQL → NULL</code>, <code>DuckDB → inf</code>, <code>PostgreSQL·MS SQL → 오류</code>. 즉 시험 환경에서는 <code>NULLIF</code> 없이도 NULL 이 나와 통과할 수 있지만, 습관을 안 들이면 다른 환경에서 쿼리가 터진다.</li><li><b>NULL 은 GROUP BY 에서 하나의 그룹이 되고, COUNT(DISTINCT) 에서는 안 세어진다.</b> <code>GROUP BY channel</code> 에 channel 이 NULL 인 행들은 모여서 NULL 그룹 한 줄이 된다. 반면 <code>COUNT(DISTINCT x)</code> 는 NULL 을 빼고 센다 (NULL, NULL, 1 → <b>1</b>).</li><li><b>문자열 연결에 NULL 이 끼면 전체가 NULL 이다.</b> <code>'a' || NULL</code> → NULL. MySQL <code>CONCAT</code> 도 같다. <code>CONCAT_WS</code> 는 NULL 을 건너뛴다. 이름 조합 같은 걸 만들 때 <code>COALESCE(미들네임, '')</code> 로 먼저 채워라.</li><li><b>NULLIF 와 IFNULL 을 바꿔 쓰면 정반대가 된다.</b> <code>NULLIF(분모, 0)</code> 은 0 을 NULL 로 만들어 나눗셈을 방어하고, <code>IFNULL(분모, 0)</code> 은 NULL 을 0 으로 만들어 <b>0 나누기를 일부러 만든다.</b></li></ul></div>
+<a class="top" href="#funcs">↑ 함수 목록</a>
+  
+<h2 id="q1"><span class="n">Q1.</span> 월별 신규 가입자와 결제 전환율<span class="lv">쉬움</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">반 인원 중에 몇 명이 학원에 등록했나 — 를 가입한 달마다 따로 센다. 등록 안 한 애도 반 인원에는 들어가야 한다.</p><table class="e">
+<tr><th>가입 월</th><th>가입자 (분모)</th><th>30일 안에 결제 (분자)</th><th>전환율</th></tr>
+<tr><td>1월</td><td>100명</td><td>23명</td><td>23.00</td></tr>
+<tr><td>2월</td><td>120명</td><td>31명</td><td>25.83</td></tr>
+</table>
+<p class="note">결제를 아예 안 한 사람도 <b>가입자 100명에는 포함</b>된다. 이게 핵심.</p>
+<h4>이렇게 푼다</h4><ol><li>먼저 사람마다 <b>첫 결제일</b>이 언제인지 따로 구해 둔다.</li><li>유저 명단 <b>왼쪽에 두고</b> 그 첫 결제일을 옆에 붙인다 (LEFT JOIN).</li><li>가입한 달로 묶어서, 전체 인원을 세고 / 30일 안에 결제한 사람만 따로 센다.</li><li>나누고 ×100, 소수점 둘째 자리까지.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>그냥 JOIN 으로 붙이면 안 된다.</b> 결제 안 한 사람이 통째로 사라져서 분모가 줄어들고, 전환율이 실제보다 훨씬 높게 나온다. <b>LEFT JOIN</b> — '왼쪽 명단은 무조건 다 남긴다' 는 뜻이다.</li><li><code>100</code> 이 아니라 <code>100.0</code>. 정수끼리 나누면 소수점이 날아가서 0 이 나오는 환경이 있다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · ‘전체’가 분모인 비율을 구할 줄 아는가. 그리고 조건부 집계.</div>
+<h4>풀이 순서</h4><ol><li>유저별 <b>첫</b> 결제일을 먼저 만든다 (MIN). payments 를 바로 조인하면 한 유저가 여러 행이 된다.</li><li>users 를 기준으로 <b>LEFT JOIN</b>. 결제 없는 유저가 분모에 남아야 한다.</li><li>converted 는 조건부 집계로 센다.</li><li>비율은 converted / signups × 100.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH first_pay AS (
+  SELECT user_id, MIN(paid_date) AS fp FROM payments GROUP BY user_id
+)
+SELECT DATE_FORMAT(u.signup_date, '%Y-%m') AS signup_month,
+       COUNT(*) AS signups,
+       SUM(CASE WHEN f.fp &lt;= DATE_ADD(u.signup_date, INTERVAL 30 DAY)
+                THEN 1 ELSE 0 END) AS converted,
+       ROUND(100.0 * SUM(CASE WHEN f.fp &lt;= DATE_ADD(u.signup_date, INTERVAL 30 DAY)
+                THEN 1 ELSE 0 END) / COUNT(*), 2) AS conversion_rate
+FROM users u
+LEFT JOIN first_pay f ON f.user_id = u.user_id
+GROUP BY signup_month
+ORDER BY signup_month;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>INNER JOIN</b> 을 쓰면 결제 없는 유저가 사라져 전환율이 부풀려진다. 이 문제의 핵심 함정.</li><li>분자를 <b>전체 결제자</b>로 쓰기 쉽다. 30일 조건이 붙은 쪽이어야 한다.</li><li><code>×100</code> 누락. <code>*1.0</code> 만으로는 비율(0.23)이지 퍼센트가 아니다.</li><li><code>f.fp IS NOT NULL</code> 은 안 써도 된다. NULL 과의 비교는 NULL 이라 CASE 가 거짓으로 떨어진다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“가입 후 7일 이내 재방문율”, “첫 구매까지 N일 이내 비율” — 날짜 기준만 바뀐다.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q2"><span class="n">Q2.</span> 채널별 퍼널 전환율<span class="lv">쉬움</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">놀이기구 줄. 입구에 100명 → 중간에 60명 → 실제로 탄 사람 20명. 각 지점에 몇 명 남았나를 세는 것.</p><table class="e">
+<tr><th>단계</th><th>사람 수</th></tr>
+<tr><td>view_landing (들어옴)</td><td>1,000</td></tr>
+<tr><td>signup_done (가입 완료)</td><td>620</td></tr>
+<tr><td>first_payment (첫 결제)</td><td>180</td></tr>
+</table>
+<p class="note">최종 전환율 = 180 / 1,000 × 100 = 18.00</p>
+<h4>이렇게 푼다</h4><ol><li>단계마다 '그 행동을 한 <b>사람</b> 수' 를 센다.</li><li>채널별로 묶는다.</li><li>마지막 단계 ÷ 첫 단계 × 100.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>사람 수로 세야 한다.</b> 같은 사람이 같은 행동을 여러 번 기록에 남기기 때문이다. 기록 개수를 세면 숫자가 부풀어 오른다. → 중복을 지우고 센다 (DISTINCT).</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 세로로 쌓인 이벤트를 가로 단계로 펼칠 줄 아는가.</div>
+<h4>풀이 순서</h4><ol><li>단계별로 <code>COUNT(DISTINCT CASE WHEN ... THEN user_id END)</code>.</li><li>같은 유저가 같은 이벤트를 여러 번 남길 수 있으므로 DISTINCT 필수.</li><li>최종 전환율은 마지막 단계 ÷ 첫 단계.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>SELECT channel,
+       COUNT(DISTINCT CASE WHEN event_name='view_landing'  THEN user_id END) AS landing_users,
+       COUNT(DISTINCT CASE WHEN event_name='signup_done'   THEN user_id END) AS signup_users,
+       COUNT(DISTINCT CASE WHEN event_name='first_payment' THEN user_id END) AS paid_users,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN event_name='first_payment' THEN user_id END)
+             / NULLIF(COUNT(DISTINCT CASE WHEN event_name='view_landing' THEN user_id END), 0), 2)
+         AS final_cvr
+FROM events
+GROUP BY channel
+ORDER BY final_cvr DESC;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>DISTINCT 누락</b> — 중복 이벤트가 있으면 단계 인원이 부풀려진다.</li><li><code>COUNT(CASE WHEN ...)</code> 는 <b>0 이 아니라 NULL 을 세지 않는 것</b>이다. ELSE 를 쓰지 말 것. <code>ELSE 0</code> 을 넣으면 전부 세어진다.</li><li>첫 단계가 0 인 채널이 있으면 0 나누기. NULLIF 로 막는다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“단계 간 전환율”(2→3, 3→4)로 바뀌면 분모를 직전 단계로 바꾸면 된다.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q3"><span class="n">Q3.</span> 월별 매출 · 누적 · 전월 대비<span class="lv">보통</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">용돈 기록장. 이번 달 얼마 썼나 / 지금까지 합쳐서 얼마 / 지난달보다 얼마나 늘었나.</p><table class="e">
+<tr><th>월</th><th>이번 달</th><th>누적</th><th>전월 대비</th></tr>
+<tr><td>1월</td><td>100</td><td>100</td><td class="x">(없음)</td></tr>
+<tr><td>2월</td><td>150</td><td>250</td><td>+50.00%</td></tr>
+<tr><td>3월</td><td>120</td><td>370</td><td>-20.00%</td></tr>
+</table>
+<p class="note">누적은 '위 칸들을 다 더한 값'. 전월 대비는 '한 칸 위 값과 비교'.</p>
+<h4>이렇게 푼다</h4><ol><li>월별 결제 금액 합계를 먼저 만든다.</li><li>누적은 <b>처음부터 이번 줄까지 더하기</b> — <code>SUM(매출) OVER (ORDER BY 월)</code>.</li><li>지난달 값은 <b>한 칸 위에서 끌어온다</b> — <code>LAG(매출) OVER (ORDER BY 월)</code>.</li><li>(이번 − 지난) ÷ 지난 × 100.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>첫 달은 전월 대비가 NULL 이다.</b> 비교할 지난달이 없으니까. 0 으로 채우면 '증감 없음' 이라는 다른 뜻이 된다.</li><li>누적을 구할 때 <code>OVER (ORDER BY 월)</code> 에서 ORDER BY 를 빼면 전체 합계가 모든 줄에 똑같이 들어간다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 윈도우 함수 기본기. 누적과 LAG.</div>
+<h4>풀이 순서</h4><ol><li>월 단위로 먼저 집계해 한 달 = 한 행으로 만든다.</li><li>그 위에서 <code>SUM() OVER (ORDER BY)</code> 로 누적.</li><li><code>LAG()</code> 로 전월 값을 끌어와 증감률.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH m AS (
+  SELECT DATE_FORMAT(paid_date, '%Y-%m-01') AS mm, SUM(amount) AS rev
+  FROM payments GROUP BY mm
+)
+SELECT DATE_FORMAT(mm, '%Y-%m') AS month,
+       rev AS revenue,
+       SUM(rev) OVER (ORDER BY mm) AS cumulative_revenue,
+       ROUND(100.0 * (rev - LAG(rev) OVER (ORDER BY mm))
+             / LAG(rev) OVER (ORDER BY mm), 2) AS mom_growth
+FROM m
+ORDER BY mm;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li>집계 전에 윈도우를 쓰려 하면 안 된다. <b>GROUP BY 로 월별 한 행을 먼저</b> 만들고 그 위에서 윈도우.</li><li>정렬용으로 <code>'%Y-%m-01'</code>(월 첫날)을 쓰고 출력은 <code>'%Y-%m'</code>. 문자열 <code>'2026-1'</code> 로 정렬하면 10월이 1월 뒤에 온다.</li><li>첫 달 증감률은 NULL 이 맞다. 0 으로 채우지 말 것.</li><li>MySQL 은 <code>LAG(rev)</code> 를 별칭으로 재사용할 수 없다. 두 번 풀어 쓴다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“전년 동월 대비”면 <code>LAG(rev, 12)</code>.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q4"><span class="n">Q4.</span> 가입 코호트별 월간 리텐션<span class="lv">어려움</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">3월에 입학한 애들이 1달 뒤·2달 뒤에 몇 명 남았나. 입학한 달마다 따로 추적한다. 반이 다르면 섞지 않는다.</p><table class="e">
+<tr><th>가입 월</th><th>0개월</th><th>1개월</th><th>2개월</th></tr>
+<tr><td>1월 (100명)</td><td>100%</td><td>42%</td><td>28%</td></tr>
+<tr><td>2월 (120명)</td><td>100%</td><td>38%</td><td>25%</td></tr>
+</table>
+<p class="note">가로가 '가입 후 몇 달째', 세로가 '언제 가입한 묶음'.
+분모는 <b>그 줄의 전체 인원</b>이고 끝까지 안 바뀐다.</p>
+<h4>이렇게 푼다</h4><ol><li>사람마다 <b>가입한 달</b>을 붙인다. 이게 그 사람이 속한 '묶음' 이다.</li><li>접속 기록마다 <b>가입 후 몇 달째인가</b>를 계산한다 (접속한 달 − 가입한 달).</li><li>가입한 달 × 경과 개월로 묶어서 <b>사람 수</b>를 센다.</li><li>그 수를 그 묶음의 전체 인원으로 나눈다.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>분모는 접속 기록에서 세면 안 된다.</b> 가입한 사람 명단에서 세야 한다. 접속 기록에서 세면 '접속한 사람 중 접속한 사람' 이 되어 항상 100% 가 나온다.</li><li>사람 수는 중복을 지우고 센다. 한 달에 열 번 접속한 사람은 한 명이다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 코호트 분석의 뼈대. 분모 고정 + 경과 개월.</div>
+<h4>풀이 순서</h4><ol><li>코호트 = 가입 월. 유저마다 하나.</li><li>활동 = app_open 이 있는 월. 유저×월 중복 제거.</li><li><code>TIMESTAMPDIFF(MONTH, 코호트, 활동월)</code> 로 경과 개월 M+1, M+2…</li><li>분모는 <b>코호트 전체 인원</b>. 활동 안 한 사람도 포함.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH base AS (
+  SELECT user_id, DATE_FORMAT(signup_date, '%Y-%m-01') AS cohort FROM users
+),
+act AS (
+  SELECT DISTINCT user_id, DATE_FORMAT(event_date, '%Y-%m-01') AS m
+  FROM events WHERE event_name = 'app_open'
+)
+SELECT DATE_FORMAT(b.cohort, '%Y-%m') AS cohort_month,
+       COUNT(DISTINCT b.user_id) AS cohort_size,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN TIMESTAMPDIFF(MONTH, b.cohort, a.m)=1
+             THEN b.user_id END) / COUNT(DISTINCT b.user_id), 1) AS m1_retention,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN TIMESTAMPDIFF(MONTH, b.cohort, a.m)=2
+             THEN b.user_id END) / COUNT(DISTINCT b.user_id), 1) AS m2_retention,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN TIMESTAMPDIFF(MONTH, b.cohort, a.m)=3
+             THEN b.user_id END) / COUNT(DISTINCT b.user_id), 1) AS m3_retention
+FROM base b
+LEFT JOIN act a ON a.user_id = b.user_id
+GROUP BY cohort_month
+ORDER BY cohort_month;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>INNER JOIN 금지.</b> 한 번도 활동 안 한 유저가 분모에서 빠지면 리텐션이 과대평가된다.</li><li>분모를 <code>COUNT(*)</code> 로 쓰면 안 된다. 조인으로 행이 불어나 있다. <code>COUNT(DISTINCT user_id)</code>.</li><li>활동 테이블에서 유저×월 <b>중복 제거를 먼저</b> 해야 한다. 안 하면 한 유저가 여러 번 세어질 수 있다 — DISTINCT 를 써서 막는다.</li><li>아직 기간이 안 지난 코호트는 0 이 나온다. 정상이다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">주 단위면 <code>TIMESTAMPDIFF(WEEK, ...)</code>. “결제 리텐션”이면 활동 테이블을 payments 로 바꾼다.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q5"><span class="n">Q5.</span> 월별 매출 분해 (신규/기존/복귀)<span class="lv">어려움</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">이번 달 매출을 통 세 개에 나눠 담기 — <b>처음 온 손님 / 지난달에도 온 손님 / 오랜만에 다시 온 손님</b>. 세 통을 합치면 전체와 딱 맞아야 한다.</p><table class="e">
+<tr><th>이 사람이</th><th>어느 통</th></tr>
+<tr><td>태어나서 첫 결제가 이번 달</td><td><b>신규</b></td></tr>
+<tr><td>지난달에도 결제했음</td><td><b>기존</b></td></tr>
+<tr><td>전에 결제한 적 있는데 지난달엔 없음</td><td><b>복귀</b></td></tr>
+</table>
+<p class="note">이 세 칸은 서로 겹치지 않고, 빠지는 경우도 없다. 그래서 합이 딱 맞는다.</p>
+<h4>이렇게 푼다</h4><ol><li>사람마다 <b>생애 첫 결제가 몇 월인지</b>를 구해 둔다.</li><li>결제 줄마다 <b>그 사람의 직전 결제가 몇 월이었나</b>를 한 칸 위에서 끌어온다.</li><li>위 표대로 셋 중 하나를 고른다 — <code>CASE WHEN 첫결제월 = 이번달 THEN '신규' WHEN 직전결제월 = 지난달 THEN '기존' ELSE '복귀' END</code>.</li><li>통별로 금액을 합친다.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>조건 순서를 바꾸면 안 된다.</b> CASE 는 위에서부터 보고 맞으면 멈춘다. 신규 → 기존 → 복귀 순서로 두면 자동으로 겹치지 않는다.</li><li><b>검산하는 법:</b> 세 통을 더해서 전체 매출과 같은지 본다. 안 맞으면 조건이 겹쳤거나 빠진 것이다. 제출 전에 꼭 해 봐라.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · FP&A 의 핵심. 배타적 분류를 만들 줄 아는가.</div>
+<h4>풀이 순서</h4><ol><li><b>유저 × 월</b> 단위로 먼저 집계한다. 이걸 안 하면 아래가 전부 꼬인다.</li><li><code>MIN(m) OVER (PARTITION BY user_id)</code> → 그 유저의 첫 결제 월.</li><li><code>LAG(m) OVER (PARTITION BY user_id ORDER BY m)</code> → 직전 결제 월.</li><li>첫 달이면 신규. 아니면 직전 달이 바로 전월인지로 기존/복귀를 가른다.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH mu AS (
+  SELECT user_id, DATE_FORMAT(paid_date, '%Y-%m-01') AS m, SUM(amount) AS amt
+  FROM payments GROUP BY user_id, m
+),
+l AS (
+  SELECT user_id, m, amt,
+         LAG(m) OVER (PARTITION BY user_id ORDER BY m) AS prev_m,
+         MIN(m) OVER (PARTITION BY user_id)            AS first_m
+  FROM mu
+)
+SELECT DATE_FORMAT(m, '%Y-%m') AS month,
+       SUM(CASE WHEN m = first_m THEN amt ELSE 0 END) AS new_revenue,
+       SUM(CASE WHEN m &lt;&gt; first_m AND prev_m = DATE_SUB(m, INTERVAL 1 MONTH)
+                THEN amt ELSE 0 END) AS existing_revenue,
+       SUM(CASE WHEN m &lt;&gt; first_m AND (prev_m IS NULL OR prev_m &lt; DATE_SUB(m, INTERVAL 1 MONTH))
+                THEN amt ELSE 0 END) AS returning_revenue,
+       SUM(amt) AS total_revenue
+FROM l
+GROUP BY month
+ORDER BY month;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>분류 순서가 핵심.</b> 첫 달(new)을 먼저 떼어내고, 나머지를 ‘직전 달 있음/없음’으로 가른다. 순서를 바꾸면 겹치거나 빈다.</li><li>세 항목 합 = total 인지 <b>반드시 검산</b>한다. 틀리면 분류가 겹치거나 빈 것이다.</li><li>유저×월 집계를 건너뛰고 payments 에 바로 LAG 를 걸면, 같은 달 두 번 결제한 유저에서 깨진다.</li><li>날짜 문자열끼리 비교하므로 <code>'%Y-%m-01'</code> 형식을 일관되게 쓴다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">이탈(churn) 매출까지 요구하면, 직전 달에는 있었는데 이번 달에 없는 유저를 따로 만들어 음수로 붙인다.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q6"><span class="n">Q6.</span> 채널별 첫 결제까지 일수의 중앙값<span class="lv">어려움</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">반 애들 키를 작은 순서로 줄 세우고 <b>딱 가운데 애</b>의 키. 평균이 아니다.</p><table class="e">
+<tr><th>인원</th><th>줄 세운 값</th><th>중앙값</th></tr>
+<tr><td>5명 (홀수)</td><td>1 · 2 · <b>3</b> · 4 · 5</td><td>3번째 = <b>3</b></td></tr>
+<tr><td>4명 (짝수)</td><td>1 · <b>2</b> · <b>3</b> · 4</td><td>2·3번째 평균 = <b>2.5</b></td></tr>
+</table>
+<p class="note">홀수면 가운데 하나, 짝수면 가운데 둘의 평균. MySQL 에는
+MEDIAN 함수가 없어서 직접 만들어야 한다.</p>
+<h4>이렇게 푼다</h4><ol><li>채널 안에서 값을 작은 순서로 <b>번호를 매긴다</b> (1, 2, 3 …).</li><li>그 채널의 <b>전체 인원 수</b>도 같은 줄에 같이 붙여 둔다.</li><li>가운데 번호만 남긴다 — <code>(인원+1)/2</code> 와 <code>(인원+2)/2</code> 두 개를 소수점 버려서 쓴다.</li><li>남은 값의 평균을 낸다.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>왜 번호 두 개냐:</b> 5명이면 (5+1)/2=3, (5+2)/2=3(소수점 버림) → 둘 다 3번 → 한 개만 남는다. 4명이면 (4+1)/2=2, (4+2)/2=3 → 2번·3번 두 개가 남는다. <b>홀수·짝수를 따로 안 나누고 한 식으로 처리</b>하는 요령이다.</li><li>소수점 버림이 필요하다. 나눗셈이 소수로 나오는 환경에서는 <code>FLOOR</code> 를 꼭 씌워라.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · MySQL 에 MEDIAN 이 없을 때 직접 만들 줄 아는가.</div>
+<h4>풀이 순서</h4><ol><li>유저별 첫 결제일 → 가입일과의 차이(일수).</li><li>채널 안에서 일수 오름차순으로 <code>ROW_NUMBER()</code>, 동시에 <code>COUNT() OVER</code> 로 인원수.</li><li>가운데 위치만 남긴다. 홀수면 1개, 짝수면 2개.</li><li>남은 값을 AVG 하면 짝수 평균까지 한 번에 처리된다.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH f AS (
+  SELECT p.user_id, u.channel,
+         DATEDIFF(MIN(p.paid_date), u.signup_date) AS d
+  FROM payments p JOIN users u ON u.user_id = p.user_id
+  GROUP BY p.user_id, u.channel, u.signup_date
+),
+r AS (
+  SELECT channel, d,
+         ROW_NUMBER() OVER (PARTITION BY channel ORDER BY d) AS rn,
+         COUNT(*)     OVER (PARTITION BY channel)            AS cnt
+  FROM f
+)
+SELECT channel, MAX(cnt) AS payers, AVG(d) AS median_days
+FROM r
+WHERE rn IN (FLOOR((cnt + 1) / 2), FLOOR((cnt + 2) / 2))
+GROUP BY channel
+ORDER BY median_days, channel;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><code>DATEDIFF(끝, 시작)</code> — MySQL 은 인자 순서가 <b>끝이 먼저</b>다. TIMESTAMPDIFF 와 반대라 헷갈린다.</li><li>짝수 처리를 빼먹으면 값이 한쪽으로 치우친다. <code>FLOOR((cnt+1)/2)</code> 와 <code>FLOOR((cnt+2)/2)</code> 두 자리를 잡는 게 정석.</li><li>홀수면 두 식이 같은 값이 되어 자동으로 1개만 남는다. 분기할 필요 없다.</li><li>payers 는 <code>COUNT(*)</code> 가 아니라 <code>MAX(cnt)</code>. WHERE 로 이미 2행만 남았기 때문.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“상위 25% 지점”이면 <code>PERCENT_RANK() <= 0.25</code> 또는 <code>NTILE(4)=1</code>.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q7"><span class="n">Q7.</span> 월별 플랜 업그레이드 / 다운그레이드<span class="lv">보통</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">지난번에 뭐 썼는지와 이번에 뭐 쓰는지를 비교. 달라졌으면 '변경' 이다.</p><table class="e">
+<tr><th>결제</th><th>이번 플랜</th><th>직전 플랜</th><th>판정</th></tr>
+<tr><td>1차</td><td>basic</td><td class="x">(없음)</td><td>첫 결제 — 제외</td></tr>
+<tr><td>2차</td><td>pro</td><td>basic</td><td><b>업그레이드</b></td></tr>
+<tr><td>3차</td><td>pro</td><td>pro</td><td>그대로 — 제외</td></tr>
+<tr><td>4차</td><td>basic</td><td>pro</td><td><b>다운그레이드</b></td></tr>
+</table>
+<h4>이렇게 푼다</h4><ol><li>결제 줄마다 <b>직전 결제의 플랜</b>을 한 칸 위에서 끌어온다 (<code>LAG</code>, 사람별로 묶고 날짜 순서로).</li><li>직전 플랜이 없으면 첫 결제니까 빼 버린다.</li><li>basic → pro 면 업, pro → basic 이면 다운으로 센다.</li><li>월별로 합친다.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>변경이 0건인 달은 아예 나오면 안 된다.</b> 걸러낼 때 <code>업 + 다운 &gt; 0</code> 으로 써라.<br><code>업 != 0 AND 다운 != 0</code> 으로 쓰면 <b>한쪽만 있는 달이 사라진다.</b> 업그레이드만 5건 있는 달도 나와야 하는데 없어진다.</li><li>사람별로 묶는 걸(<code>PARTITION BY user_id</code>) 빼먹으면 다른 사람의 플랜과 비교해 버린다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 직전 행과 비교할 줄 아는가.</div>
+<h4>풀이 순서</h4><ol><li>유저별 결제 순서로 <code>LAG(plan)</code>.</li><li>직전 플랜과 현재 플랜을 비교해 방향을 판정.</li><li>첫 결제는 직전이 NULL 이므로 제외.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH l AS (
+  SELECT user_id, paid_date, plan,
+         LAG(plan) OVER (PARTITION BY user_id ORDER BY paid_date) AS prev_plan
+  FROM payments
+)
+SELECT DATE_FORMAT(paid_date, '%Y-%m') AS month,
+       SUM(CASE WHEN prev_plan='basic' AND plan='pro'   THEN 1 ELSE 0 END) AS upgrades,
+       SUM(CASE WHEN prev_plan='pro'   AND plan='basic' THEN 1 ELSE 0 END) AS downgrades
+FROM l
+WHERE prev_plan IS NOT NULL
+GROUP BY month
+HAVING upgrades + downgrades &gt; 0
+ORDER BY month;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><code>PARTITION BY user_id</code> 누락 — 다른 유저의 플랜과 비교하게 된다.</li><li>첫 결제를 변경으로 세지 않도록 <code>prev_plan IS NOT NULL</code>.</li><li>MySQL 은 <b>HAVING 에서 SELECT 별칭을 쓸 수 있다</b>. 표준 SQL 은 안 된다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“상태가 바뀐 시점”, “가격이 인상된 건” 전부 같은 구조.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q8"><span class="n">Q8.</span> 3개월 이상 연속 결제한 유저<span class="lv">어려움</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">출석 도장. 1월·2월·3월 쭉 찍었으면 3연속. 1월·3월만 찍었으면 끊긴 것. <b>이 트릭은 외워 두면 평생 쓴다.</b></p><table class="e">
+<tr><th>결제한 달</th><th>달 번호</th><th>줄 번호</th><th>차이</th></tr>
+<tr><td>1월</td><td>1</td><td>1</td><td><b>0</b></td></tr>
+<tr><td>2월</td><td>2</td><td>2</td><td><b>0</b></td></tr>
+<tr><td>3월</td><td>3</td><td>3</td><td><b>0</b></td></tr>
+<tr><td>6월</td><td>6</td><td>4</td><td class="x">2</td></tr>
+</table>
+<p class="note"><b>차이가 같은 것끼리 한 덩어리</b>다. 위에서는 0 이 세 개니까 3연속.
+연속이면 달 번호와 줄 번호가 <b>똑같이 1씩</b> 늘어서 차이가 안 변한다.
+끊기면 달 번호만 껑충 뛰어서 차이가 달라진다.</p>
+<h4>이렇게 푼다</h4><ol><li>사람별로 <b>결제한 달 목록</b>을 중복 없이 만든다.</li><li>달을 숫자로 바꾼다 (기준월부터 몇 개월째인가).</li><li><b>달 숫자 − 줄 번호</b>를 계산한다.</li><li>그 값으로 묶어서 개수를 세고, 3 이상만 남긴다.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>중복 제거를 빼먹으면 틀린다.</b> 같은 달에 두 번 결제한 사람은 줄 번호가 두 칸 가는데 달 숫자는 그대로라서, 안 연속인데 연속으로 잡힌다.</li><li>마지막에 사람 수를 셀 때 중복을 지워라. 한 사람이 '1~3월 연속' 과 '7~9월 연속' 두 덩어리를 가질 수 있다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · gaps and islands. 알면 1분, 모르면 못 푼다.</div>
+<h4>풀이 순서</h4><ol><li>유저별 결제한 <b>월</b> 목록을 중복 없이 만든다.</li><li>월을 일련번호로 바꾼다 (기준월로부터 몇 개월째인가).</li><li><code>일련번호 − ROW_NUMBER()</code> → 연속 구간마다 같은 값이 나온다.</li><li>그 값으로 묶어 개수를 세고 3 이상만 남긴다.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH mu AS (
+  SELECT DISTINCT user_id, DATE_FORMAT(paid_date, '%Y-%m-01') AS m FROM payments
+),
+g AS (
+  SELECT user_id, m,
+         TIMESTAMPDIFF(MONTH, '2026-01-01', m)
+         - ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY m) AS grp
+  FROM mu
+),
+runs AS (
+  SELECT user_id, grp, COUNT(*) AS run_len FROM g GROUP BY user_id, grp
+)
+SELECT COUNT(DISTINCT user_id) AS users_with_3plus_streak
+FROM runs WHERE run_len &gt;= 3;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>왜 되는지</b>를 알아야 응용된다. 연속이면 일련번호와 행번호가 같은 보폭으로 증가해 차이가 고정된다. 끊기면 차이가 점프한다.<br><code>2,3,4월 → 1,2,3 − 1,2,3 = 0,0,0</code> (같은 그룹)<br><code>2월, 5월 → 1,4 − 1,2 = 0,2</code> (다른 그룹)</li><li>월 중복 제거(<code>DISTINCT</code>)를 안 하면 같은 달 두 번 결제한 유저가 연속으로 잘못 잡힌다.</li><li>마지막에 <code>COUNT(DISTINCT user_id)</code> — 한 유저가 연속 구간을 두 개 가질 수 있다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“연속 출석 일수”, “N일 연속 접속” 전부 동일. 일 단위면 DATEDIFF 를 일련번호로.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q9"><span class="n">Q9.</span> 채널별 결제 전환과 LTV<span class="lv">보통</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">돈 쓴 손님만 모아서 1인당 평균 얼마 썼나. 안 쓴 손님은 평균에서 뺀다.</p><table class="e">
+<tr><th></th><th>분자</th><th>분모</th></tr>
+<tr><td>결제 비중</td><td>결제한 사람</td><td>전체 유저</td></tr>
+<tr><td>LTV</td><td>총 결제액</td><td><b>결제한 사람</b></td></tr>
+</table>
+<p class="note">같은 문제 안에서 분모가 두 번 바뀐다. 여기서 헷갈린다.</p>
+<h4>이렇게 푼다</h4><ol><li>사람마다 총 결제액을 구한다.</li><li>유저 명단 왼쪽에 두고 붙인다 (전체 유저 수를 세야 하므로).</li><li>전체 유저 수 / 결제한 사람 수를 각각 센다.</li><li>LTV = 총 결제액 ÷ <b>결제한 사람 수</b>.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>LTV 의 분모는 결제한 사람이다.</b> 전체 유저로 나누면 그건 ARPU 라는 다른 지표다. 문제를 다시 읽어라 — 어느 쪽을 묻는지가 갈린다.</li><li><code>* 1.0</code> 또는 <code>100.0</code> 을 꼭 넣어라.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 분모가 다른 지표 두 개를 한 쿼리에서 만들 줄 아는가.</div>
+<h4>풀이 순서</h4><ol><li>유저별 누적 결제액을 먼저 만든다.</li><li>users 에 LEFT JOIN.</li><li><code>COUNT(*)</code> 는 전체 유저, <code>COUNT(결제컬럼)</code> 은 결제 유저. NULL 을 세지 않는 성질을 이용한다.</li><li>AVG 도 NULL 을 무시하므로 결제 유저 기준 평균이 자동으로 나온다.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH pu AS (
+  SELECT user_id, SUM(amount) AS amt FROM payments GROUP BY user_id
+)
+SELECT u.channel,
+       COUNT(*)                                       AS total_users,
+       COUNT(pu.user_id)                              AS paying_users,
+       ROUND(100.0 * COUNT(pu.user_id) / COUNT(*), 2) AS paying_ratio,
+       ROUND(AVG(pu.amt), 2)                          AS ltv
+FROM users u
+LEFT JOIN pu ON pu.user_id = u.user_id
+GROUP BY u.channel
+ORDER BY ltv DESC;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>이 문제의 핵심은 <code>COUNT(*)</code> 와 <code>COUNT(컬럼)</code> 의 차이</b>다. 분모 두 개를 CASE 없이 만들 수 있다.</li><li>LTV 분모를 전체 유저로 착각하기 쉽다. 문제를 다시 읽을 것.</li><li><code>AVG(COALESCE(amt,0))</code> 로 쓰면 결제 안 한 유저가 0 으로 들어가 LTV 가 내려간다. 의도가 다르다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“ARPU vs ARPPU” 가 정확히 이 차이다. ARPU 는 전체 유저, ARPPU 는 결제 유저 기준.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q10"><span class="n">Q10.</span> 채널별 ARPPU와 순위 변동<span class="lv">어려움</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">반별 평균 점수로 등수를 매기고, 지난달 등수보다 올랐나 내렸나를 본다.</p><table class="e">
+<tr><th>월</th><th>채널</th><th>평균</th><th>등수</th><th>지난달 등수</th><th>변동</th></tr>
+<tr><td>1월</td><td>referral</td><td>23,000</td><td>1</td><td class="x">(없음)</td><td class="x">(없음)</td></tr>
+<tr><td>2월</td><td>referral</td><td>23,200</td><td>1</td><td>1</td><td>0</td></tr>
+<tr><td>2월</td><td>sns</td><td>16,900</td><td>4</td><td>3</td><td>-1 (내려감)</td></tr>
+</table>
+<p class="note">변동 = 지난달 등수 − 이번달 등수. 등수가 1→4 로 내려가면 음수.</p>
+<h4>이렇게 푼다</h4><ol><li>월·채널별 평균을 먼저 만든다.</li><li><b>월 안에서</b> 등수를 매긴다 — <code>RANK() OVER (PARTITION BY 월 ORDER BY 평균 DESC)</code>.</li><li><b>채널별로</b> 지난달 등수를 끌어온다 — <code>LAG(등수) OVER (PARTITION BY 채널 ORDER BY 월)</code>.</li><li>지난달 등수 − 이번달 등수.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>묶는 기준이 두 번 바뀐다.</b> 등수를 매길 때는 <b>월</b>로 묶고, 지난달 등수를 끌어올 때는 <b>채널</b>로 묶는다. 둘을 같게 쓰면 전부 틀린다.</li><li>첫 달은 지난달 등수가 NULL 이고, 변동도 NULL 이다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 윈도우를 두 단계로 겹쳐 쓸 줄 아는가.</div>
+<h4>풀이 순서</h4><ol><li>월×채널 ARPPU 를 먼저 집계.</li><li>월 안에서 <code>RANK()</code> → 파티션은 <b>월</b>.</li><li>채널 기준으로 <code>LAG(rnk)</code> → 파티션은 <b>채널</b>. 파티션 기준이 다르다.</li><li>윈도우 결과를 다시 윈도우에 넣으려면 한 단계 감싸야 한다.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH a AS (
+  SELECT DATE_FORMAT(p.paid_date, '%Y-%m-01') AS mm, u.channel,
+         ROUND(SUM(p.amount) / COUNT(DISTINCT p.user_id), 2) AS arppu
+  FROM payments p JOIN users u ON u.user_id = p.user_id
+  GROUP BY mm, u.channel
+),
+r AS (
+  SELECT mm, channel, arppu,
+         RANK() OVER (PARTITION BY mm ORDER BY arppu DESC) AS rnk
+  FROM a
+)
+SELECT DATE_FORMAT(mm, '%Y-%m') AS month, channel, arppu, rnk,
+       LAG(rnk) OVER (PARTITION BY channel ORDER BY mm)       AS prev_rnk,
+       LAG(rnk) OVER (PARTITION BY channel ORDER BY mm) - rnk AS rank_change
+FROM r
+ORDER BY mm, rnk;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>같은 SELECT 안에서 RANK 를 LAG 에 넣을 수 없다.</b> CTE 로 한 단계 감싼다. 이 문제가 묻는 게 바로 이것.</li><li>순위는 <b>월</b>로 파티션, 변동은 <b>채널</b>로 파티션. 둘을 같게 쓰면 전부 틀린다.</li><li><code>rank_change</code> 부호 방향을 문제대로. 여기서는 ‘전월 − 이번달’이라 오르면 양수.</li><li>ARPPU 분모는 <code>COUNT(DISTINCT user_id)</code>. 결제 건수가 아니다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“전월 대비 매출 순위 변동”, “주간 랭킹 변화” 전부 같은 2단 구조.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q11"><span class="n">Q11.</span> 5일 이동평균 (부분 구간)<span class="lv">보통</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline"><b>최근 5일 평균</b>. 아직 5일이 안 모인 날은 있는 날만 가지고 평균.</p><table class="e">
+<tr><th>날</th><th>종가</th><th>평균에 쓰는 개수</th><th>ma5</th></tr>
+<tr><td>1일차</td><td>100</td><td>1개</td><td>100.00</td></tr>
+<tr><td>2일차</td><td>200</td><td>2개</td><td>150.00</td></tr>
+<tr><td>5일차</td><td>…</td><td>5개</td><td>…</td></tr>
+<tr><td>6일차</td><td>…</td><td>5개 (1일차는 빠짐)</td><td>…</td></tr>
+</table>
+<p class="note">창문이 5칸이고, 날짜가 가면 창문도 같이 미끄러진다.
+시작할 때는 창문이 아직 다 안 찼다.</p>
+<h4>이렇게 푼다</h4><ol><li><code>AVG(close_price) OVER (ORDER BY trade_date ROWS BETWEEN 4 PRECEDING AND CURRENT ROW)</code> — 이 한 줄이 전부다.</li><li>소수점 둘째 자리까지 반올림.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b><code>ROWS BETWEEN …</code> 을 빼면 전혀 다른 값이 나온다.</b> 안 쓰면 기본값이 '처음부터 이번 줄까지' 라서 <b>누적 평균</b>이 되어 버린다. 이게 이동평균 문제에서 가장 많이 틀리는 부분이다.</li><li><b><code>4 PRECEDING</code> 이다. 5 가 아니다.</b> 오늘을 포함해서 5개니까 앞으로 4칸이다.</li><li><b>날짜를 빼서 구하면 안 된다.</b> 주말에는 데이터가 없어서 '5일 전' 자리가 비어 있다. <b>줄 개수</b>로 세야 한다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 프레임을 쓸 줄 아는가. 날짜가 아니라 행으로 세는가.</div>
+<h4>풀이 순서</h4><ol><li><code>AVG(x) OVER (ORDER BY 날짜 ROWS BETWEEN 4 PRECEDING AND CURRENT ROW)</code>.</li><li>끝.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>SELECT trade_date, close_price,
+       ROUND(AVG(close_price) OVER (ORDER BY trade_date
+             ROWS BETWEEN 4 PRECEDING AND CURRENT ROW), 2) AS ma5
+FROM prices
+WHERE stock_code = '005930'
+ORDER BY trade_date;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b><code>ROWS</code> 누락</b> — 기본 프레임이 <code>RANGE UNBOUNDED PRECEDING</code> 이라 <b>누적평균</b>이 된다. 가장 흔한 실수.</li><li><code>5 PRECEDING</code> 으로 쓰면 6일 평균. 당일이 포함되므로 <code>4 PRECEDING</code>.</li><li><b>날짜 조인으로 풀려고 하면 안 된다.</b> <code>INTERVAL 4 DAY</code> 는 달력 4일이라 주말이 끼면 거래일 수가 맞지 않는다.</li><li>부분 구간 처리는 <b>따로 할 필요가 없다</b>. 앞 행이 모자라면 윈도우가 알아서 줄어든다. CASE 분기는 오히려 틀린다.</li><li>반대로 “초반 4일은 NULL” 이라는 문제면 <code>CASE WHEN ROW_NUMBER() OVER (...) >= 5 THEN ... END</code> 를 덧붙인다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“최근 7일 합계”, “최근 3건 평균” 전부 같은 프레임.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q12"><span class="n">Q12.</span> 종목별 5일·20일 이동평균<span class="lv">보통</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">Q11 과 똑같은데 <b>종목마다 따로</b>. 종목이 바뀌는 지점에서 섞이면 안 된다.</p><p class="note">삼성 마지막 날 다음 줄이 하이닉스 첫날이다.
+종목으로 묶어 주지 않으면 삼성 종가와 하이닉스 종가를 같이 평균 낸다.</p>
+<table class="e">
+<tr><th>종목</th><th>날</th><th>묶어주면</th><th>안 묶으면</th></tr>
+<tr><td>005930</td><td>마지막</td><td>삼성만</td><td>삼성만</td></tr>
+<tr><td>000660</td><td>첫날</td><td>하이닉스만 (1개)</td><td class="x">삼성 4개 + 하이닉스 1개</td></tr>
+</table>
+<h4>이렇게 푼다</h4><ol><li>Q11 식에 <code>PARTITION BY stock_code</code> 를 넣는다.</li><li><code>AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date ROWS BETWEEN 4 PRECEDING AND CURRENT ROW)</code></li><li>20일선은 <code>19 PRECEDING</code> 으로 하나 더 만든다.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b><code>PARTITION BY</code> 를 두 식 <b>모두</b>에 넣어라.</b> ma5 에만 넣고 ma20 에 빼먹는 실수가 흔하다.</li><li>정렬도 <code>종목 ASC, 날짜 ASC</code> 둘 다 써야 한다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · Q11 에 PARTITION 을 추가할 줄 아는가.</div>
+<h4>풀이 순서</h4><ol><li>Q11 과 같되 <code>PARTITION BY stock_code</code> 를 넣는다.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>SELECT stock_code, trade_date, close_price,
+       ROUND(AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
+             ROWS BETWEEN  4 PRECEDING AND CURRENT ROW), 2) AS ma5,
+       ROUND(AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
+             ROWS BETWEEN 19 PRECEDING AND CURRENT ROW), 2) AS ma20
+FROM prices
+ORDER BY stock_code, trade_date;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>PARTITION 누락</b> — 종목 경계를 넘어 평균이 섞인다. 삼성전자 첫날 ma5 에 SK하이닉스 종가가 들어간다.</li><li>WHERE 로 한 종목만 거르는 Q11 과 달리 여기서는 전 종목이 섞여 있다. 반드시 파티션.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“지점별 7일 평균 매출”, “유저별 최근 3건 평균” 전부 동일.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q13"><span class="n">Q13.</span> 골든크로스 발생일<span class="lv">어려움</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">단기선이 장기선을 <b>아래에서 위로 뚫는 날</b>. 어제는 아래에 있었고 오늘 위로 올라온 바로 그 날 하나.</p><table class="e">
+<tr><th>날</th><th>ma5 vs ma20</th><th>판정</th></tr>
+<tr><td>월</td><td>ma5 &lt; ma20 (아래)</td><td></td></tr>
+<tr><td>화</td><td>ma5 &gt; ma20 (위)</td><td><b>골든크로스!</b></td></tr>
+<tr><td>수</td><td>ma5 &gt; ma20 (위)</td><td>이미 위 — 아니다</td></tr>
+<tr><td>목</td><td>ma5 &gt; ma20 (위)</td><td>이미 위 — 아니다</td></tr>
+</table>
+<p class="note">'위에 있는 날' 이 아니라 '<b>올라온 날</b>' 을 찾는 문제다.
+그래서 <b>어제와 비교</b>해야 한다.</p>
+<h4>이렇게 푼다</h4><ol><li>먼저 ma5 와 ma20 을 만든다 (Q12 와 같은 방식).</li><li>그 결과를 한 번 감싸고, <b>어제의 ma5·ma20</b> 을 한 칸 위에서 끌어온다.</li><li>어제는 <code>ma5 &lt;= ma20</code> 이었고 오늘은 <code>ma5 &gt; ma20</code> 인 날만 남긴다.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>오늘만 보고 <code>ma5 &gt; ma20</code> 으로 하면 틀린다.</b> 계속 위에 있는 날이 전부 걸려서 결과가 몇 배로 많아진다.</li><li><b>비교는 반올림 전 값으로 한다.</b> 반올림한 값으로 비교하면 두 값이 같아져서 교차를 놓친다. 보여줄 때만 반올림한다.</li><li>종목마다 따로 (<code>PARTITION BY stock_code</code>). 그리고 첫 거래일은 어제가 없으니 빠진다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 윈도우 결과에 다시 LAG 를 거는가. 그리고 ‘교차’의 정의.</div>
+<h4>풀이 순서</h4><ol><li>ma5, ma20 을 만든다 (CTE 1).</li><li>그 위에 <code>LAG</code> 로 전일 ma5, ma20 을 가져온다 (CTE 2).</li><li>전일 <code>ma5 &lt;= ma20</code> <b>그리고</b> 당일 <code>ma5 &gt; ma20</code>.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH m AS (
+  SELECT stock_code, trade_date,
+         AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
+               ROWS BETWEEN  4 PRECEDING AND CURRENT ROW) AS ma5,
+         AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
+               ROWS BETWEEN 19 PRECEDING AND CURRENT ROW) AS ma20
+  FROM prices
+),
+d AS (
+  SELECT m.*,
+         LAG(ma5)  OVER (PARTITION BY stock_code ORDER BY trade_date) AS prev_ma5,
+         LAG(ma20) OVER (PARTITION BY stock_code ORDER BY trade_date) AS prev_ma20
+  FROM m
+)
+SELECT stock_code, trade_date, ROUND(ma5, 2) AS ma5, ROUND(ma20, 2) AS ma20
+FROM d
+WHERE prev_ma5 IS NOT NULL AND prev_ma5 &lt;= prev_ma20 AND ma5 &gt; ma20
+ORDER BY stock_code, trade_date;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>당일 조건만 쓰면 안 된다.</b> <code>ma5 &gt; ma20</code> 만 보면 이미 올라가 있는 구간이 전부 걸린다. ‘뚫고 올라간 그 날’이어야 한다.</li><li><code>trade_date + INTERVAL 1 DAY</code> 로 전일을 찾으면 <b>월요일과 공휴일 다음날이 통째로 누락</b>된다. 실제로 거래일의 20% 가 빠진다. 반드시 LAG.</li><li>반올림은 <b>출력할 때만</b>. 비교는 반올림 전 값으로 해야 경계에서 안 틀린다.</li><li><code>WHERE</code> 에서 윈도우 함수를 못 쓰므로 CTE 2 단이 필요하다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">데드크로스는 부등호만 뒤집는다. “임계값을 상향 돌파한 날”도 같은 패턴.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q14"><span class="n">Q14.</span> 전 유저 결제 요약 (NULL 처리)<span class="lv">보통</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">전교생 명단에 성적을 붙이는데, <b>시험 안 본 애도 명단에 남아야</b> 한다. 점수 칸은 0 으로, 시험 날짜 칸은 빈칸으로.</p><p class="note"><b>더할 게 하나도 없을 때 뭐가 나오나</b> — 이걸 알아야 풀린다.</p>
+<table class="e">
+<tr><th>함수</th><th>아무것도 없을 때</th></tr>
+<tr><td>COUNT(*) · COUNT(칸)</td><td><b>0</b></td></tr>
+<tr><td>SUM · AVG · MAX · MIN</td><td class="x"><b>NULL</b> (0 이 아니다!)</td></tr>
+</table>
+<h4>이렇게 푼다</h4><ol><li>유저 명단을 <b>왼쪽에 두고</b> 결제를 붙인다 (LEFT JOIN).</li><li>건수는 <code>COUNT</code> — 결제가 없으면 자동으로 0 이 된다.</li><li>금액은 <code>COALESCE(SUM(금액), 0)</code> — <b>SUM 밖에</b> 씌운다.</li><li>마지막 결제일은 <b>NULL 그대로</b> 둔다.</li><li>결제 없는 사람을 뒤로 보내고, 금액 많은 순, 상위 20명만.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b><code>SUM</code> 은 더할 게 없으면 0 이 아니라 NULL 이다.</b> 그래서 <code>COALESCE(…, 0)</code> 이 필요하다. 이것 때문에 금액 칸이 빈칸으로 나오는 실수가 가장 흔하다.</li><li><b>결제 없는 사람을 뒤로 보내는 요령:</b> <code>ORDER BY (마지막결제일 IS NULL), 금액 DESC, user_id ASC</code> — <code>IS NULL</code> 은 0 또는 1 이라서, 결제 있는 사람(0)이 먼저 온다.</li><li><code>LIMIT 20</code> 빼먹지 마라. 안 쓰면 3,000줄이 다 나온다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · LEFT JOIN 후 NULL 을 어떻게 다루는가. 그리고 NULL 정렬.</div>
+<h4>풀이 순서</h4><ol><li>users 기준 LEFT JOIN.</li><li>건수는 <code>COUNT(p.user_id)</code> — NULL 을 안 세므로 0 이 된다.</li><li>합계는 <code>COALESCE(SUM(...), 0)</code> — SUM 은 대상이 없으면 NULL 을 반환한다.</li><li>마지막 결제일은 NULL 그대로 두되, 정렬에서 뒤로 보낸다.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>SELECT u.user_id, u.channel,
+       COUNT(p.user_id)           AS pay_count,
+       COALESCE(SUM(p.amount), 0) AS total_amount,
+       MAX(p.paid_date)           AS last_paid
+FROM users u
+LEFT JOIN payments p ON p.user_id = u.user_id
+GROUP BY u.user_id, u.channel
+ORDER BY (MAX(p.paid_date) IS NULL), COALESCE(SUM(p.amount),0) DESC, u.user_id
+LIMIT 20;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><code>COUNT(*)</code> 를 쓰면 결제 없는 유저도 <b>1</b> 이 된다. LEFT JOIN 으로 행은 하나 생기기 때문. <code>COUNT(p.user_id)</code> 여야 0.</li><li><code>SUM</code> 은 대상 행이 없으면 0 이 아니라 <b>NULL</b>. COALESCE 로 감싼다.</li><li>MySQL 에 <code>NULLS LAST</code> 가 없다. <code>ORDER BY (컬럼 IS NULL), 컬럼</code> 로 쓴다. 조건식이 0/1 이 되어 NULL 이 뒤로 간다.</li><li><code>COALESCE(total, '없음')</code> 처럼 <b>문자 기본값을 넣으면 컬럼 전체가 문자열</b>이 되어 정렬이 사전순으로 깨진다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“주문 없는 고객 포함 요약”, “미거래 종목 포함” 전부 동일.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q15"><span class="n">Q15.</span> 채널별 pro 비중 (0 나누기)<span class="lv">보통</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">결제한 사람 중에 비싼 요금제 쓴 비율. 결제한 사람이 <b>0명</b>인 채널은 계산이 불가능하니 빈칸이어야 한다.</p><table class="e">
+<tr><th>채널</th><th>결제 유저</th><th>pro 유저</th><th>비중</th></tr>
+<tr><td>organic</td><td>371</td><td>130</td><td>35.04</td></tr>
+<tr><td>newsletter</td><td><b>0</b></td><td>0</td><td class="x"><b>NULL</b></td></tr>
+</table>
+<p class="note">0 ÷ 0 은 '0%' 가 아니다. <b>계산할 수 없음</b> 이다.
+그래서 0 이 아니라 빈칸(NULL)이 맞다. 그리고 그 채널도 결과에 <b>나와야</b> 한다.</p>
+<h4>이렇게 푼다</h4><ol><li>채널을 <b>전부 남긴다</b> (결제 유저가 0명인 채널도).</li><li>채널별로 결제한 사람 수, 그중 pro 쓴 사람 수를 센다.</li><li><code>pro수 * 100.0 / NULLIF(결제수, 0)</code>.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b><code>NULLIF(분모, 0)</code> 이 이 문제의 전부다.</b> '분모가 0 이면 NULL 로 바꿔라' 는 뜻이고, NULL 로 나누면 결과가 NULL 이 된다. 이름이 헷갈리는데, <b>NULLIF 는 NULL 을 <u>만드는</u> 함수</b>다.</li><li><b><code>IFNULL</code> 과 반대다.</b> <code>IFNULL(분모, 0)</code> 은 NULL 을 0 으로 바꿔서 <b>0 나누기를 일부러 만든다.</b> 정반대다.</li><li>결제 유저 0명인 채널을 <code>WHERE</code> 로 걸러내면 안 된다. 그 줄도 나와야 한다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 분모가 0 이 될 수 있는 상황을 아는가.</div>
+<h4>풀이 순서</h4><ol><li>결제 유저 수와 pro 유저 수를 조건부 DISTINCT 집계로.</li><li>비율 계산에서 분모를 <code>NULLIF(분모, 0)</code> 로 감싼다.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>SELECT u.channel,
+       COUNT(DISTINCT p.user_id) AS paying_users,
+       COUNT(DISTINCT CASE WHEN p.plan='pro' THEN p.user_id END) AS pro_users,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN p.plan='pro' THEN p.user_id END)
+             / NULLIF(COUNT(DISTINCT p.user_id), 0), 2) AS pro_ratio
+FROM users u
+LEFT JOIN payments p ON p.user_id = u.user_id
+GROUP BY u.channel
+ORDER BY pro_ratio DESC, u.channel;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b><code>IFNULL(분모, 0)</code> 은 정반대다.</b> 0 나누기를 막는 게 아니라 만든다. 방어는 <code>NULLIF(분모, 0)</code>.</li><li>결제 유저가 0 명인 채널도 결과에 나와야 하므로 LEFT JOIN.</li><li><code>CASE WHEN ... THEN user_id END</code> 에 <b>ELSE 를 쓰지 않는다</b>. ELSE 0 을 넣으면 0 도 값이라 DISTINCT 집계에 섞인다.</li><li>이 데이터로는 ‘분모 0’ 이 드물다. <b>안 걸린다고 맞는 게 아니다</b> — 여러 데이터셋으로 채점되면 그때 터진다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“환불률”, “쿠폰 사용률” 처럼 모집단이 비어 있을 수 있는 비율 전부.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q16"><span class="n">Q16.</span> 퍼널 단계별 유저 수와 단계 전환율<span class="lv">쉬움</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">들어온 사람 → 구경한 사람 → 장바구니에 담은 사람 → 산 사람. 각 칸에 몇 명.</p><table class="e">
+<tr><th>단계</th><th>사람 수</th><th>앞 단계 대비</th></tr>
+<tr><td>app_open</td><td>2,834</td><td></td></tr>
+<tr><td>item_view</td><td>1,872</td><td>66.1%</td></tr>
+<tr><td>add_to_cart</td><td>837</td><td>44.7%</td></tr>
+<tr><td>purchase</td><td>320</td><td>38.2%</td></tr>
+</table>
+<p class="note">표 하나에 한 줄로 나와야 한다. 테이블은 한 번만 읽으면 된다.</p>
+<h4>이렇게 푼다</h4><ol><li>한 번 읽으면서 네 숫자를 동시에 만든다 — <code>COUNT(DISTINCT CASE WHEN 행동='app_open' THEN user_id END)</code> 식으로 네 개.</li><li>그 네 개를 <b>서브쿼리로 감싸서</b> 바깥에서 이름으로 다시 쓴다. 안 감싸면 전환율 식에 같은 걸 또 써야 해서 쿼리가 네 배로 길어진다.</li><li><code>ROUND(100.0 * 뒤 / NULLIF(앞, 0), 1)</code>.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b><code>DISTINCT</code> 를 빼면 안 된다.</b> 한 사람이 app_open 을 네 번 남기면 4 로 세어진다. 묻는 건 사람 수다.</li><li><b><code>CASE</code> 에 <code>ELSE 0</code> 을 쓰지 마라.</b> 0 도 값이라서 '0 번 사람' 한 명으로 세어진다. ELSE 를 안 쓰면 NULL 이 되고, COUNT 는 NULL 을 안 센다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 한 테이블을 한 번만 읽어 네 숫자를 뽑고, 그 숫자끼리 나눈다. JOIN 도 GROUP BY 도 필요 없다. 여기서 시간을 쓰면 안 되는 문제다.</div>
+<h4>풀이 순서</h4><ol><li><code>COUNT(DISTINCT CASE WHEN ... THEN user_id END)</code> 로 단계별 순 유저 수를 한 줄씩 만든다. 테이블을 네 번 읽을 필요가 없다.</li><li>그 네 숫자를 <b>서브쿼리로 감싸서</b> 바깥에서 이름으로 다시 쓴다. 그러지 않으면 전환율 식에 COUNT(DISTINCT CASE...) 를 또 써야 해서 길이가 네 배가 된다.</li><li>전환율은 <code>100.0 *</code> 을 앞에 붙이고 <code>ROUND(..., 1)</code>.</li><li>분모에 <code>NULLIF(분모, 0)</code> 을 씌운다.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>SELECT a AS app_open_users,
+       v AS item_view_users,
+       k AS cart_users,
+       p AS purchase_users,
+       ROUND(100.0 * v / NULLIF(a, 0), 1) AS view_conversion_rate,
+       ROUND(100.0 * k / NULLIF(v, 0), 1) AS cart_conversion_rate,
+       ROUND(100.0 * p / NULLIF(k, 0), 1) AS purchase_conversion_rate
+FROM (
+  SELECT COUNT(DISTINCT CASE WHEN event_name = 'app_open'    THEN user_id END) AS a,
+         COUNT(DISTINCT CASE WHEN event_name = 'item_view'   THEN user_id END) AS v,
+         COUNT(DISTINCT CASE WHEN event_name = 'add_to_cart' THEN user_id END) AS k,
+         COUNT(DISTINCT CASE WHEN event_name = 'purchase'    THEN user_id END) AS p
+  FROM user_event_logs
+) c;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>DISTINCT 를 빼면 틀린다.</b> 한 유저가 app_open 을 네 번 남기면 <code>COUNT(CASE ...)</code> 는 4 를 센다. 묻는 건 유저 수이지 이벤트 수가 아니다.</li><li><b>CASE 에 ELSE 를 쓰지 마라.</b> <code>ELSE 0</code> 을 붙이면 0 도 값이라서 <code>COUNT(DISTINCT ...)</code> 가 0 을 하나의 유저로 센다. ELSE 를 안 쓰면 NULL 이 되고 COUNT 는 NULL 을 세지 않는다.</li><li><b>100.0 의 소수점이 핵심이다.</b> <code>100 * v / a</code> 는 정수 나눗셈이 되는 엔진에서 0 이 나온다. 토스 테스트돔에서 실제로 이걸로 틀린 적이 있다.</li><li><b>이 문제의 NULLIF 는 채점으로 확인할 수 없다.</b> MySQL·SQLite 는 0 으로 나누면 오류 없이 NULL 을 준다. PostgreSQL·MS SQL 은 오류가 난다. 즉 여기서는 있어도 없어도 같은 답이 나오지만, 습관을 안 들이면 다른 엔진에서 터진다.</li><li><b>이 문제의 '퍼널' 은 진짜 퍼널이 아니다.</b> 단계 순서를 안 따지므로, 장바구니를 안 거치고 구매한 유저가 있으면 뒤 단계가 앞 단계보다 많아져 전환율이 100% 를 넘을 수 있다. 면접에서 이걸 물으면 '순서를 강제하려면 단계별 첫 시각을 비교해야 한다' 고 답하면 된다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“단계별 이탈률”은 <code>100 − 전환율</code>. “채널별 퍼널”이면 <code>GROUP BY channel</code> 만 추가되고 구조는 그대로다. 순서를 강제하는 진짜 퍼널은 단계별 <code>MIN(created_at)</code> 을 구해 <code>MIN(cart) &gt; MIN(view)</code> 처럼 비교한다.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q17"><span class="n">Q17.</span> 코호트별 D7 리텐션율<span class="lv">보통</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">첫 거래한 날로부터 <b>딱 7일 뒤</b> 다시 왔나. 첫 거래일마다 따로 센다.</p><table class="e">
+<tr><th>첫 거래</th><th>확인할 날</th><th>왔으면</th></tr>
+<tr><td>2월 1일</td><td><b>2월 8일</b></td><td>재방문 1명</td></tr>
+<tr><td>2월 2일</td><td><b>2월 9일</b></td><td>아무도 안 옴 → 0</td></tr>
+</table>
+<p class="note">'7일 안에' 가 아니라 '<b>딱 그 날</b>'. 2월 7일에 왔어도 안 세고,
+2월 9일에 왔어도 안 센다. 재방문 0명인 날도 0 으로 한 줄 나와야 한다.</p>
+<h4>이렇게 푼다</h4><ol><li>코호트 명단(first_trades)을 <b>왼쪽에</b> 둔다. 분모가 여기서 나온다.</li><li>방문 기록을 붙이는데, <b>조건을 ON 안에</b> 쓴다 — <code>ON 같은사람 AND 방문일 = 첫거래일 + 7일</code>.</li><li>분모 = 명단 사람 수, 분자 = 붙은 사람 수. 둘 다 중복 지우고 센다.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>조건을 WHERE 에 쓰면 LEFT JOIN 이 그냥 JOIN 이 되어 버린다.</b> 안 온 사람은 방문일이 빈칸인데, WHERE 가 그 빈칸을 걸러내서 <b>분모에서까지 사라진다.</b> → 오른쪽 테이블 조건은 <b>반드시 ON 에</b>. 이 한 줄이 리텐션 문제의 핵심이다.</li><li><b>분자에 중복 제거를 빼면 100% 를 넘는다.</b> 같은 사람이 같은 날 여러 번 방문 기록을 남길 수 있다. 리텐션이 100 을 넘으면 거의 항상 이 실수다.</li><li>분모를 <code>COUNT(*)</code> 로 쓰면 안 된다. 붙이면서 늘어난 줄 수가 나온다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 코호트 테이블을 왼쪽에 두고 활동 로그를 LEFT JOIN 한다. 코호트 문제의 90% 가 이 모양이다.</div>
+<h4>풀이 순서</h4><ol><li>코호트 테이블(<code>first_trades</code>)을 <b>왼쪽</b>에 둔다. 분모가 여기서 나온다.</li><li>활동 로그를 <code>LEFT JOIN</code> 하고, 조인 조건에 <code>visit_date = first_trade_date + 7일</code> 을 넣는다.</li><li>분모는 <code>COUNT(DISTINCT f.user_id)</code>, 분자는 <code>COUNT(DISTINCT v.user_id)</code>. 둘 다 DISTINCT 다.</li><li>범위 조건은 <code>WHERE</code> 에 쓴다 (왼쪽 테이블 조건이므로 안전하다).</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>SELECT f.first_trade_date,
+       COUNT(DISTINCT f.user_id) AS cohort_size,
+       COUNT(DISTINCT v.user_id) AS d7_active_users,
+       ROUND(100.0 * COUNT(DISTINCT v.user_id)
+             / NULLIF(COUNT(DISTINCT f.user_id), 0), 1) AS d7_retention_rate
+FROM first_trades f
+LEFT JOIN daily_app_visits v
+       ON v.user_id = f.user_id
+      AND v.visit_date = DATE_ADD(f.first_trade_date, INTERVAL 7 DAY)
+WHERE f.first_trade_date BETWEEN '2026-02-01' AND '2026-02-07'
+GROUP BY f.first_trade_date
+ORDER BY f.first_trade_date;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>JOIN 조건을 WHERE 로 옮기면 LEFT JOIN 이 INNER JOIN 이 된다.</b> <code>WHERE v.visit_date = ...</code> 로 쓰면 재방문 안 한 유저의 NULL 행이 조건에 걸려 사라지고, 분모까지 같이 깎인다. <b>오른쪽 테이블 조건은 반드시 ON 에</b> — 이 한 줄이 리텐션 문제의 핵심이다.</li><li><b>'정확히 7일' 과 '7일 이내' 는 다른 문제다.</b> <code>=</code> 로 쓸 자리에 <code>&lt;=</code> 를 쓰면 숫자가 크게 부풀어 오른다. 문제를 다시 읽어라.</li><li><b>분자에 DISTINCT 를 빼면 100% 를 넘는다.</b> 방문 로그는 같은 유저가 같은 날 여러 행을 남길 수 있다. 리텐션율이 100 을 넘으면 거의 항상 이 실수다.</li><li><b>분모를 COUNT(*) 로 쓰면 안 된다.</b> LEFT JOIN 후의 <code>COUNT(*)</code> 는 조인으로 불어난 행 수다. 코호트 크기가 아니다.</li><li><b>재방문자 0 명인 날도 한 행 나와야 한다.</b> LEFT JOIN 이면 자동으로 0 이 된다. <code>COUNT</code> 는 빈 입력에서 0 을 돌려주기 때문이다 (<code>SUM</code> 은 NULL 이 된다 — 다른 문제에서 자주 나오는 함정).</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“D1/D7/D30 을 한 번에”면 조인 조건을 <code>visit_date IN (+1일, +7일, +30일)</code> 로 바꾸고 <code>COUNT(DISTINCT CASE WHEN ... END)</code> 를 세 개 만든다. “월 코호트 매트릭스”면 <code>TIMESTAMPDIFF(MONTH, 코호트월, 활동월)</code> 을 경과 개월로 쓰고 그걸로 피벗한다.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q18"><span class="n">Q18.</span> 유저별 최장 연속 거래일수<span class="lv">어려움</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">Q8 의 출석 도장 트릭과 <b>똑같다</b>. 단위가 '달' 에서 '날' 로 바뀐 것뿐.</p><table class="e">
+<tr><th>거래한 날</th><th>날 번호</th><th>줄 번호</th><th>차이</th></tr>
+<tr><td>3월 2일</td><td>60</td><td>1</td><td><b>59</b></td></tr>
+<tr><td>3월 3일</td><td>61</td><td>2</td><td><b>59</b></td></tr>
+<tr><td>3월 4일</td><td>62</td><td>3</td><td><b>59</b></td></tr>
+<tr><td>3월 8일</td><td>66</td><td>4</td><td class="x">62</td></tr>
+</table>
+<p class="note">차이 59 가 세 개 → 3연속. 그 다음은 끊긴 것.</p>
+<h4>이렇게 푼다</h4><ol><li><b>성공한 주문만</b> 남기고, <b>하루는 1번으로</b> 중복을 지운다. 이 한 줄에 문제 조건 두 개가 다 들어 있다.</li><li>날짜를 숫자로 바꾼다.</li><li>날 숫자 − 줄 번호 → 묶어서 개수 → 사람별 최대값 → 3 이상만.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>취소된 주문을 빼라.</b> 그 날 주문이 <b>전부 취소</b>면 거래 안 한 날이고, 연속이 거기서 끊겨야 한다.</li><li><b>하루 여러 건을 1건으로 지워라.</b> 하루에 3건 거래했으면 줄 번호가 3칸 가는데 날짜는 그대로여서 연속일수가 부풀어 오른다.</li><li>동점이 아주 많은 문제다. <code>최장일수 DESC, user_id ASC</code> 둘 다 써라.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · gaps and islands. 알면 2분, 모르면 못 푼다. 반드시 외워 둘 패턴.</div>
+<h4>풀이 순서</h4><ol><li>먼저 <b>조건을 걸고 하루 단위로 중복을 지운다</b>: <code>SELECT DISTINCT user_id, order_date ... WHERE status='COMPLETED'</code>. 이 한 줄에 문제의 조건 두 개가 다 들어 있다.</li><li>날짜를 일련번호로 바꾼다: <code>DATEDIFF(order_date, '기준일')</code>.</li><li><code>일련번호 − ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY order_date)</code> → 연속 구간마다 같은 값이 나온다.</li><li>그 값으로 묶어 <code>COUNT(*)</code> → 구간 길이. 유저별 <code>MAX()</code> → 최장 길이. <code>HAVING</code> 으로 3 이상만.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH d AS (
+  SELECT DISTINCT user_id, order_date
+  FROM stock_orders
+  WHERE status = 'COMPLETED'
+),
+g AS (
+  SELECT user_id, order_date,
+         DATEDIFF(order_date, '2026-01-01')
+         - ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY order_date) AS grp
+  FROM d
+),
+runs AS (
+  SELECT user_id, grp, COUNT(*) AS run_len
+  FROM g GROUP BY user_id, grp
+)
+SELECT user_id, MAX(run_len) AS max_streak_days
+FROM runs
+GROUP BY user_id
+HAVING MAX(run_len) &gt;= 3
+ORDER BY max_streak_days DESC, user_id ASC;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>왜 되는가.</b> 연속이면 날짜 일련번호와 행 번호가 같은 보폭으로 늘어나 차이가 고정된다. 끊기면 차이가 점프한다.<br><code>3/2,3/3,3/4 → 60,61,62 − 1,2,3 = 59,59,59</code> (한 구간)<br><code>3/2, 3/6 → 60,64 − 1,2 = 59,62</code> (다른 구간)</li><li><b>DISTINCT 를 빼면 연속일수가 부풀어 오른다.</b> 하루에 3건 거래했으면 ROW_NUMBER 가 세 칸 가는데 날짜는 그대로라 차이가 틀어진다.</li><li><b>status 필터를 빼면 끊겨야 할 구간이 이어진다.</b> 그 날 주문이 전부 CANCELLED 면 거래하지 않은 날이다. 「끊김복귀」 데이터셋이 이걸 잡는다.</li><li><b>HAVING 에 MAX(run_len) 을 그대로 쓴다.</b> <code>WHERE run_len &gt;= 3</code> 으로 미리 걸러도 같은 답이 나오지만, 그러면 '최장 구간이 3 미만인 유저' 와 '3 이상 구간만 남긴 유저' 의 MAX 가 달라질 수 있는 변형 문제에서 틀린다.</li><li><b>정렬 두 개를 다 쓴다.</b> 동점이 많은 문제다. <code>max_streak_days DESC</code> 만 쓰면 같은 값들 사이 순서가 실행마다 바뀐다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“연속 출석일수”, “N일 연속 접속”, “연속 결제 개월수” 전부 같은 패턴이다. 월 단위면 일련번호를 <code>TIMESTAMPDIFF(MONTH, 기준월, 그달)</code> 로 바꾼다. “현재 진행 중인 연속일수”면 마지막 구간만 (<code>MAX(order_date) = 오늘</code> 인 구간) 남긴다.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q19"><span class="n">Q19.</span> A/B 테스트 그룹 집계 (상위 1% 제외)<span class="lv">보통</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">반 평균 낼 때 혼자 만점인 애를 빼고 계산. 단, <b>빼는 순서</b>가 중요하다.</p><p class="note">이 순서를 바꾸면 답이 달라진다.</p>
+<table class="e">
+<tr><td>①</td><td>거래 없는 참가자를 <b>0 으로 채운다</b></td></tr>
+<tr><td>②</td><td>그 상태에서 그룹별로 <b>등수를 매긴다</b></td></tr>
+<tr><td>③</td><td>맨 위를 <b>자른다</b></td></tr>
+<tr><td>④</td><td>남은 사람으로 <b>평균</b></td></tr>
+</table>
+<p class="note">①을 빼고 ②를 하면 모집단이 달라져서 잘려나갈 사람도 달라진다.</p>
+<h4>이렇게 푼다</h4><ol><li>참가자 명단을 왼쪽에 두고 거래 금액을 붙이고 <code>COALESCE(금액, 0)</code>.</li><li>그 결과 위에서 <code>PERCENT_RANK() OVER (PARTITION BY 그룹 ORDER BY 금액)</code>.</li><li><b>한 번 더 감싸서</b> 바깥에서 <code>WHERE 등수 &lt;= 0.99</code>.</li><li>남은 것으로 인원·합계·평균.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>등수 함수는 <code>WHERE</code> 에 못 쓴다.</b> <code>WHERE PERCENT_RANK() OVER (…) &lt;= 0.99</code> 는 문법 오류다. 실행 순서가 WHERE 먼저, 등수 나중이라서 그렇다. <b>한 단 감싸는 것 외에 방법이 없다.</b></li><li><b>거래 없는 참가자를 빼면 안 된다.</b> 실험에 참가한 사람은 거래를 안 했어도 참가자다. 분모를 임의로 줄이면 A/B 결과를 못 쓴다.</li><li><b>알아 둘 것:</b> <code>PERCENT_RANK</code> 는 맨 위가 <b>항상 정확히 1.0</b> 이다. 그래서 <code>&gt; 0.99</code> 는 '상위 1%' 가 아니라 거의 항상 <b>맨 위 한 명</b>만 자른다. 문제가 그렇게 시켰으니 그대로 풀되, 이게 허술한 정의라는 건 알고 있어라. 면접에서 물으면 '진짜 상위 1% 는 NTILE(100) 로 자른다' 고 답하면 된다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 순서가 생명인 문제. ①0 채우기 → ②순위 매기기 → ③자르기 → ④집계. 이 순서를 바꾸면 답이 달라진다.</div>
+<h4>풀이 순서</h4><ol><li><b>실험 참가자 테이블을 왼쪽에 두고</b> 거래 요약을 LEFT JOIN, <code>COALESCE(금액, 0)</code> 으로 0 을 채운다. 분모는 참가자 수여야 한다.</li><li>그 결과 위에서 <code>PERCENT_RANK() OVER (PARTITION BY group_name ORDER BY amt)</code>. 0 을 채운 <b>뒤에</b> 순위를 매기는 것이 중요하다 — 0 인 유저도 모집단의 일부다.</li><li><code>WHERE pr &lt;= 0.99</code> 로 이상치를 떨어뜨린다. 윈도우 함수는 WHERE 에서 못 쓰므로 반드시 서브쿼리/CTE 로 한 단 감싸야 한다.</li><li>남은 행으로 <code>COUNT(*)</code>, <code>SUM(amt)</code>, 그리고 <code>ROUND(SUM(amt)/COUNT(*), 0)</code>.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH j AS (
+  SELECT e.user_id, e.group_name,
+         COALESCE(s.total_trading_amount, 0) AS amt
+  FROM experiment_users e
+  LEFT JOIN user_trades_summary s ON s.user_id = e.user_id
+),
+p AS (
+  SELECT group_name, amt,
+         PERCENT_RANK() OVER (PARTITION BY group_name ORDER BY amt) AS pr
+  FROM j
+)
+SELECT group_name,
+       COUNT(*) AS user_count,
+       SUM(amt) AS group_total_amount,
+       ROUND(SUM(amt) / COUNT(*), 0) AS arpu
+FROM p
+WHERE pr &lt;= 0.99
+GROUP BY group_name
+ORDER BY group_name;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>윈도우 함수는 WHERE 에 못 쓴다.</b> <code>WHERE PERCENT_RANK() OVER (...) &lt;= 0.99</code> 는 문법 오류다. 실행 순서가 WHERE → 윈도우 함수이기 때문이다. 한 단 감싸는 것 외에 방법이 없다.</li><li><b>LEFT JOIN 을 INNER JOIN 으로 쓰면 유저 수가 깎인다.</b> 거래가 없는 참가자도 실험 참가자다. A/B 테스트에서 분모를 임의로 줄이면 그 결과는 못 쓴다. 「결제없음」 데이터셋이 이걸 잡는다.</li><li><b>0 을 채우기 전에 순위를 매기면 다른 답이 나온다.</b> 거래 없는 유저를 빼고 순위를 매기면 모집단이 달라지고 잘려 나가는 사람도 달라진다. 문제가 지정한 순서를 따르라.</li><li><b>PERCENT_RANK 의 정의를 알고 써라.</b> <code>(순위 − 1) / (전체 − 1)</code> 이므로 <b>최솟값은 항상 0, 최댓값은 항상 1</b> 이다. 그래서 <code>&gt; 0.99</code> 는 '상위 1%' 가 아니라 거의 항상 <b>최댓값 행만</b> 떨어뜨린다. 그룹에 2명뿐이면 1명이 날아간다. 면접에서 물으면 '진짜 상위 1% 는 <code>NTILE(100)</code> 이나 <code>PERCENTILE_CONT</code> 로 임계값을 구해 자른다' 고 답하라.</li><li><b>최댓값이 동점이면 둘 다 빠진다.</b> PERCENT_RANK 는 동점에 같은 값을 주므로 공동 1위가 둘이면 둘 다 1.0 이다. 「동점」 데이터셋이 이걸 잡는다.</li><li><b>ROUND(..., 0) 은 정수가 아니라 소수 0자리다.</b> 엔진에 따라 <code>150</code> 또는 <code>150.0</code> 으로 보인다. 정수형으로 받아야 하면 <code>CAST(ROUND(...) AS SIGNED)</code> 까지 써라.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“상·하위 1% 양쪽 제거”면 <code>pr BETWEEN 0.01 AND 0.99</code>. “중앙값 비교”면 <code>ROW_NUMBER</code> + <code>COUNT() OVER</code> 패턴. “전환율 비교”면 <code>COUNT(DISTINCT 전환유저)/COUNT(DISTINCT 참가자)</code> 로 분모를 참가자 전체로 둔다 (intention-to-treat).</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q20"><span class="n">Q20.</span> 3일 이상 연속 상승 구간 모두 찾기<span class="lv">어려움</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">Q8 출석 도장 트릭 + 어제와 비교. <b>두 개를 겹쳐 쓰는 문제</b>다. 이게 풀리면 시계열 문제는 거의 다 풀린다.</p><table class="e">
+<tr><th>줄번호</th><th>날</th><th>종가</th><th>어제</th><th>올랐나</th><th>오른날 줄번호</th><th>차이</th></tr>
+<tr><td>1</td><td>1일</td><td>100</td><td class="x">-</td><td>-</td><td></td><td></td></tr>
+<tr><td>2</td><td>2일</td><td>110</td><td>100</td><td>O</td><td>1</td><td><b>1</b></td></tr>
+<tr><td>3</td><td>3일</td><td>120</td><td>110</td><td>O</td><td>2</td><td><b>1</b></td></tr>
+<tr><td>4</td><td>4일</td><td>130</td><td>120</td><td>O</td><td>3</td><td><b>1</b></td></tr>
+<tr><td>5</td><td>5일</td><td>125</td><td>130</td><td class="x">X</td><td></td><td></td></tr>
+<tr><td>6</td><td>6일</td><td>130</td><td>125</td><td>O</td><td>4</td><td class="x">2</td></tr>
+</table>
+<p class="note">차이 1 이 세 개 → 2일~4일이 한 덩어리(3일 연속). 6일은 차이가 2 라서 다른 덩어리.</p>
+<h4>이렇게 푼다</h4><ol><li><b>전체 줄에 먼저 번호를 매기고</b>, 어제 종가도 같이 끌어온다.</li><li>오른 날만 남긴다 (<code>오늘 &gt; 어제</code>).</li><li><b>남은 것에 번호를 새로 매기고</b>, (전체 줄번호 − 새 번호).</li><li>그 값으로 묶어서 시작일·끝일·개수, 3 이상만.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>번호는 거르기 <u>전에</u> 매겨야 한다.</b> 거른 다음에 매기면 빠진 자리가 메워져서 <b>끊긴 구간이 붙어 버린다.</b> 이게 핵심이고 여기서 대부분 틀린다.</li><li><b>날짜 차이로 묶으면 틀린다.</b> 금요일과 월요일은 날짜로는 3일 차이지만 거래일로는 바로 연속이다. 주말에 데이터가 없으니까. <b>줄 번호</b>를 써야 한다.</li><li><b>같은 가격은 상승이 아니다.</b> <code>&gt;</code> 지 <code>&gt;=</code> 가 아니다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · LAG 로 상승일을 가리고, 그 위에 gaps and islands 를 한 번 더 얹는다. 두 패턴을 포개는 문제. 이게 풀리면 시계열 문제는 거의 다 풀린다.</div>
+<h4>풀이 순서</h4><ol><li>먼저 <b>모든 행에 행 번호</b>를 매긴다: <code>ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY trade_date) AS rn</code>. 이게 '몇 번째 거래일인가' 다. 날짜가 아니라 이 번호가 기준이 된다.</li><li>같은 단에서 <code>LAG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date)</code> 로 전 거래일 종가를 끌어온다.</li><li><code>WHERE prev IS NOT NULL AND close_price &gt; prev</code> 로 상승일만 남긴다.</li><li>남은 상승일에 <b>새로 행 번호를 매기고</b> <code>rn − 새 행번호</code> → 연속 상승 구간마다 같은 값.</li><li>그 값으로 묶어 <code>MIN/MAX/COUNT</code>, <code>HAVING COUNT(*) &gt;= 3</code>.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH p AS (
+  SELECT stock_code, trade_date, close_price,
+         ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY trade_date) AS rn,
+         LAG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date) AS prev
+  FROM stock_daily_prices
+),
+u AS (
+  SELECT stock_code, trade_date,
+         rn - ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY trade_date) AS grp
+  FROM p
+  WHERE prev IS NOT NULL AND close_price &gt; prev
+)
+SELECT stock_code,
+       MIN(trade_date) AS streak_start_date,
+       MAX(trade_date) AS streak_end_date,
+       COUNT(*) AS streak_days
+FROM u
+GROUP BY stock_code, grp
+HAVING COUNT(*) &gt;= 3
+ORDER BY stock_code, streak_start_date;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>날짜 차이로 구간을 묶으면 틀린다.</b> 주말이 비어 있어서 금요일과 월요일은 날짜로는 3일 차이지만 거래일로는 연속이다. <code>DATEDIFF</code> 대신 <b>행 번호</b>를 일련번호로 써야 한다. 「끊김복귀」·「동점」 데이터셋이 이걸 잡는다.</li><li><b>rn 은 상승일만 걸러낸 뒤에 매기면 안 된다.</b> 전체 행에 먼저 매겨 둬야 '거래일 순서' 가 보존된다. 걸러낸 뒤 매기면 하락일이 사라진 자리가 메워져 끊긴 구간이 붙어 버린다.</li><li><b>&gt; 와 &gt;= 는 다른 문제다.</b> 전일과 같은 가격은 상승이 아니다. 「경계값」 데이터셋에 같은 가격이 들어 있다.</li><li><b>prev IS NOT NULL 을 빼면 첫 행이 섞인다.</b> 각 종목의 첫 거래일은 전일이 없어서 LAG 가 NULL 이다. <code>close_price &gt; NULL</code> 은 NULL(거짓 취급)이라 대부분 자동으로 빠지지만, 명시하는 편이 안전하고 읽기도 낫다.</li><li><b>streak_days 는 상승일의 개수다.</b> 상승이 시작되기 전 날(기준이 된 날)은 세지 않는다. 세어야 하는 문제면 <code>COUNT(*) + 1</code> 이고 시작일도 하루 앞이 된다. 문제를 다시 읽어라 — 출제자가 어느 쪽을 묻는지가 갈린다.</li><li><b>PARTITION BY stock_code 를 LAG 와 ROW_NUMBER 양쪽에 다 써라.</b> 하나라도 빠지면 종목이 넘어가는 지점에서 앞 종목의 마지막 가격과 비교해 버린다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“N일 연속 하락”이면 부등호만 뒤집는다. “최장 구간 하나만”이면 마지막에 <code>ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY COUNT(*) DESC)</code> 로 1등만. “연속 상승률”이면 구간 양 끝 종가가 필요하므로 <code>FIRST_VALUE/LAST_VALUE</code> 를 쓰거나 시작일 하루 전 종가를 따로 끌어온다.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q21"><span class="n">Q21.</span> 채널별 ARPU 와 ARPPU<span class="lv">보통</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">같은 매출을 <b>전교생으로 나누면 ARPU</b>, <b>돈 낸 애들로만 나누면 ARPPU</b>. 분자는 같고 분모만 다르다.</p><table class="e">
+<tr><th></th><th>분자</th><th>분모</th></tr>
+<tr><td><b>ARPU</b></td><td>총 결제액</td><td>전체 가입자</td></tr>
+<tr><td><b>ARPPU</b></td><td>총 결제액</td><td>결제한 사람</td></tr>
+</table>
+<p class="note">가입자 100명, 결제자 20명, 매출 200만원이면 →
+ARPU = 2만원, ARPPU = 10만원. 다섯 배 차이가 난다.</p>
+<h4>이렇게 푼다</h4><ol><li>유저 명단 왼쪽에 두고 결제를 붙인다 (LEFT JOIN).</li><li>분모 두 개를 따로 센다 — 전체는 <code>COUNT(DISTINCT u.user_id)</code>, 결제자는 <code>COUNT(DISTINCT p.user_id)</code>.</li><li><b>왜 저게 되냐:</b> LEFT JOIN 이라 결제 없는 사람의 <code>p.user_id</code> 는 빈칸이고, <code>COUNT(DISTINCT)</code> 는 빈칸을 안 세기 때문이다.</li><li>각각 나누고 <code>* 1.0</code>, <code>ROUND(…, 2)</code>.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b><code>AVG(금액)</code> 은 둘 다 아니다.</b> 그건 <b>결제 건당</b> 평균이다. 한 사람이 다섯 번 결제하면 그 사람이 다섯 번 반영된다. '1인당' 을 물었으면 분모를 사람 수로 직접 써야 한다.</li><li><b><code>AVG</code> 는 빈칸인 줄을 분모에서도 뺀다.</b> 값이 10, 빈칸, 20 이면 AVG 는 15 다. 10 이 아니다. 그래서 AVG 로는 ARPU 가 절대 안 나온다.</li><li>결제자가 0명인 채널은 ARPPU 계산이 안 되니 <b>결과 전체</b>에 <code>COALESCE(…, 0)</code> 을 씌운다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 분모가 다른 두 평균을 한 쿼리에서 만든다. 실무에서 가장 자주 틀리는 지표 쌍이고, 면접에서도 묻는다.</div>
+<h4>풀이 순서</h4><ol><li><b>ARPU 와 ARPPU 는 분자가 같고 분모만 다르다.</b> 분자는 둘 다 결제액 합계, 분모는 ARPU 는 전체 가입자, ARPPU 는 결제 유저.</li><li><code>users LEFT JOIN payments</code> 로 결제 안 한 유저까지 붙인다.</li><li>분모 두 개를 <code>COUNT(DISTINCT u.user_id)</code> 와 <code>COUNT(DISTINCT p.user_id)</code> 로 따로 센다. LEFT JOIN 이라 결제 없는 유저의 <code>p.user_id</code> 는 NULL 이고, <code>COUNT(DISTINCT)</code> 는 NULL 을 안 세므로 자동으로 결제 유저 수가 된다.</li><li><code>* 1.0</code> 을 붙이고 <code>ROUND(..., 2)</code>.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>SELECT u.channel,
+       COUNT(DISTINCT u.user_id) AS users,
+       COUNT(DISTINCT p.user_id) AS payers,
+       ROUND(COALESCE(SUM(p.amount), 0) * 1.0
+             / NULLIF(COUNT(DISTINCT u.user_id), 0), 2)     AS arpu,
+       COALESCE(ROUND(SUM(p.amount) * 1.0
+             / NULLIF(COUNT(DISTINCT p.user_id), 0), 2), 0) AS arppu
+FROM users u
+LEFT JOIN payments p ON p.user_id = u.user_id
+GROUP BY u.channel
+ORDER BY arpu DESC, u.channel ASC;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b><code>AVG(p.amount)</code> 는 ARPU 도 ARPPU 도 아니다.</b> 결제 <b>건당</b> 평균이다. 한 유저가 5번 결제하면 그 유저가 5번 반영된다. '유저당' 을 물었으면 분모를 유저 수로 직접 써야 한다. 이 한 줄 차이로 숫자가 두 배 넘게 벌어진다.</li><li><b>AVG 는 NULL 을 분모에서도 뺀다.</b> 결제 안 한 유저의 amount 는 LEFT JOIN 뒤 NULL 이고, <code>AVG</code> 는 그 행을 분모에서 제외한다. 그래서 <code>AVG(p.amount)</code> 로는 ARPU 가 절대 안 나온다. 값이 10, NULL, 20 이면 AVG 는 15 지 10 이 아니다.</li><li><b>COALESCE 위치가 두 컬럼에서 다르다.</b><br>arpu — 분모(가입자 수)는 항상 1 이상이므로 <b>분자</b>를 0 으로 채운다: <code>COALESCE(SUM(...), 0) / 가입자수</code><br>arppu — 분모(결제 유저 수)가 0 일 수 있어 나눗셈 자체가 NULL 이 된다. <b>결과 전체</b>를 0 으로 채운다: <code>COALESCE(ROUND(...), 0)</code><br>arppu 를 arpu 처럼 쓰면 결제 없는 채널에서 0 대신 NULL 이 나온다.</li><li><b><code>* 1.0</code> 을 빼면 안 된다.</b> amount 와 COUNT 가 둘 다 정수라 정수 나눗셈이 된다. 실제 토스 테스트에서 이걸로 틀린 적이 있다.</li><li><b>정렬을 두 개 다 쓴다.</b> <code>arpu DESC</code> 만 쓰면 동점에서 순서가 흔들린다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“ARPPU 대신 중앙값”이면 <code>ROW_NUMBER</code> + <code>COUNT() OVER</code> 패턴. “월별 ARPU 추이”면 <code>GROUP BY 월, 채널</code> 로 바꾸되 <b>분모를 그 달의 활성 유저로 둘지 전체 가입자로 둘지</b>를 문제에서 확인하라 — 여기서 정의가 갈린다.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q22"><span class="n">Q22.</span> 한 번도 결제하지 않은 유저 수<span class="lv">쉬움</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">명단에서 '숙제 안 낸 사람' 찾기. 쉬워 보이는데 <b>함정이 하나 있고, 그것만 보는 문제</b>다.</p><p class="note"><b>이게 함정이다.</b></p>
+<table class="e">
+<tr><td><code>SELECT 5 WHERE 5 NOT IN (1, 2, NULL)</code></td>
+    <td class="x"><b>0행</b></td></tr>
+</table>
+<p class="note">왜 그런가 — 이 식은 이렇게 풀린다.<br>
+<code>5≠1</code>(참) <b>그리고</b> <code>5≠2</code>(참) <b>그리고</b>
+<code>5≠NULL</code>(<b>모름</b>)<br>
+마지막을 모르니까 전체가 '모름' 이 되고, 조건에서 '모름' 은 거짓 취급이라
+<b>전부 탈락</b>한다. 한 줄도 안 나온다.</p>
+<h4>이렇게 푼다</h4><ol><li><b>방법 1</b> — <code>NOT EXISTS (SELECT 1 FROM payments p WHERE p.user_id = u.user_id)</code></li><li><b>방법 2</b> — 결제자 목록을 왼쪽 붙이기 하고 <b>안 붙은 것</b>만 센다 (<code>p.user_id IS NULL</code>).</li><li>채널별로 <code>SUM(CASE WHEN p.user_id IS NULL THEN 1 ELSE 0 END)</code>.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b><code>NOT IN</code> 에 빈칸이 하나라도 섞이면 결과가 전부 사라진다.</b> 본 데이터에는 빈칸이 없어서 통과하고, 다른 데이터셋에서 터진다. 실제 시험이 데이터셋을 여러 개 쓰는 이유가 이것이다.</li><li><b><code>NOT EXISTS</code> 는 이 문제에 안전하다.</b> 빈칸인 줄은 '같다' 비교가 성립하지 않아서 알아서 무시된다. <b>'없는 것 찾기' 는 NOT EXISTS 를 기본으로 삼아라.</b></li><li><b><code>IN</code> 은 괜찮다.</b> 하나만 맞으면 참이니까. 부정형만 문제다.</li><li><code>COUNT(*)</code> 로 세면 그 채널 전체 인원이 나온다. <code>SUM(CASE WHEN … IS NULL THEN 1 ELSE 0 END)</code> 이 맞다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · '존재하지 않는 것 찾기'. 쉬워 보이지만 <code>NOT IN</code> 을 쓰면 데이터에 NULL 이 하나 섞인 순간 <b>결과가 0행</b>이 된다. 이 함정 하나만 아는지 보는 문제다.</div>
+<h4>풀이 순서</h4><ol><li>결제한 유저 목록을 만든다. <b>user_id 가 NULL 인 행은 뺀다</b> (누구의 결제인지 모르는 행이므로).</li><li><code>users LEFT JOIN 그 목록</code> → 붙지 않은 유저가 '결제 없음' 이다.</li><li><code>SUM(CASE WHEN p.user_id IS NULL THEN 1 ELSE 0 END)</code> 으로 센다. <code>COUNT(*)</code> 로 세면 전체 유저 수가 나온다.</li><li>0 명인 채널도 한 행 나와야 하므로 <code>WHERE</code> 로 걸러내지 말고 <code>CASE</code> 로 센다.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>-- 방법 1. LEFT JOIN ... IS NULL (0명인 채널도 행이 남는다)
+SELECT u.channel,
+       SUM(CASE WHEN p.user_id IS NULL THEN 1 ELSE 0 END) AS never_paid
+FROM users u
+LEFT JOIN (SELECT DISTINCT user_id FROM payments WHERE user_id IS NOT NULL) p
+       ON p.user_id = u.user_id
+GROUP BY u.channel
+ORDER BY never_paid DESC, u.channel ASC;
+
+-- 방법 2. NOT EXISTS — NULL 에 면역이라 IS NOT NULL 을 안 써도 된다
+SELECT u.channel,
+       SUM(CASE WHEN NOT EXISTS (SELECT 1 FROM payments p
+                                  WHERE p.user_id = u.user_id)
+                THEN 1 ELSE 0 END) AS never_paid
+FROM users u
+GROUP BY u.channel
+ORDER BY never_paid DESC, u.channel ASC;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b><code>NOT IN</code> + NULL = 결과 전멸.</b> 이게 이 문제의 핵심이다.<br><code>WHERE u.user_id NOT IN (SELECT user_id FROM payments)</code> 는 payments 에 NULL 이 <b>한 행이라도</b> 있으면 <b>0행</b>을 돌려준다.<br><code>5 NOT IN (1, 2, NULL)</code> 은 <code>5&lt;&gt;1 AND 5&lt;&gt;2 AND 5&lt;&gt;NULL</code> 이고, 마지막 항이 NULL 이라 전체가 NULL → WHERE 에서 거짓 취급 → 전부 탈락.<br>본 데이터에는 NULL 이 없어서 통과하고, 「NULL섞임」 데이터셋에서 터진다. 실제 시험이 여러 데이터셋으로 채점하는 이유가 바로 이것이다.</li><li><b><code>NOT EXISTS</code> 는 NULL 에 면역이다.</b> <code>p.user_id = u.user_id</code> 가 NULL 이면 매칭 실패로 처리되어 그 행은 조용히 무시된다. '존재하지 않는 것 찾기' 는 <b>NOT EXISTS 를 기본값</b>으로 삼으면 이 사고가 안 난다.</li><li><b><code>IN</code> 은 멀쩡하다.</b> 하나만 맞으면 참이므로 NULL 이 섞여도 된다. 문제는 부정형(<code>NOT IN</code>)뿐이다.</li><li><b><code>COUNT(*)</code> 로 세면 안 된다.</b> LEFT JOIN 후 <code>COUNT(*)</code> 는 그 채널의 전체 유저 수다. <code>SUM(CASE WHEN ... IS NULL THEN 1 ELSE 0 END)</code> 이 정확하다.</li><li><b>서브쿼리에 <code>DISTINCT</code> 를 넣어라.</b> 안 넣으면 한 유저의 결제가 여러 건일 때 LEFT JOIN 으로 행이 불어난다. 여기서는 IS NULL 만 세니 결과가 같지만, 금액을 같이 구하는 변형에서 바로 깨진다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“이탈 유저 찾기”, “한 번도 로그인 안 한 유저”, “재구매 없는 유저” 전부 같은 패턴. 반대로 “결제한 유저만”이면 <code>EXISTS</code> 또는 <code>INNER JOIN + DISTINCT</code>.</p></div><a class="top" href="#top">↑ 위로</a>
+<h2 id="q23"><span class="n">Q23.</span> 유저별 결제 요약 (NULL 표시와 정렬 분리)<span class="lv">보통</span></h2>
+
+<div class="ver easy"><span class="vtag e">쉬운 설명</span>
+<p class="oneline">성적표에 '미응시' 라고 <b>써 넣는 것</b>은 된다. 그런데 그걸로 <b>줄을 세우면</b> 망한다.</p><p class="note"><code>COALESCE(날짜, '없음')</code> 을 쓰면
+날짜 칸이 <b>글자 칸</b>으로 바뀐다. 그걸로 줄을 세우면 사전순이 된다.</p>
+<table class="e">
+<tr><th>원래 (날짜)</th><th>글자로 바꾸면</th></tr>
+<tr><td>2026-01-05</td><td>'2026-01-05'</td></tr>
+<tr><td>2026-01-20</td><td>'2026-01-20'</td></tr>
+<tr><td>(빈칸)</td><td class="x">'없음' ← 글자라서 날짜들보다 뒤로 간다</td></tr>
+</table>
+<p class="note">숫자에서도 똑같다. 글자로 바뀌면 <b>'9' 가 '20' 보다 크다.</b>
+사전순이니까 첫 글자 9 와 2 를 비교하는 것이다.</p>
+<h4>이렇게 푼다</h4><ol><li>유저 명단 왼쪽에 두고 결제를 붙여서 합계·첫 결제일·마지막 결제일을 만든다.</li><li>금액은 <code>COALESCE(SUM(금액), 0)</code> — <b>SUM 밖에</b> 씌운다.</li><li>첫 결제일은 <b>빈칸 그대로 둔다</b>. 글자로 바꾸지 않는다.</li><li>플랜 이름은 원래 글자라서 <code>COALESCE(…, '없음')</code> 이 안전하다.</li><li>줄 세우기는 <b>원래 칸</b>으로 한다.</li></ol>
+<h4>이것만 피하면 된다</h4><div class="wt"><ul><li><b>MySQL 은 이 변환을 에러 없이 조용히 해 버린다.</b> 빨간 줄도 안 뜨고, 결과만 틀린다. 그래서 더 위험하다.</li><li><b>보여줄 값과 줄 세울 값을 분리해라.</b> 글자로 보여주고 싶으면 그 칸은 따로 만들고, <code>ORDER BY</code> 에는 원래 칸을 쓴다.</li><li><b>빈칸의 줄 세우기 위치:</b> MySQL·SQLite 는 빈칸을 <b>가장 작은 값</b>으로 본다 → 오름차순이면 맨 앞. 확실하게 하려면 <code>ORDER BY (칸 IS NULL), 칸</code> 으로 직접 정해라.</li><li><b>마지막 플랜을 <code>MAX(plan)</code> 로 뽑으면 틀린다.</b> 그건 알파벳 순으로 가장 큰 글자다 ('pro' &gt; 'basic'). '마지막' 은 <b>날짜</b>로 찾아야 한다.</li></ul></div></div>
+<div class="ver deep"><span class="vtag d">자세한 설명</span>
+<div class="asks"><b>묻는 것</b> · 토스 쿼리 테스트에 나온 '데이터 타입 문제' 가 정확히 이 유형이다. <b>보여 줄 값</b>과 <b>정렬할 값</b>을 분리할 수 있는지를 본다.</div>
+<h4>풀이 순서</h4><ol><li><code>users LEFT JOIN payments</code> + <code>GROUP BY user_id</code> 로 유저별 합계·첫 결제일·마지막 결제일을 만든다.</li><li>금액은 <code>COALESCE(SUM(p.amount), 0)</code> — <b>SUM 밖에</b> 씌운다.</li><li>첫 결제일은 <b>NULL 을 그대로 둔다</b>. 문자열로 바꾸면 정렬이 깨진다.</li><li>마지막 plan 은 <code>paid_date = MAX(paid_date)</code> 로 다시 조인해 가져오고 <code>COALESCE(..., '없음')</code> — 이 컬럼은 원래 문자열이라 안전하다.</li><li>정렬은 원본 컬럼으로 한다: <code>ORDER BY total_amount DESC, first_paid ASC, user_id ASC</code>.</li></ol>
+<h4>정답 (MySQL)</h4><pre><code>WITH s AS (
+  SELECT u.user_id,
+         COALESCE(SUM(p.amount), 0) AS total_amount,
+         MIN(p.paid_date)           AS first_paid,
+         MAX(p.paid_date)           AS last_paid
+  FROM users u
+  LEFT JOIN payments p ON p.user_id = u.user_id
+  GROUP BY u.user_id
+)
+SELECT s.user_id, s.total_amount, s.first_paid,
+       COALESCE(MAX(lp.plan), '없음') AS plan_label
+FROM s
+LEFT JOIN payments lp
+       ON lp.user_id = s.user_id AND lp.paid_date = s.last_paid
+GROUP BY s.user_id, s.total_amount, s.first_paid
+ORDER BY s.total_amount DESC, s.first_paid ASC, s.user_id ASC
+LIMIT 20;</code></pre>
+<h4>함정</h4><div class="trap"><ul><li><b>날짜에 COALESCE 로 문자열을 넣으면 컬럼 전체가 문자열이 된다.</b> <code>COALESCE(first_paid, '없음')</code> 을 쓰면 반환 타입이 공통 타입인 <b>문자열</b>로 승격되고, 그걸로 정렬하면 사전순이 된다. MySQL·SQLite 는 이 변환을 <b>오류 없이 조용히</b> 하므로 에러도 안 나고 결과만 틀린다. (PostgreSQL·DuckDB 는 오류를 낸다.)<br><b>해법: 표시와 정렬을 분리한다.</b> 표시용 문자열 컬럼을 따로 만들고 <code>ORDER BY</code> 에는 <b>원본 컬럼</b>을 쓴다.</li><li><b>정렬에서 NULL 의 위치는 엔진마다 다르다.</b> 실제로 돌려 본 결과:<br><code>MySQL·SQLite</code> → NULL 을 가장 작은 값으로 본다 (ASC 면 맨 앞, DESC 면 맨 뒤)<br><code>PostgreSQL·DuckDB</code> → 기본이 NULLS LAST (ASC 에서도 맨 뒤)<br>확실하게 하려면 <code>ORDER BY (first_paid IS NULL), first_paid</code> 처럼 <code>IS NULL</code>(0/1)을 첫 키로 써서 직접 정한다. MySQL 에는 <code>NULLS LAST</code> 문법이 없다.</li><li><b>COALESCE 를 SUM 안에 넣을지 밖에 씌울지.</b> <code>LEFT JOIN + GROUP BY 왼쪽테이블</code> 이면 그룹마다 NULL 행이 한 개 남아 <code>SUM(COALESCE(amount,0))</code> 도 0 이 나온다. 하지만 <b>그룹 자체가 비는 경우</b>(상관 서브쿼리, INNER JOIN 뒤)는 SUM 이 NULL 이고 안쪽 COALESCE 는 실행될 기회가 없다. <b>밖에 씌우는 쪽이 항상 안전하다.</b></li><li><b>마지막 plan 을 <code>MAX(plan)</code> 로 바로 뽑으면 틀린다.</b> 그건 '알파벳 순으로 가장 큰 plan' 이다 ('pro' &gt; 'basic'). '마지막 결제의 plan' 은 날짜로 찾아야 한다 — <code>paid_date = MAX(paid_date)</code> 로 재조인하거나 <code>ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY paid_date DESC)</code> 로 1 번만 남긴다.</li><li><b><code>LIMIT</code> 은 정렬 뒤에 걸린다.</b> ORDER BY 를 빼고 LIMIT 만 쓰면 아무 20행이 나온다. 20번째와 21번째가 완전 동점이면 어느 쪽이 들어올지 정해지지 않으므로, 문제가 준 정렬 키를 <b>전부</b> 써야 한다.</li></ul></div>
+<h4>이렇게 변형된다</h4><p class="var">“결제 없는 유저를 맨 뒤로”면 <code>ORDER BY (first_paid IS NULL), first_paid</code>. “마지막 결제 금액까지”면 재조인에서 <code>MAX(lp.amount)</code> 를 같이 가져온다. “N일 이상 결제 없는 유저”면 <code>DATEDIFF(기준일, MAX(paid_date)) &gt;= N</code> 에 <code>MAX(paid_date) IS NULL</code> 케이스를 따로 처리한다.</p></div><a class="top" href="#top">↑ 위로</a>
+</main>
+<script>
+(function(){
+  var KEY='guideMode';
+  function set(m){
+    document.body.className='mode-'+m;
+    var bs=document.querySelectorAll('.modebar button');
+    for(var i=0;i<bs.length;i++)
+      bs[i].className=(bs[i].getAttribute('data-m')===m)?'on':'';
+    try{localStorage.setItem(KEY,m);}catch(e){}
+  }
+  var bs=document.querySelectorAll('.modebar button');
+  for(var i=0;i<bs.length;i++)
+    bs[i].onclick=function(){set(this.getAttribute('data-m'));};
+  var saved='easy';
+  try{saved=localStorage.getItem(KEY)||'easy';}catch(e){}
+  set(saved);
+})();
+</script>
+</body></html>
