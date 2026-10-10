@@ -1,0 +1,106 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>가입 코호트별 월간 리텐션 — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="3월에 입학한 애들이 1달 뒤·2달 뒤에 몇 명 남았나. 입학한 달마다 따로 추적한다. 반이 다르면 섞지 않는다.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/q/4.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="가입 코호트별 월간 리텐션 — SQL 풀이">
+<meta property="og:description" content="3월에 입학한 애들이 1달 뒤·2달 뒤에 몇 명 남았나. 입학한 달마다 따로 추적한다. 반이 다르면 섞지 않는다.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/q/4.html">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:16px/1.78 "Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding-inline:18px;padding-block:0 70px}
+nav.bc{font-size:13px;color:var(--muted);padding-block:16px 0}
+nav.bc a{color:var(--accent);text-decoration:none}
+nav.bc a:hover{text-decoration:underline}
+h1{font-size:25px;line-height:1.4;margin:14px 0 6px;letter-spacing:-.4px;
+   word-break:keep-all;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+     border-radius:9px;padding:10px 20px;font-weight:700;font-size:15px;margin:4px 0 22px}
+h2{font-size:18px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line);
+   letter-spacing:-.2px}
+h3{font-size:14px;color:var(--muted);margin:20px 0 7px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+     padding:14px 16px;white-space:pre-wrap;word-break:keep-all;font-size:14.5px;
+     line-height:1.72}
+.spec{font-size:13.5px;color:var(--muted);margin-top:10px;word-break:break-all}
+code{font-family:Consolas,"D2Coding",monospace;font-size:.9em;background:var(--code);
+     padding:1px 5px;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.66}
+pre code{background:none;padding:0;font-size:inherit}
+ol,ul{padding-left:22px}li{margin-bottom:7px;word-break:keep-all}
+.oneline{font-size:17px;line-height:1.7;font-weight:600;word-break:keep-all;margin:0 0 14px}
+table.e,table.g{border-collapse:collapse;margin:6px 0 12px;font-size:13.5px}
+table.e th,table.e td,table.g th,table.g td{border:1px solid var(--line);padding:4px 11px;
+    text-align:left}
+table.e th,table.g th{background:var(--code);font-size:12.5px;color:var(--muted)}
+table.e td.x{color:var(--bad)}
+p.note{font-size:13.5px;color:var(--muted);margin:5px 0 12px;word-break:keep-all}
+.trap{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.trap ul{padding-left:34px;margin:0}
+.wt{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.wt ul{padding-left:34px;margin:0}
+.var{color:var(--muted);font-size:14px;word-break:keep-all}
+.pager{display:flex;gap:10px;margin-top:40px;padding-top:18px;
+       border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.pager a{color:var(--accent);text-decoration:none}
+.pager a:hover{text-decoration:underline}
+.pager .r{margin-left:auto}
+.list{list-style:none;padding:0}
+.list li{margin-bottom:0;border-bottom:1px solid var(--line)}
+.list a{display:block;padding:13px 4px;color:var(--fg);text-decoration:none}
+.list a:hover{background:var(--panel)}
+.list .lv{color:var(--muted);font-size:12.5px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+       color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head><body><div class="wrap">
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q4</nav><h1>가입 코호트별 월간 리텐션</h1><div class="meta">난이도 어려움 · 권장 18분 · 출력 컬럼 <code>cohort_month, cohort_size, m1_retention, m2_retention, m3_retention</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q4">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">가입 월을 코호트로 삼아 M+1, M+2, M+3 리텐션(%)을 구하세요.
+
+· 잔존 기준: 해당 월에 app_open 이벤트가 1건 이상 있으면 잔존으로 봅니다.
+· 리텐션 = 그 달에 활동한 코호트 인원 / 코호트 전체 인원 × 100
+· 소수점 첫째 자리까지 반올림합니다.
+· 코호트 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>cohort_month ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">3월에 입학한 애들이 1달 뒤·2달 뒤에 몇 명 남았나. 입학한 달마다 따로 추적한다. 반이 다르면 섞지 않는다.</p><table class="e">
+<tr><th>가입 월</th><th>0개월</th><th>1개월</th><th>2개월</th></tr>
+<tr><td>1월 (100명)</td><td>100%</td><td>42%</td><td>28%</td></tr>
+<tr><td>2월 (120명)</td><td>100%</td><td>38%</td><td>25%</td></tr>
+</table>
+<p class="note">가로가 '가입 후 몇 달째', 세로가 '언제 가입한 묶음'.
+분모는 <b>그 줄의 전체 인원</b>이고 끝까지 안 바뀐다.</p><h3>이렇게 푼다</h3><ol><li>사람마다 <b>가입한 달</b>을 붙인다. 이게 그 사람이 속한 '묶음' 이다.</li><li>접속 기록마다 <b>가입 후 몇 달째인가</b>를 계산한다 (접속한 달 − 가입한 달).</li><li>가입한 달 × 경과 개월로 묶어서 <b>사람 수</b>를 센다.</li><li>그 수를 그 묶음의 전체 인원으로 나눈다.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>분모는 접속 기록에서 세면 안 된다.</b> 가입한 사람 명단에서 세야 한다. 접속 기록에서 세면 '접속한 사람 중 접속한 사람' 이 되어 항상 100% 가 나온다.</li><li>사람 수는 중복을 지우고 센다. 한 달에 열 번 접속한 사람은 한 명이다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 코호트 분석의 뼈대. 분모 고정 + 경과 개월.</p><h3>풀이 순서</h3><ol><li>코호트 = 가입 월. 유저마다 하나.</li><li>활동 = app_open 이 있는 월. 유저×월 중복 제거.</li><li><code>TIMESTAMPDIFF(MONTH, 코호트, 활동월)</code> 로 경과 개월 M+1, M+2…</li><li>분모는 <b>코호트 전체 인원</b>. 활동 안 한 사람도 포함.</li></ol><h3>정답 (MySQL)</h3><pre><code>WITH base AS (
+  SELECT user_id, DATE_FORMAT(signup_date, &#x27;%Y-%m-01&#x27;) AS cohort FROM users
+),
+act AS (
+  SELECT DISTINCT user_id, DATE_FORMAT(event_date, &#x27;%Y-%m-01&#x27;) AS m
+  FROM events WHERE event_name = &#x27;app_open&#x27;
+)
+SELECT DATE_FORMAT(b.cohort, &#x27;%Y-%m&#x27;) AS cohort_month,
+       COUNT(DISTINCT b.user_id) AS cohort_size,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN TIMESTAMPDIFF(MONTH, b.cohort, a.m)=1
+             THEN b.user_id END) / COUNT(DISTINCT b.user_id), 1) AS m1_retention,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN TIMESTAMPDIFF(MONTH, b.cohort, a.m)=2
+             THEN b.user_id END) / COUNT(DISTINCT b.user_id), 1) AS m2_retention,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN TIMESTAMPDIFF(MONTH, b.cohort, a.m)=3
+             THEN b.user_id END) / COUNT(DISTINCT b.user_id), 1) AS m3_retention
+FROM base b
+LEFT JOIN act a ON a.user_id = b.user_id
+GROUP BY cohort_month
+ORDER BY cohort_month;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>INNER JOIN 금지.</b> 한 번도 활동 안 한 유저가 분모에서 빠지면 리텐션이 과대평가된다.</li><li>분모를 <code>COUNT(*)</code> 로 쓰면 안 된다. 조인으로 행이 불어나 있다. <code>COUNT(DISTINCT user_id)</code>.</li><li>활동 테이블에서 유저×월 <b>중복 제거를 먼저</b> 해야 한다. 안 하면 한 유저가 여러 번 세어질 수 있다 — DISTINCT 를 써서 막는다.</li><li>아직 기간이 안 지난 코호트는 0 이 나온다. 정상이다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">주 단위면 <code>TIMESTAMPDIFF(WEEK, ...)</code>. “결제 리텐션”이면 활동 테이블을 payments 로 바꾼다.</p><div class="pager"><a href="./3.html">← Q3. 월별 매출 · 누적 · 전월 대비</a><a class="r" href="./5.html">Q5. 월별 매출 분해 (신규/기존/복귀) →</a></div>
+<footer>
+  <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
+  서버도 회원가입도 없습니다. ·
+  <a href="https://github.com/Haweee47/sql-drill">소스</a>
+</footer>
+</div></body></html>

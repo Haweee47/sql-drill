@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://haweee47.github.io/sql-drill/sitemap.xml

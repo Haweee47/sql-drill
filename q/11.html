@@ -1,0 +1,95 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5일 이동평균 (부분 구간) — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="최근 5일 평균. 아직 5일이 안 모인 날은 있는 날만 가지고 평균.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/q/11.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="5일 이동평균 (부분 구간) — SQL 풀이">
+<meta property="og:description" content="최근 5일 평균. 아직 5일이 안 모인 날은 있는 날만 가지고 평균.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/q/11.html">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:16px/1.78 "Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding-inline:18px;padding-block:0 70px}
+nav.bc{font-size:13px;color:var(--muted);padding-block:16px 0}
+nav.bc a{color:var(--accent);text-decoration:none}
+nav.bc a:hover{text-decoration:underline}
+h1{font-size:25px;line-height:1.4;margin:14px 0 6px;letter-spacing:-.4px;
+   word-break:keep-all;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+     border-radius:9px;padding:10px 20px;font-weight:700;font-size:15px;margin:4px 0 22px}
+h2{font-size:18px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line);
+   letter-spacing:-.2px}
+h3{font-size:14px;color:var(--muted);margin:20px 0 7px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+     padding:14px 16px;white-space:pre-wrap;word-break:keep-all;font-size:14.5px;
+     line-height:1.72}
+.spec{font-size:13.5px;color:var(--muted);margin-top:10px;word-break:break-all}
+code{font-family:Consolas,"D2Coding",monospace;font-size:.9em;background:var(--code);
+     padding:1px 5px;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.66}
+pre code{background:none;padding:0;font-size:inherit}
+ol,ul{padding-left:22px}li{margin-bottom:7px;word-break:keep-all}
+.oneline{font-size:17px;line-height:1.7;font-weight:600;word-break:keep-all;margin:0 0 14px}
+table.e,table.g{border-collapse:collapse;margin:6px 0 12px;font-size:13.5px}
+table.e th,table.e td,table.g th,table.g td{border:1px solid var(--line);padding:4px 11px;
+    text-align:left}
+table.e th,table.g th{background:var(--code);font-size:12.5px;color:var(--muted)}
+table.e td.x{color:var(--bad)}
+p.note{font-size:13.5px;color:var(--muted);margin:5px 0 12px;word-break:keep-all}
+.trap{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.trap ul{padding-left:34px;margin:0}
+.wt{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.wt ul{padding-left:34px;margin:0}
+.var{color:var(--muted);font-size:14px;word-break:keep-all}
+.pager{display:flex;gap:10px;margin-top:40px;padding-top:18px;
+       border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.pager a{color:var(--accent);text-decoration:none}
+.pager a:hover{text-decoration:underline}
+.pager .r{margin-left:auto}
+.list{list-style:none;padding:0}
+.list li{margin-bottom:0;border-bottom:1px solid var(--line)}
+.list a{display:block;padding:13px 4px;color:var(--fg);text-decoration:none}
+.list a:hover{background:var(--panel)}
+.list .lv{color:var(--muted);font-size:12.5px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+       color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head><body><div class="wrap">
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q11</nav><h1>5일 이동평균 (부분 구간)</h1><div class="meta">난이도 보통 · 권장 8분 · 출력 컬럼 <code>trade_date, close_price, ma5</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q11">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">종목코드 &#x27;005930&#x27;의 일별 종가에 대해 5일 이동평균을 구하세요.
+
+· 직전 5거래일이 아직 쌓이지 않은 날은, 그날까지 있는 데이터만으로 평균을 냅니다.
+  (1일차는 1개, 2일차는 2개 ... 5일차부터 5개)
+· 이동평균은 소수점 둘째 자리까지 반올림합니다.
+· 날짜 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>trade_date ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline"><b>최근 5일 평균</b>. 아직 5일이 안 모인 날은 있는 날만 가지고 평균.</p><table class="e">
+<tr><th>날</th><th>종가</th><th>평균에 쓰는 개수</th><th>ma5</th></tr>
+<tr><td>1일차</td><td>100</td><td>1개</td><td>100.00</td></tr>
+<tr><td>2일차</td><td>200</td><td>2개</td><td>150.00</td></tr>
+<tr><td>5일차</td><td>…</td><td>5개</td><td>…</td></tr>
+<tr><td>6일차</td><td>…</td><td>5개 (1일차는 빠짐)</td><td>…</td></tr>
+</table>
+<p class="note">창문이 5칸이고, 날짜가 가면 창문도 같이 미끄러진다.
+시작할 때는 창문이 아직 다 안 찼다.</p><h3>이렇게 푼다</h3><ol><li><code>AVG(close_price) OVER (ORDER BY trade_date ROWS BETWEEN 4 PRECEDING AND CURRENT ROW)</code> — 이 한 줄이 전부다.</li><li>소수점 둘째 자리까지 반올림.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b><code>ROWS BETWEEN …</code> 을 빼면 전혀 다른 값이 나온다.</b> 안 쓰면 기본값이 '처음부터 이번 줄까지' 라서 <b>누적 평균</b>이 되어 버린다. 이게 이동평균 문제에서 가장 많이 틀리는 부분이다.</li><li><b><code>4 PRECEDING</code> 이다. 5 가 아니다.</b> 오늘을 포함해서 5개니까 앞으로 4칸이다.</li><li><b>날짜를 빼서 구하면 안 된다.</b> 주말에는 데이터가 없어서 '5일 전' 자리가 비어 있다. <b>줄 개수</b>로 세야 한다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 프레임을 쓸 줄 아는가. 날짜가 아니라 행으로 세는가.</p><h3>풀이 순서</h3><ol><li><code>AVG(x) OVER (ORDER BY 날짜 ROWS BETWEEN 4 PRECEDING AND CURRENT ROW)</code>.</li><li>끝.</li></ol><h3>정답 (MySQL)</h3><pre><code>SELECT trade_date, close_price,
+       ROUND(AVG(close_price) OVER (ORDER BY trade_date
+             ROWS BETWEEN 4 PRECEDING AND CURRENT ROW), 2) AS ma5
+FROM prices
+WHERE stock_code = &#x27;005930&#x27;
+ORDER BY trade_date;</code></pre><h3>함정</h3><div class="trap"><ul><li><b><code>ROWS</code> 누락</b> — 기본 프레임이 <code>RANGE UNBOUNDED PRECEDING</code> 이라 <b>누적평균</b>이 된다. 가장 흔한 실수.</li><li><code>5 PRECEDING</code> 으로 쓰면 6일 평균. 당일이 포함되므로 <code>4 PRECEDING</code>.</li><li><b>날짜 조인으로 풀려고 하면 안 된다.</b> <code>INTERVAL 4 DAY</code> 는 달력 4일이라 주말이 끼면 거래일 수가 맞지 않는다.</li><li>부분 구간 처리는 <b>따로 할 필요가 없다</b>. 앞 행이 모자라면 윈도우가 알아서 줄어든다. CASE 분기는 오히려 틀린다.</li><li>반대로 “초반 4일은 NULL” 이라는 문제면 <code>CASE WHEN ROW_NUMBER() OVER (...) >= 5 THEN ... END</code> 를 덧붙인다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“최근 7일 합계”, “최근 3건 평균” 전부 같은 프레임.</p><div class="pager"><a href="./10.html">← Q10. 채널별 ARPPU와 순위 변동</a><a class="r" href="./12.html">Q12. 종목별 5일·20일 이동평균 →</a></div>
+<footer>
+  <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
+  서버도 회원가입도 없습니다. ·
+  <a href="https://github.com/Haweee47/sql-drill">소스</a>
+</footer>
+</div></body></html>

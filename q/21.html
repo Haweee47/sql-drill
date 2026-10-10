@@ -1,0 +1,102 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>채널별 ARPU 와 ARPPU — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="같은 매출을 전교생으로 나누면 ARPU, 돈 낸 애들로만 나누면 ARPPU. 분자는 같고 분모만 다르다.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/q/21.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="채널별 ARPU 와 ARPPU — SQL 풀이">
+<meta property="og:description" content="같은 매출을 전교생으로 나누면 ARPU, 돈 낸 애들로만 나누면 ARPPU. 분자는 같고 분모만 다르다.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/q/21.html">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:16px/1.78 "Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding-inline:18px;padding-block:0 70px}
+nav.bc{font-size:13px;color:var(--muted);padding-block:16px 0}
+nav.bc a{color:var(--accent);text-decoration:none}
+nav.bc a:hover{text-decoration:underline}
+h1{font-size:25px;line-height:1.4;margin:14px 0 6px;letter-spacing:-.4px;
+   word-break:keep-all;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+     border-radius:9px;padding:10px 20px;font-weight:700;font-size:15px;margin:4px 0 22px}
+h2{font-size:18px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line);
+   letter-spacing:-.2px}
+h3{font-size:14px;color:var(--muted);margin:20px 0 7px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+     padding:14px 16px;white-space:pre-wrap;word-break:keep-all;font-size:14.5px;
+     line-height:1.72}
+.spec{font-size:13.5px;color:var(--muted);margin-top:10px;word-break:break-all}
+code{font-family:Consolas,"D2Coding",monospace;font-size:.9em;background:var(--code);
+     padding:1px 5px;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.66}
+pre code{background:none;padding:0;font-size:inherit}
+ol,ul{padding-left:22px}li{margin-bottom:7px;word-break:keep-all}
+.oneline{font-size:17px;line-height:1.7;font-weight:600;word-break:keep-all;margin:0 0 14px}
+table.e,table.g{border-collapse:collapse;margin:6px 0 12px;font-size:13.5px}
+table.e th,table.e td,table.g th,table.g td{border:1px solid var(--line);padding:4px 11px;
+    text-align:left}
+table.e th,table.g th{background:var(--code);font-size:12.5px;color:var(--muted)}
+table.e td.x{color:var(--bad)}
+p.note{font-size:13.5px;color:var(--muted);margin:5px 0 12px;word-break:keep-all}
+.trap{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.trap ul{padding-left:34px;margin:0}
+.wt{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.wt ul{padding-left:34px;margin:0}
+.var{color:var(--muted);font-size:14px;word-break:keep-all}
+.pager{display:flex;gap:10px;margin-top:40px;padding-top:18px;
+       border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.pager a{color:var(--accent);text-decoration:none}
+.pager a:hover{text-decoration:underline}
+.pager .r{margin-left:auto}
+.list{list-style:none;padding:0}
+.list li{margin-bottom:0;border-bottom:1px solid var(--line)}
+.list a{display:block;padding:13px 4px;color:var(--fg);text-decoration:none}
+.list a:hover{background:var(--panel)}
+.list .lv{color:var(--muted);font-size:12.5px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+       color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head><body><div class="wrap">
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q21</nav><h1>채널별 ARPU 와 ARPPU</h1><div class="meta">난이도 보통 · 권장 11분 · 출력 컬럼 <code>channel, users, payers, arpu, arppu</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q21">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">채널별로 아래 네 가지를 구하세요.
+
+  users   그 채널의 전체 가입자 수
+  payers  그중 결제를 한 번이라도 한 유저 수
+  arpu    결제액 합계 / 전체 가입자 수   (결제 안 한 유저도 분모에 넣습니다)
+  arppu   결제액 합계 / 결제한 유저 수   (결제한 유저만 분모에 넣습니다)
+
+· 결제가 한 건도 없는 채널은 arpu, arppu 를 모두 0 으로 출력하세요.
+· arpu, arppu 는 소수점 둘째 자리까지 반올림합니다.
+· arpu 내림차순, 같으면 channel 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>arpu DESC, channel ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">같은 매출을 <b>전교생으로 나누면 ARPU</b>, <b>돈 낸 애들로만 나누면 ARPPU</b>. 분자는 같고 분모만 다르다.</p><table class="e">
+<tr><th></th><th>분자</th><th>분모</th></tr>
+<tr><td><b>ARPU</b></td><td>총 결제액</td><td>전체 가입자</td></tr>
+<tr><td><b>ARPPU</b></td><td>총 결제액</td><td>결제한 사람</td></tr>
+</table>
+<p class="note">가입자 100명, 결제자 20명, 매출 200만원이면 →
+ARPU = 2만원, ARPPU = 10만원. 다섯 배 차이가 난다.</p><h3>이렇게 푼다</h3><ol><li>유저 명단 왼쪽에 두고 결제를 붙인다 (LEFT JOIN).</li><li>분모 두 개를 따로 센다 — 전체는 <code>COUNT(DISTINCT u.user_id)</code>, 결제자는 <code>COUNT(DISTINCT p.user_id)</code>.</li><li><b>왜 저게 되냐:</b> LEFT JOIN 이라 결제 없는 사람의 <code>p.user_id</code> 는 빈칸이고, <code>COUNT(DISTINCT)</code> 는 빈칸을 안 세기 때문이다.</li><li>각각 나누고 <code>* 1.0</code>, <code>ROUND(…, 2)</code>.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b><code>AVG(금액)</code> 은 둘 다 아니다.</b> 그건 <b>결제 건당</b> 평균이다. 한 사람이 다섯 번 결제하면 그 사람이 다섯 번 반영된다. '1인당' 을 물었으면 분모를 사람 수로 직접 써야 한다.</li><li><b><code>AVG</code> 는 빈칸인 줄을 분모에서도 뺀다.</b> 값이 10, 빈칸, 20 이면 AVG 는 15 다. 10 이 아니다. 그래서 AVG 로는 ARPU 가 절대 안 나온다.</li><li>결제자가 0명인 채널은 ARPPU 계산이 안 되니 <b>결과 전체</b>에 <code>COALESCE(…, 0)</code> 을 씌운다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 분모가 다른 두 평균을 한 쿼리에서 만든다. 실무에서 가장 자주 틀리는 지표 쌍이고, 면접에서도 묻는다.</p><h3>풀이 순서</h3><ol><li><b>ARPU 와 ARPPU 는 분자가 같고 분모만 다르다.</b> 분자는 둘 다 결제액 합계, 분모는 ARPU 는 전체 가입자, ARPPU 는 결제 유저.</li><li><code>users LEFT JOIN payments</code> 로 결제 안 한 유저까지 붙인다.</li><li>분모 두 개를 <code>COUNT(DISTINCT u.user_id)</code> 와 <code>COUNT(DISTINCT p.user_id)</code> 로 따로 센다. LEFT JOIN 이라 결제 없는 유저의 <code>p.user_id</code> 는 NULL 이고, <code>COUNT(DISTINCT)</code> 는 NULL 을 안 세므로 자동으로 결제 유저 수가 된다.</li><li><code>* 1.0</code> 을 붙이고 <code>ROUND(..., 2)</code>.</li></ol><h3>정답 (MySQL)</h3><pre><code>SELECT u.channel,
+       COUNT(DISTINCT u.user_id) AS users,
+       COUNT(DISTINCT p.user_id) AS payers,
+       ROUND(COALESCE(SUM(p.amount), 0) * 1.0
+             / NULLIF(COUNT(DISTINCT u.user_id), 0), 2)     AS arpu,
+       COALESCE(ROUND(SUM(p.amount) * 1.0
+             / NULLIF(COUNT(DISTINCT p.user_id), 0), 2), 0) AS arppu
+FROM users u
+LEFT JOIN payments p ON p.user_id = u.user_id
+GROUP BY u.channel
+ORDER BY arpu DESC, u.channel ASC;</code></pre><h3>함정</h3><div class="trap"><ul><li><b><code>AVG(p.amount)</code> 는 ARPU 도 ARPPU 도 아니다.</b> 결제 <b>건당</b> 평균이다. 한 유저가 5번 결제하면 그 유저가 5번 반영된다. '유저당' 을 물었으면 분모를 유저 수로 직접 써야 한다. 이 한 줄 차이로 숫자가 두 배 넘게 벌어진다.</li><li><b>AVG 는 NULL 을 분모에서도 뺀다.</b> 결제 안 한 유저의 amount 는 LEFT JOIN 뒤 NULL 이고, <code>AVG</code> 는 그 행을 분모에서 제외한다. 그래서 <code>AVG(p.amount)</code> 로는 ARPU 가 절대 안 나온다. 값이 10, NULL, 20 이면 AVG 는 15 지 10 이 아니다.</li><li><b>COALESCE 위치가 두 컬럼에서 다르다.</b><br>arpu — 분모(가입자 수)는 항상 1 이상이므로 <b>분자</b>를 0 으로 채운다: <code>COALESCE(SUM(...), 0) / 가입자수</code><br>arppu — 분모(결제 유저 수)가 0 일 수 있어 나눗셈 자체가 NULL 이 된다. <b>결과 전체</b>를 0 으로 채운다: <code>COALESCE(ROUND(...), 0)</code><br>arppu 를 arpu 처럼 쓰면 결제 없는 채널에서 0 대신 NULL 이 나온다.</li><li><b><code>* 1.0</code> 을 빼면 안 된다.</b> amount 와 COUNT 가 둘 다 정수라 정수 나눗셈이 된다. 실제 토스 테스트에서 이걸로 틀린 적이 있다.</li><li><b>정렬을 두 개 다 쓴다.</b> <code>arpu DESC</code> 만 쓰면 동점에서 순서가 흔들린다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“ARPPU 대신 중앙값”이면 <code>ROW_NUMBER</code> + <code>COUNT() OVER</code> 패턴. “월별 ARPU 추이”면 <code>GROUP BY 월, 채널</code> 로 바꾸되 <b>분모를 그 달의 활성 유저로 둘지 전체 가입자로 둘지</b>를 문제에서 확인하라 — 여기서 정의가 갈린다.</p><div class="pager"><a href="./20.html">← Q20. 3일 이상 연속 상승 구간 모두 찾기</a><a class="r" href="./22.html">Q22. 한 번도 결제하지 않은 유저 수 →</a></div>
+<footer>
+  <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
+  서버도 회원가입도 없습니다. ·
+  <a href="https://github.com/Haweee47/sql-drill">소스</a>
+</footer>
+</div></body></html>

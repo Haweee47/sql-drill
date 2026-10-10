@@ -1,0 +1,109 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>월별 매출 분해 (신규/기존/복귀) — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="이번 달 매출을 통 세 개에 나눠 담기 — 처음 온 손님 / 지난달에도 온 손님 / 오랜만에 다시 온 손님. 세 통을 합치면 전체와 딱 맞아야 한다.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/q/5.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="월별 매출 분해 (신규/기존/복귀) — SQL 풀이">
+<meta property="og:description" content="이번 달 매출을 통 세 개에 나눠 담기 — 처음 온 손님 / 지난달에도 온 손님 / 오랜만에 다시 온 손님. 세 통을 합치면 전체와 딱 맞아야 한다.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/q/5.html">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:16px/1.78 "Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding-inline:18px;padding-block:0 70px}
+nav.bc{font-size:13px;color:var(--muted);padding-block:16px 0}
+nav.bc a{color:var(--accent);text-decoration:none}
+nav.bc a:hover{text-decoration:underline}
+h1{font-size:25px;line-height:1.4;margin:14px 0 6px;letter-spacing:-.4px;
+   word-break:keep-all;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+     border-radius:9px;padding:10px 20px;font-weight:700;font-size:15px;margin:4px 0 22px}
+h2{font-size:18px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line);
+   letter-spacing:-.2px}
+h3{font-size:14px;color:var(--muted);margin:20px 0 7px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+     padding:14px 16px;white-space:pre-wrap;word-break:keep-all;font-size:14.5px;
+     line-height:1.72}
+.spec{font-size:13.5px;color:var(--muted);margin-top:10px;word-break:break-all}
+code{font-family:Consolas,"D2Coding",monospace;font-size:.9em;background:var(--code);
+     padding:1px 5px;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.66}
+pre code{background:none;padding:0;font-size:inherit}
+ol,ul{padding-left:22px}li{margin-bottom:7px;word-break:keep-all}
+.oneline{font-size:17px;line-height:1.7;font-weight:600;word-break:keep-all;margin:0 0 14px}
+table.e,table.g{border-collapse:collapse;margin:6px 0 12px;font-size:13.5px}
+table.e th,table.e td,table.g th,table.g td{border:1px solid var(--line);padding:4px 11px;
+    text-align:left}
+table.e th,table.g th{background:var(--code);font-size:12.5px;color:var(--muted)}
+table.e td.x{color:var(--bad)}
+p.note{font-size:13.5px;color:var(--muted);margin:5px 0 12px;word-break:keep-all}
+.trap{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.trap ul{padding-left:34px;margin:0}
+.wt{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.wt ul{padding-left:34px;margin:0}
+.var{color:var(--muted);font-size:14px;word-break:keep-all}
+.pager{display:flex;gap:10px;margin-top:40px;padding-top:18px;
+       border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.pager a{color:var(--accent);text-decoration:none}
+.pager a:hover{text-decoration:underline}
+.pager .r{margin-left:auto}
+.list{list-style:none;padding:0}
+.list li{margin-bottom:0;border-bottom:1px solid var(--line)}
+.list a{display:block;padding:13px 4px;color:var(--fg);text-decoration:none}
+.list a:hover{background:var(--panel)}
+.list .lv{color:var(--muted);font-size:12.5px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+       color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head><body><div class="wrap">
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q5</nav><h1>월별 매출 분해 (신규/기존/복귀)</h1><div class="meta">난이도 어려움 · 권장 25분 · 출력 컬럼 <code>month, new_revenue, existing_revenue, returning_revenue, total_revenue</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q5">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">월 매출을 세 갈래로 나누세요.
+
+  new       그 유저의 생애 첫 결제가 일어난 달
+  existing  직전 달에도 결제한 유저
+  returning 과거에 결제한 적은 있으나 직전 달에는 결제가 없던 유저
+
+· 세 항목의 합이 total_revenue와 정확히 같아야 합니다.
+· 월 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>month ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">이번 달 매출을 통 세 개에 나눠 담기 — <b>처음 온 손님 / 지난달에도 온 손님 / 오랜만에 다시 온 손님</b>. 세 통을 합치면 전체와 딱 맞아야 한다.</p><table class="e">
+<tr><th>이 사람이</th><th>어느 통</th></tr>
+<tr><td>태어나서 첫 결제가 이번 달</td><td><b>신규</b></td></tr>
+<tr><td>지난달에도 결제했음</td><td><b>기존</b></td></tr>
+<tr><td>전에 결제한 적 있는데 지난달엔 없음</td><td><b>복귀</b></td></tr>
+</table>
+<p class="note">이 세 칸은 서로 겹치지 않고, 빠지는 경우도 없다. 그래서 합이 딱 맞는다.</p><h3>이렇게 푼다</h3><ol><li>사람마다 <b>생애 첫 결제가 몇 월인지</b>를 구해 둔다.</li><li>결제 줄마다 <b>그 사람의 직전 결제가 몇 월이었나</b>를 한 칸 위에서 끌어온다.</li><li>위 표대로 셋 중 하나를 고른다 — <code>CASE WHEN 첫결제월 = 이번달 THEN '신규' WHEN 직전결제월 = 지난달 THEN '기존' ELSE '복귀' END</code>.</li><li>통별로 금액을 합친다.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>조건 순서를 바꾸면 안 된다.</b> CASE 는 위에서부터 보고 맞으면 멈춘다. 신규 → 기존 → 복귀 순서로 두면 자동으로 겹치지 않는다.</li><li><b>검산하는 법:</b> 세 통을 더해서 전체 매출과 같은지 본다. 안 맞으면 조건이 겹쳤거나 빠진 것이다. 제출 전에 꼭 해 봐라.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · FP&A 의 핵심. 배타적 분류를 만들 줄 아는가.</p><h3>풀이 순서</h3><ol><li><b>유저 × 월</b> 단위로 먼저 집계한다. 이걸 안 하면 아래가 전부 꼬인다.</li><li><code>MIN(m) OVER (PARTITION BY user_id)</code> → 그 유저의 첫 결제 월.</li><li><code>LAG(m) OVER (PARTITION BY user_id ORDER BY m)</code> → 직전 결제 월.</li><li>첫 달이면 신규. 아니면 직전 달이 바로 전월인지로 기존/복귀를 가른다.</li></ol><h3>정답 (MySQL)</h3><pre><code>WITH mu AS (
+  SELECT user_id, DATE_FORMAT(paid_date, &#x27;%Y-%m-01&#x27;) AS m, SUM(amount) AS amt
+  FROM payments GROUP BY user_id, m
+),
+l AS (
+  SELECT user_id, m, amt,
+         LAG(m) OVER (PARTITION BY user_id ORDER BY m) AS prev_m,
+         MIN(m) OVER (PARTITION BY user_id)            AS first_m
+  FROM mu
+)
+SELECT DATE_FORMAT(m, &#x27;%Y-%m&#x27;) AS month,
+       SUM(CASE WHEN m = first_m THEN amt ELSE 0 END) AS new_revenue,
+       SUM(CASE WHEN m &lt;&gt; first_m AND prev_m = DATE_SUB(m, INTERVAL 1 MONTH)
+                THEN amt ELSE 0 END) AS existing_revenue,
+       SUM(CASE WHEN m &lt;&gt; first_m AND (prev_m IS NULL OR prev_m &lt; DATE_SUB(m, INTERVAL 1 MONTH))
+                THEN amt ELSE 0 END) AS returning_revenue,
+       SUM(amt) AS total_revenue
+FROM l
+GROUP BY month
+ORDER BY month;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>분류 순서가 핵심.</b> 첫 달(new)을 먼저 떼어내고, 나머지를 ‘직전 달 있음/없음’으로 가른다. 순서를 바꾸면 겹치거나 빈다.</li><li>세 항목 합 = total 인지 <b>반드시 검산</b>한다. 틀리면 분류가 겹치거나 빈 것이다.</li><li>유저×월 집계를 건너뛰고 payments 에 바로 LAG 를 걸면, 같은 달 두 번 결제한 유저에서 깨진다.</li><li>날짜 문자열끼리 비교하므로 <code>'%Y-%m-01'</code> 형식을 일관되게 쓴다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">이탈(churn) 매출까지 요구하면, 직전 달에는 있었는데 이번 달에 없는 유저를 따로 만들어 음수로 붙인다.</p><div class="pager"><a href="./4.html">← Q4. 가입 코호트별 월간 리텐션</a><a class="r" href="./6.html">Q6. 채널별 첫 결제까지 일수의 중앙값 →</a></div>
+<footer>
+  <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
+  서버도 회원가입도 없습니다. ·
+  <a href="https://github.com/Haweee47/sql-drill">소스</a>
+</footer>
+</div></body></html>

@@ -1,0 +1,101 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>채널별 pro 비중 (0 나누기) — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="결제한 사람 중에 비싼 요금제 쓴 비율. 결제한 사람이 0명인 채널은 계산이 불가능하니 빈칸이어야 한다.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/q/15.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="채널별 pro 비중 (0 나누기) — SQL 풀이">
+<meta property="og:description" content="결제한 사람 중에 비싼 요금제 쓴 비율. 결제한 사람이 0명인 채널은 계산이 불가능하니 빈칸이어야 한다.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/q/15.html">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:16px/1.78 "Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding-inline:18px;padding-block:0 70px}
+nav.bc{font-size:13px;color:var(--muted);padding-block:16px 0}
+nav.bc a{color:var(--accent);text-decoration:none}
+nav.bc a:hover{text-decoration:underline}
+h1{font-size:25px;line-height:1.4;margin:14px 0 6px;letter-spacing:-.4px;
+   word-break:keep-all;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+     border-radius:9px;padding:10px 20px;font-weight:700;font-size:15px;margin:4px 0 22px}
+h2{font-size:18px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line);
+   letter-spacing:-.2px}
+h3{font-size:14px;color:var(--muted);margin:20px 0 7px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+     padding:14px 16px;white-space:pre-wrap;word-break:keep-all;font-size:14.5px;
+     line-height:1.72}
+.spec{font-size:13.5px;color:var(--muted);margin-top:10px;word-break:break-all}
+code{font-family:Consolas,"D2Coding",monospace;font-size:.9em;background:var(--code);
+     padding:1px 5px;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.66}
+pre code{background:none;padding:0;font-size:inherit}
+ol,ul{padding-left:22px}li{margin-bottom:7px;word-break:keep-all}
+.oneline{font-size:17px;line-height:1.7;font-weight:600;word-break:keep-all;margin:0 0 14px}
+table.e,table.g{border-collapse:collapse;margin:6px 0 12px;font-size:13.5px}
+table.e th,table.e td,table.g th,table.g td{border:1px solid var(--line);padding:4px 11px;
+    text-align:left}
+table.e th,table.g th{background:var(--code);font-size:12.5px;color:var(--muted)}
+table.e td.x{color:var(--bad)}
+p.note{font-size:13.5px;color:var(--muted);margin:5px 0 12px;word-break:keep-all}
+.trap{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.trap ul{padding-left:34px;margin:0}
+.wt{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.wt ul{padding-left:34px;margin:0}
+.var{color:var(--muted);font-size:14px;word-break:keep-all}
+.pager{display:flex;gap:10px;margin-top:40px;padding-top:18px;
+       border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.pager a{color:var(--accent);text-decoration:none}
+.pager a:hover{text-decoration:underline}
+.pager .r{margin-left:auto}
+.list{list-style:none;padding:0}
+.list li{margin-bottom:0;border-bottom:1px solid var(--line)}
+.list a{display:block;padding:13px 4px;color:var(--fg);text-decoration:none}
+.list a:hover{background:var(--panel)}
+.list .lv{color:var(--muted);font-size:12.5px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+       color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head><body><div class="wrap">
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q15</nav><h1>채널별 pro 비중 (0 나누기)</h1><div class="meta">난이도 보통 · 권장 9분 · 출력 컬럼 <code>channel, paying_users, pro_users, pro_ratio</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q15">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">채널별로 결제 유저 가운데 pro 플랜을 쓴 적 있는 유저의 비중을
+구하세요.
+
+  channel      채널
+  paying_users 그 채널에서 결제 이력이 1건 이상인 유저 수
+  pro_users    그중 pro 플랜 결제가 1건 이상인 유저 수
+  pro_ratio    pro_users / paying_users × 100 (소수점 둘째 자리 반올림)
+
+· 모든 채널이 결과에 나와야 합니다. 결제 유저가 한 명도 없는 채널도 포함합니다.
+· 결제 유저가 0 명인 채널의 pro_ratio 는 NULL 이어야 합니다. 0 이나 에러가 아닙니다.
+· pro_ratio 내림차순, 같으면 channel 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>pro_ratio DESC, channel ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">결제한 사람 중에 비싼 요금제 쓴 비율. 결제한 사람이 <b>0명</b>인 채널은 계산이 불가능하니 빈칸이어야 한다.</p><table class="e">
+<tr><th>채널</th><th>결제 유저</th><th>pro 유저</th><th>비중</th></tr>
+<tr><td>organic</td><td>371</td><td>130</td><td>35.04</td></tr>
+<tr><td>newsletter</td><td><b>0</b></td><td>0</td><td class="x"><b>NULL</b></td></tr>
+</table>
+<p class="note">0 ÷ 0 은 '0%' 가 아니다. <b>계산할 수 없음</b> 이다.
+그래서 0 이 아니라 빈칸(NULL)이 맞다. 그리고 그 채널도 결과에 <b>나와야</b> 한다.</p><h3>이렇게 푼다</h3><ol><li>채널을 <b>전부 남긴다</b> (결제 유저가 0명인 채널도).</li><li>채널별로 결제한 사람 수, 그중 pro 쓴 사람 수를 센다.</li><li><code>pro수 * 100.0 / NULLIF(결제수, 0)</code>.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b><code>NULLIF(분모, 0)</code> 이 이 문제의 전부다.</b> '분모가 0 이면 NULL 로 바꿔라' 는 뜻이고, NULL 로 나누면 결과가 NULL 이 된다. 이름이 헷갈리는데, <b>NULLIF 는 NULL 을 <u>만드는</u> 함수</b>다.</li><li><b><code>IFNULL</code> 과 반대다.</b> <code>IFNULL(분모, 0)</code> 은 NULL 을 0 으로 바꿔서 <b>0 나누기를 일부러 만든다.</b> 정반대다.</li><li>결제 유저 0명인 채널을 <code>WHERE</code> 로 걸러내면 안 된다. 그 줄도 나와야 한다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 분모가 0 이 될 수 있는 상황을 아는가.</p><h3>풀이 순서</h3><ol><li>결제 유저 수와 pro 유저 수를 조건부 DISTINCT 집계로.</li><li>비율 계산에서 분모를 <code>NULLIF(분모, 0)</code> 로 감싼다.</li></ol><h3>정답 (MySQL)</h3><pre><code>SELECT u.channel,
+       COUNT(DISTINCT p.user_id) AS paying_users,
+       COUNT(DISTINCT CASE WHEN p.plan=&#x27;pro&#x27; THEN p.user_id END) AS pro_users,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN p.plan=&#x27;pro&#x27; THEN p.user_id END)
+             / NULLIF(COUNT(DISTINCT p.user_id), 0), 2) AS pro_ratio
+FROM users u
+LEFT JOIN payments p ON p.user_id = u.user_id
+GROUP BY u.channel
+ORDER BY pro_ratio DESC, u.channel;</code></pre><h3>함정</h3><div class="trap"><ul><li><b><code>IFNULL(분모, 0)</code> 은 정반대다.</b> 0 나누기를 막는 게 아니라 만든다. 방어는 <code>NULLIF(분모, 0)</code>.</li><li>결제 유저가 0 명인 채널도 결과에 나와야 하므로 LEFT JOIN.</li><li><code>CASE WHEN ... THEN user_id END</code> 에 <b>ELSE 를 쓰지 않는다</b>. ELSE 0 을 넣으면 0 도 값이라 DISTINCT 집계에 섞인다.</li><li>이 데이터로는 ‘분모 0’ 이 드물다. <b>안 걸린다고 맞는 게 아니다</b> — 여러 데이터셋으로 채점되면 그때 터진다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“환불률”, “쿠폰 사용률” 처럼 모집단이 비어 있을 수 있는 비율 전부.</p><div class="pager"><a href="./14.html">← Q14. 전 유저 결제 요약 (NULL 처리)</a><a class="r" href="./16.html">Q16. 퍼널 단계별 유저 수와 단계 전환율 →</a></div>
+<footer>
+  <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
+  서버도 회원가입도 없습니다. ·
+  <a href="https://github.com/Haweee47/sql-drill">소스</a>
+</footer>
+</div></body></html>

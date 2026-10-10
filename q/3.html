@@ -1,0 +1,97 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>월별 매출 · 누적 · 전월 대비 — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="용돈 기록장. 이번 달 얼마 썼나 / 지금까지 합쳐서 얼마 / 지난달보다 얼마나 늘었나.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/q/3.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="월별 매출 · 누적 · 전월 대비 — SQL 풀이">
+<meta property="og:description" content="용돈 기록장. 이번 달 얼마 썼나 / 지금까지 합쳐서 얼마 / 지난달보다 얼마나 늘었나.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/q/3.html">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:16px/1.78 "Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding-inline:18px;padding-block:0 70px}
+nav.bc{font-size:13px;color:var(--muted);padding-block:16px 0}
+nav.bc a{color:var(--accent);text-decoration:none}
+nav.bc a:hover{text-decoration:underline}
+h1{font-size:25px;line-height:1.4;margin:14px 0 6px;letter-spacing:-.4px;
+   word-break:keep-all;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+     border-radius:9px;padding:10px 20px;font-weight:700;font-size:15px;margin:4px 0 22px}
+h2{font-size:18px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line);
+   letter-spacing:-.2px}
+h3{font-size:14px;color:var(--muted);margin:20px 0 7px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+     padding:14px 16px;white-space:pre-wrap;word-break:keep-all;font-size:14.5px;
+     line-height:1.72}
+.spec{font-size:13.5px;color:var(--muted);margin-top:10px;word-break:break-all}
+code{font-family:Consolas,"D2Coding",monospace;font-size:.9em;background:var(--code);
+     padding:1px 5px;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.66}
+pre code{background:none;padding:0;font-size:inherit}
+ol,ul{padding-left:22px}li{margin-bottom:7px;word-break:keep-all}
+.oneline{font-size:17px;line-height:1.7;font-weight:600;word-break:keep-all;margin:0 0 14px}
+table.e,table.g{border-collapse:collapse;margin:6px 0 12px;font-size:13.5px}
+table.e th,table.e td,table.g th,table.g td{border:1px solid var(--line);padding:4px 11px;
+    text-align:left}
+table.e th,table.g th{background:var(--code);font-size:12.5px;color:var(--muted)}
+table.e td.x{color:var(--bad)}
+p.note{font-size:13.5px;color:var(--muted);margin:5px 0 12px;word-break:keep-all}
+.trap{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.trap ul{padding-left:34px;margin:0}
+.wt{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.wt ul{padding-left:34px;margin:0}
+.var{color:var(--muted);font-size:14px;word-break:keep-all}
+.pager{display:flex;gap:10px;margin-top:40px;padding-top:18px;
+       border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.pager a{color:var(--accent);text-decoration:none}
+.pager a:hover{text-decoration:underline}
+.pager .r{margin-left:auto}
+.list{list-style:none;padding:0}
+.list li{margin-bottom:0;border-bottom:1px solid var(--line)}
+.list a{display:block;padding:13px 4px;color:var(--fg);text-decoration:none}
+.list a:hover{background:var(--panel)}
+.list .lv{color:var(--muted);font-size:12.5px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+       color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head><body><div class="wrap">
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q3</nav><h1>월별 매출 · 누적 · 전월 대비</h1><div class="meta">난이도 보통 · 권장 8분 · 출력 컬럼 <code>month, revenue, cumulative_revenue, mom_growth</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q3">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">월별 결제 금액 합계와 누적 매출, 전월 대비 증감률(%)을 구하세요.
+
+· 증감률 = (이번달 - 전달) / 전달 × 100, 소수점 둘째 자리 반올림
+· 첫 달의 증감률은 NULL 입니다.
+· 월 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>month ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">용돈 기록장. 이번 달 얼마 썼나 / 지금까지 합쳐서 얼마 / 지난달보다 얼마나 늘었나.</p><table class="e">
+<tr><th>월</th><th>이번 달</th><th>누적</th><th>전월 대비</th></tr>
+<tr><td>1월</td><td>100</td><td>100</td><td class="x">(없음)</td></tr>
+<tr><td>2월</td><td>150</td><td>250</td><td>+50.00%</td></tr>
+<tr><td>3월</td><td>120</td><td>370</td><td>-20.00%</td></tr>
+</table>
+<p class="note">누적은 '위 칸들을 다 더한 값'. 전월 대비는 '한 칸 위 값과 비교'.</p><h3>이렇게 푼다</h3><ol><li>월별 결제 금액 합계를 먼저 만든다.</li><li>누적은 <b>처음부터 이번 줄까지 더하기</b> — <code>SUM(매출) OVER (ORDER BY 월)</code>.</li><li>지난달 값은 <b>한 칸 위에서 끌어온다</b> — <code>LAG(매출) OVER (ORDER BY 월)</code>.</li><li>(이번 − 지난) ÷ 지난 × 100.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>첫 달은 전월 대비가 NULL 이다.</b> 비교할 지난달이 없으니까. 0 으로 채우면 '증감 없음' 이라는 다른 뜻이 된다.</li><li>누적을 구할 때 <code>OVER (ORDER BY 월)</code> 에서 ORDER BY 를 빼면 전체 합계가 모든 줄에 똑같이 들어간다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 윈도우 함수 기본기. 누적과 LAG.</p><h3>풀이 순서</h3><ol><li>월 단위로 먼저 집계해 한 달 = 한 행으로 만든다.</li><li>그 위에서 <code>SUM() OVER (ORDER BY)</code> 로 누적.</li><li><code>LAG()</code> 로 전월 값을 끌어와 증감률.</li></ol><h3>정답 (MySQL)</h3><pre><code>WITH m AS (
+  SELECT DATE_FORMAT(paid_date, &#x27;%Y-%m-01&#x27;) AS mm, SUM(amount) AS rev
+  FROM payments GROUP BY mm
+)
+SELECT DATE_FORMAT(mm, &#x27;%Y-%m&#x27;) AS month,
+       rev AS revenue,
+       SUM(rev) OVER (ORDER BY mm) AS cumulative_revenue,
+       ROUND(100.0 * (rev - LAG(rev) OVER (ORDER BY mm))
+             / LAG(rev) OVER (ORDER BY mm), 2) AS mom_growth
+FROM m
+ORDER BY mm;</code></pre><h3>함정</h3><div class="trap"><ul><li>집계 전에 윈도우를 쓰려 하면 안 된다. <b>GROUP BY 로 월별 한 행을 먼저</b> 만들고 그 위에서 윈도우.</li><li>정렬용으로 <code>'%Y-%m-01'</code>(월 첫날)을 쓰고 출력은 <code>'%Y-%m'</code>. 문자열 <code>'2026-1'</code> 로 정렬하면 10월이 1월 뒤에 온다.</li><li>첫 달 증감률은 NULL 이 맞다. 0 으로 채우지 말 것.</li><li>MySQL 은 <code>LAG(rev)</code> 를 별칭으로 재사용할 수 없다. 두 번 풀어 쓴다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“전년 동월 대비”면 <code>LAG(rev, 12)</code>.</p><div class="pager"><a href="./2.html">← Q2. 채널별 퍼널 전환율</a><a class="r" href="./4.html">Q4. 가입 코호트별 월간 리텐션 →</a></div>
+<footer>
+  <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
+  서버도 회원가입도 없습니다. ·
+  <a href="https://github.com/Haweee47/sql-drill">소스</a>
+</footer>
+</div></body></html>

@@ -1,0 +1,97 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>채널별 퍼널 전환율 — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="놀이기구 줄. 입구에 100명 → 중간에 60명 → 실제로 탄 사람 20명. 각 지점에 몇 명 남았나를 세는 것.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/q/2.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="채널별 퍼널 전환율 — SQL 풀이">
+<meta property="og:description" content="놀이기구 줄. 입구에 100명 → 중간에 60명 → 실제로 탄 사람 20명. 각 지점에 몇 명 남았나를 세는 것.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/q/2.html">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:16px/1.78 "Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding-inline:18px;padding-block:0 70px}
+nav.bc{font-size:13px;color:var(--muted);padding-block:16px 0}
+nav.bc a{color:var(--accent);text-decoration:none}
+nav.bc a:hover{text-decoration:underline}
+h1{font-size:25px;line-height:1.4;margin:14px 0 6px;letter-spacing:-.4px;
+   word-break:keep-all;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+     border-radius:9px;padding:10px 20px;font-weight:700;font-size:15px;margin:4px 0 22px}
+h2{font-size:18px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line);
+   letter-spacing:-.2px}
+h3{font-size:14px;color:var(--muted);margin:20px 0 7px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+     padding:14px 16px;white-space:pre-wrap;word-break:keep-all;font-size:14.5px;
+     line-height:1.72}
+.spec{font-size:13.5px;color:var(--muted);margin-top:10px;word-break:break-all}
+code{font-family:Consolas,"D2Coding",monospace;font-size:.9em;background:var(--code);
+     padding:1px 5px;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.66}
+pre code{background:none;padding:0;font-size:inherit}
+ol,ul{padding-left:22px}li{margin-bottom:7px;word-break:keep-all}
+.oneline{font-size:17px;line-height:1.7;font-weight:600;word-break:keep-all;margin:0 0 14px}
+table.e,table.g{border-collapse:collapse;margin:6px 0 12px;font-size:13.5px}
+table.e th,table.e td,table.g th,table.g td{border:1px solid var(--line);padding:4px 11px;
+    text-align:left}
+table.e th,table.g th{background:var(--code);font-size:12.5px;color:var(--muted)}
+table.e td.x{color:var(--bad)}
+p.note{font-size:13.5px;color:var(--muted);margin:5px 0 12px;word-break:keep-all}
+.trap{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.trap ul{padding-left:34px;margin:0}
+.wt{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.wt ul{padding-left:34px;margin:0}
+.var{color:var(--muted);font-size:14px;word-break:keep-all}
+.pager{display:flex;gap:10px;margin-top:40px;padding-top:18px;
+       border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.pager a{color:var(--accent);text-decoration:none}
+.pager a:hover{text-decoration:underline}
+.pager .r{margin-left:auto}
+.list{list-style:none;padding:0}
+.list li{margin-bottom:0;border-bottom:1px solid var(--line)}
+.list a{display:block;padding:13px 4px;color:var(--fg);text-decoration:none}
+.list a:hover{background:var(--panel)}
+.list .lv{color:var(--muted);font-size:12.5px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+       color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head><body><div class="wrap">
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q2</nav><h1>채널별 퍼널 전환율</h1><div class="meta">난이도 쉬움 · 권장 7분 · 출력 컬럼 <code>channel, landing_users, signup_users, paid_users, final_cvr</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q2">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">채널별로 아래 세 단계의 순 유저 수와 최종 전환율(%)을 구하세요.
+  view_landing / signup_done / first_payment
+
+· 최종 전환율 = first_payment 유저 수 / view_landing 유저 수 × 100
+· 소수점 둘째 자리까지 반올림합니다.
+· 최종 전환율 내림차순으로 정렬하세요.</div><div class="spec">정렬 <code>final_cvr DESC</code></div><h2>쉽게 설명하면</h2><p class="oneline">놀이기구 줄. 입구에 100명 → 중간에 60명 → 실제로 탄 사람 20명. 각 지점에 몇 명 남았나를 세는 것.</p><table class="e">
+<tr><th>단계</th><th>사람 수</th></tr>
+<tr><td>view_landing (들어옴)</td><td>1,000</td></tr>
+<tr><td>signup_done (가입 완료)</td><td>620</td></tr>
+<tr><td>first_payment (첫 결제)</td><td>180</td></tr>
+</table>
+<p class="note">최종 전환율 = 180 / 1,000 × 100 = 18.00</p><h3>이렇게 푼다</h3><ol><li>단계마다 '그 행동을 한 <b>사람</b> 수' 를 센다.</li><li>채널별로 묶는다.</li><li>마지막 단계 ÷ 첫 단계 × 100.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>사람 수로 세야 한다.</b> 같은 사람이 같은 행동을 여러 번 기록에 남기기 때문이다. 기록 개수를 세면 숫자가 부풀어 오른다. → 중복을 지우고 센다 (DISTINCT).</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 세로로 쌓인 이벤트를 가로 단계로 펼칠 줄 아는가.</p><h3>풀이 순서</h3><ol><li>단계별로 <code>COUNT(DISTINCT CASE WHEN ... THEN user_id END)</code>.</li><li>같은 유저가 같은 이벤트를 여러 번 남길 수 있으므로 DISTINCT 필수.</li><li>최종 전환율은 마지막 단계 ÷ 첫 단계.</li></ol><h3>정답 (MySQL)</h3><pre><code>SELECT channel,
+       COUNT(DISTINCT CASE WHEN event_name=&#x27;view_landing&#x27;  THEN user_id END) AS landing_users,
+       COUNT(DISTINCT CASE WHEN event_name=&#x27;signup_done&#x27;   THEN user_id END) AS signup_users,
+       COUNT(DISTINCT CASE WHEN event_name=&#x27;first_payment&#x27; THEN user_id END) AS paid_users,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN event_name=&#x27;first_payment&#x27; THEN user_id END)
+             / NULLIF(COUNT(DISTINCT CASE WHEN event_name=&#x27;view_landing&#x27; THEN user_id END), 0), 2)
+         AS final_cvr
+FROM events
+GROUP BY channel
+ORDER BY final_cvr DESC;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>DISTINCT 누락</b> — 중복 이벤트가 있으면 단계 인원이 부풀려진다.</li><li><code>COUNT(CASE WHEN ...)</code> 는 <b>0 이 아니라 NULL 을 세지 않는 것</b>이다. ELSE 를 쓰지 말 것. <code>ELSE 0</code> 을 넣으면 전부 세어진다.</li><li>첫 단계가 0 인 채널이 있으면 0 나누기. NULLIF 로 막는다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“단계 간 전환율”(2→3, 3→4)로 바뀌면 분모를 직전 단계로 바꾸면 된다.</p><div class="pager"><a href="./1.html">← Q1. 월별 신규 가입자와 결제 전환율</a><a class="r" href="./3.html">Q3. 월별 매출 · 누적 · 전월 대비 →</a></div>
+<footer>
+  <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
+  서버도 회원가입도 없습니다. ·
+  <a href="https://github.com/Haweee47/sql-drill">소스</a>
+</footer>
+</div></body></html>

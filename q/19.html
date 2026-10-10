@@ -1,0 +1,112 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A/B 테스트 그룹 집계 (상위 1% 제외) — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="반 평균 낼 때 혼자 만점인 애를 빼고 계산. 단, 빼는 순서가 중요하다.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/q/19.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="A/B 테스트 그룹 집계 (상위 1% 제외) — SQL 풀이">
+<meta property="og:description" content="반 평균 낼 때 혼자 만점인 애를 빼고 계산. 단, 빼는 순서가 중요하다.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/q/19.html">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:16px/1.78 "Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding-inline:18px;padding-block:0 70px}
+nav.bc{font-size:13px;color:var(--muted);padding-block:16px 0}
+nav.bc a{color:var(--accent);text-decoration:none}
+nav.bc a:hover{text-decoration:underline}
+h1{font-size:25px;line-height:1.4;margin:14px 0 6px;letter-spacing:-.4px;
+   word-break:keep-all;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+     border-radius:9px;padding:10px 20px;font-weight:700;font-size:15px;margin:4px 0 22px}
+h2{font-size:18px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line);
+   letter-spacing:-.2px}
+h3{font-size:14px;color:var(--muted);margin:20px 0 7px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+     padding:14px 16px;white-space:pre-wrap;word-break:keep-all;font-size:14.5px;
+     line-height:1.72}
+.spec{font-size:13.5px;color:var(--muted);margin-top:10px;word-break:break-all}
+code{font-family:Consolas,"D2Coding",monospace;font-size:.9em;background:var(--code);
+     padding:1px 5px;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.66}
+pre code{background:none;padding:0;font-size:inherit}
+ol,ul{padding-left:22px}li{margin-bottom:7px;word-break:keep-all}
+.oneline{font-size:17px;line-height:1.7;font-weight:600;word-break:keep-all;margin:0 0 14px}
+table.e,table.g{border-collapse:collapse;margin:6px 0 12px;font-size:13.5px}
+table.e th,table.e td,table.g th,table.g td{border:1px solid var(--line);padding:4px 11px;
+    text-align:left}
+table.e th,table.g th{background:var(--code);font-size:12.5px;color:var(--muted)}
+table.e td.x{color:var(--bad)}
+p.note{font-size:13.5px;color:var(--muted);margin:5px 0 12px;word-break:keep-all}
+.trap{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.trap ul{padding-left:34px;margin:0}
+.wt{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.wt ul{padding-left:34px;margin:0}
+.var{color:var(--muted);font-size:14px;word-break:keep-all}
+.pager{display:flex;gap:10px;margin-top:40px;padding-top:18px;
+       border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.pager a{color:var(--accent);text-decoration:none}
+.pager a:hover{text-decoration:underline}
+.pager .r{margin-left:auto}
+.list{list-style:none;padding:0}
+.list li{margin-bottom:0;border-bottom:1px solid var(--line)}
+.list a{display:block;padding:13px 4px;color:var(--fg);text-decoration:none}
+.list a:hover{background:var(--panel)}
+.list .lv{color:var(--muted);font-size:12.5px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+       color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head><body><div class="wrap">
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q19</nav><h1>A/B 테스트 그룹 집계 (상위 1% 제외)</h1><div class="meta">난이도 보통 · 권장 14분 · 출력 컬럼 <code>group_name, user_count, group_total_amount, arpu</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q19">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">experiment_users 의 모든 참가자를 대상으로 그룹별 지표를 구하세요.
+
+  group_name
+  user_count          이상치를 뺀 유저 수
+  group_total_amount  이상치를 뺀 총 거래 금액 합계
+  arpu                group_total_amount / user_count, 소수점 없이 반올림
+
+· user_trades_summary 에 행이 없는 참가자는 거래 금액 0 으로 봅니다.
+· 이상치 판정은 &#x27;거래 금액 0 처리까지 끝낸 뒤&#x27; 그룹별로 합니다.
+  PERCENT_RANK() OVER (PARTITION BY group_name ORDER BY 금액) &gt; 0.99 인 유저를 뺍니다.
+· group_name 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>group_name ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">반 평균 낼 때 혼자 만점인 애를 빼고 계산. 단, <b>빼는 순서</b>가 중요하다.</p><p class="note">이 순서를 바꾸면 답이 달라진다.</p>
+<table class="e">
+<tr><td>①</td><td>거래 없는 참가자를 <b>0 으로 채운다</b></td></tr>
+<tr><td>②</td><td>그 상태에서 그룹별로 <b>등수를 매긴다</b></td></tr>
+<tr><td>③</td><td>맨 위를 <b>자른다</b></td></tr>
+<tr><td>④</td><td>남은 사람으로 <b>평균</b></td></tr>
+</table>
+<p class="note">①을 빼고 ②를 하면 모집단이 달라져서 잘려나갈 사람도 달라진다.</p><h3>이렇게 푼다</h3><ol><li>참가자 명단을 왼쪽에 두고 거래 금액을 붙이고 <code>COALESCE(금액, 0)</code>.</li><li>그 결과 위에서 <code>PERCENT_RANK() OVER (PARTITION BY 그룹 ORDER BY 금액)</code>.</li><li><b>한 번 더 감싸서</b> 바깥에서 <code>WHERE 등수 &lt;= 0.99</code>.</li><li>남은 것으로 인원·합계·평균.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>등수 함수는 <code>WHERE</code> 에 못 쓴다.</b> <code>WHERE PERCENT_RANK() OVER (…) &lt;= 0.99</code> 는 문법 오류다. 실행 순서가 WHERE 먼저, 등수 나중이라서 그렇다. <b>한 단 감싸는 것 외에 방법이 없다.</b></li><li><b>거래 없는 참가자를 빼면 안 된다.</b> 실험에 참가한 사람은 거래를 안 했어도 참가자다. 분모를 임의로 줄이면 A/B 결과를 못 쓴다.</li><li><b>알아 둘 것:</b> <code>PERCENT_RANK</code> 는 맨 위가 <b>항상 정확히 1.0</b> 이다. 그래서 <code>&gt; 0.99</code> 는 '상위 1%' 가 아니라 거의 항상 <b>맨 위 한 명</b>만 자른다. 문제가 그렇게 시켰으니 그대로 풀되, 이게 허술한 정의라는 건 알고 있어라. 면접에서 물으면 '진짜 상위 1% 는 NTILE(100) 로 자른다' 고 답하면 된다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 순서가 생명인 문제. ①0 채우기 → ②순위 매기기 → ③자르기 → ④집계. 이 순서를 바꾸면 답이 달라진다.</p><h3>풀이 순서</h3><ol><li><b>실험 참가자 테이블을 왼쪽에 두고</b> 거래 요약을 LEFT JOIN, <code>COALESCE(금액, 0)</code> 으로 0 을 채운다. 분모는 참가자 수여야 한다.</li><li>그 결과 위에서 <code>PERCENT_RANK() OVER (PARTITION BY group_name ORDER BY amt)</code>. 0 을 채운 <b>뒤에</b> 순위를 매기는 것이 중요하다 — 0 인 유저도 모집단의 일부다.</li><li><code>WHERE pr &lt;= 0.99</code> 로 이상치를 떨어뜨린다. 윈도우 함수는 WHERE 에서 못 쓰므로 반드시 서브쿼리/CTE 로 한 단 감싸야 한다.</li><li>남은 행으로 <code>COUNT(*)</code>, <code>SUM(amt)</code>, 그리고 <code>ROUND(SUM(amt)/COUNT(*), 0)</code>.</li></ol><h3>정답 (MySQL)</h3><pre><code>WITH j AS (
+  SELECT e.user_id, e.group_name,
+         COALESCE(s.total_trading_amount, 0) AS amt
+  FROM experiment_users e
+  LEFT JOIN user_trades_summary s ON s.user_id = e.user_id
+),
+p AS (
+  SELECT group_name, amt,
+         PERCENT_RANK() OVER (PARTITION BY group_name ORDER BY amt) AS pr
+  FROM j
+)
+SELECT group_name,
+       COUNT(*) AS user_count,
+       SUM(amt) AS group_total_amount,
+       ROUND(SUM(amt) / COUNT(*), 0) AS arpu
+FROM p
+WHERE pr &lt;= 0.99
+GROUP BY group_name
+ORDER BY group_name;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>윈도우 함수는 WHERE 에 못 쓴다.</b> <code>WHERE PERCENT_RANK() OVER (...) &lt;= 0.99</code> 는 문법 오류다. 실행 순서가 WHERE → 윈도우 함수이기 때문이다. 한 단 감싸는 것 외에 방법이 없다.</li><li><b>LEFT JOIN 을 INNER JOIN 으로 쓰면 유저 수가 깎인다.</b> 거래가 없는 참가자도 실험 참가자다. A/B 테스트에서 분모를 임의로 줄이면 그 결과는 못 쓴다. 「결제없음」 데이터셋이 이걸 잡는다.</li><li><b>0 을 채우기 전에 순위를 매기면 다른 답이 나온다.</b> 거래 없는 유저를 빼고 순위를 매기면 모집단이 달라지고 잘려 나가는 사람도 달라진다. 문제가 지정한 순서를 따르라.</li><li><b>PERCENT_RANK 의 정의를 알고 써라.</b> <code>(순위 − 1) / (전체 − 1)</code> 이므로 <b>최솟값은 항상 0, 최댓값은 항상 1</b> 이다. 그래서 <code>&gt; 0.99</code> 는 '상위 1%' 가 아니라 거의 항상 <b>최댓값 행만</b> 떨어뜨린다. 그룹에 2명뿐이면 1명이 날아간다. 면접에서 물으면 '진짜 상위 1% 는 <code>NTILE(100)</code> 이나 <code>PERCENTILE_CONT</code> 로 임계값을 구해 자른다' 고 답하라.</li><li><b>최댓값이 동점이면 둘 다 빠진다.</b> PERCENT_RANK 는 동점에 같은 값을 주므로 공동 1위가 둘이면 둘 다 1.0 이다. 「동점」 데이터셋이 이걸 잡는다.</li><li><b>ROUND(..., 0) 은 정수가 아니라 소수 0자리다.</b> 엔진에 따라 <code>150</code> 또는 <code>150.0</code> 으로 보인다. 정수형으로 받아야 하면 <code>CAST(ROUND(...) AS SIGNED)</code> 까지 써라.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“상·하위 1% 양쪽 제거”면 <code>pr BETWEEN 0.01 AND 0.99</code>. “중앙값 비교”면 <code>ROW_NUMBER</code> + <code>COUNT() OVER</code> 패턴. “전환율 비교”면 <code>COUNT(DISTINCT 전환유저)/COUNT(DISTINCT 참가자)</code> 로 분모를 참가자 전체로 둔다 (intention-to-treat).</p><div class="pager"><a href="./18.html">← Q18. 유저별 최장 연속 거래일수</a><a class="r" href="./20.html">Q20. 3일 이상 연속 상승 구간 모두 찾기 →</a></div>
+<footer>
+  <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
+  서버도 회원가입도 없습니다. ·
+  <a href="https://github.com/Haweee47/sql-drill">소스</a>
+</footer>
+</div></body></html>

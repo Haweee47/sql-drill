@@ -1,0 +1,100 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>월별 플랜 업그레이드 / 다운그레이드 — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="지난번에 뭐 썼는지와 이번에 뭐 쓰는지를 비교. 달라졌으면 &#x27;변경&#x27; 이다.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/q/7.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="월별 플랜 업그레이드 / 다운그레이드 — SQL 풀이">
+<meta property="og:description" content="지난번에 뭐 썼는지와 이번에 뭐 쓰는지를 비교. 달라졌으면 &#x27;변경&#x27; 이다.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/q/7.html">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:16px/1.78 "Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding-inline:18px;padding-block:0 70px}
+nav.bc{font-size:13px;color:var(--muted);padding-block:16px 0}
+nav.bc a{color:var(--accent);text-decoration:none}
+nav.bc a:hover{text-decoration:underline}
+h1{font-size:25px;line-height:1.4;margin:14px 0 6px;letter-spacing:-.4px;
+   word-break:keep-all;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+     border-radius:9px;padding:10px 20px;font-weight:700;font-size:15px;margin:4px 0 22px}
+h2{font-size:18px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line);
+   letter-spacing:-.2px}
+h3{font-size:14px;color:var(--muted);margin:20px 0 7px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+     padding:14px 16px;white-space:pre-wrap;word-break:keep-all;font-size:14.5px;
+     line-height:1.72}
+.spec{font-size:13.5px;color:var(--muted);margin-top:10px;word-break:break-all}
+code{font-family:Consolas,"D2Coding",monospace;font-size:.9em;background:var(--code);
+     padding:1px 5px;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.66}
+pre code{background:none;padding:0;font-size:inherit}
+ol,ul{padding-left:22px}li{margin-bottom:7px;word-break:keep-all}
+.oneline{font-size:17px;line-height:1.7;font-weight:600;word-break:keep-all;margin:0 0 14px}
+table.e,table.g{border-collapse:collapse;margin:6px 0 12px;font-size:13.5px}
+table.e th,table.e td,table.g th,table.g td{border:1px solid var(--line);padding:4px 11px;
+    text-align:left}
+table.e th,table.g th{background:var(--code);font-size:12.5px;color:var(--muted)}
+table.e td.x{color:var(--bad)}
+p.note{font-size:13.5px;color:var(--muted);margin:5px 0 12px;word-break:keep-all}
+.trap{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.trap ul{padding-left:34px;margin:0}
+.wt{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.wt ul{padding-left:34px;margin:0}
+.var{color:var(--muted);font-size:14px;word-break:keep-all}
+.pager{display:flex;gap:10px;margin-top:40px;padding-top:18px;
+       border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.pager a{color:var(--accent);text-decoration:none}
+.pager a:hover{text-decoration:underline}
+.pager .r{margin-left:auto}
+.list{list-style:none;padding:0}
+.list li{margin-bottom:0;border-bottom:1px solid var(--line)}
+.list a{display:block;padding:13px 4px;color:var(--fg);text-decoration:none}
+.list a:hover{background:var(--panel)}
+.list .lv{color:var(--muted);font-size:12.5px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+       color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head><body><div class="wrap">
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q7</nav><h1>월별 플랜 업그레이드 / 다운그레이드</h1><div class="meta">난이도 보통 · 권장 10분 · 출력 컬럼 <code>month, upgrades, downgrades</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q7">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">결제 이력에서 직전 결제와 플랜이 달라진 건을 찾아, 월별 업그레이드
+(basic→pro)와 다운그레이드(pro→basic) 건수를 구하세요.
+
+· 유저의 첫 결제는 변경이 아니므로 제외합니다.
+· 변경이 한 건도 없는 달은 결과에서 제외합니다.
+· 월 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>month ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">지난번에 뭐 썼는지와 이번에 뭐 쓰는지를 비교. 달라졌으면 '변경' 이다.</p><table class="e">
+<tr><th>결제</th><th>이번 플랜</th><th>직전 플랜</th><th>판정</th></tr>
+<tr><td>1차</td><td>basic</td><td class="x">(없음)</td><td>첫 결제 — 제외</td></tr>
+<tr><td>2차</td><td>pro</td><td>basic</td><td><b>업그레이드</b></td></tr>
+<tr><td>3차</td><td>pro</td><td>pro</td><td>그대로 — 제외</td></tr>
+<tr><td>4차</td><td>basic</td><td>pro</td><td><b>다운그레이드</b></td></tr>
+</table><h3>이렇게 푼다</h3><ol><li>결제 줄마다 <b>직전 결제의 플랜</b>을 한 칸 위에서 끌어온다 (<code>LAG</code>, 사람별로 묶고 날짜 순서로).</li><li>직전 플랜이 없으면 첫 결제니까 빼 버린다.</li><li>basic → pro 면 업, pro → basic 이면 다운으로 센다.</li><li>월별로 합친다.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>변경이 0건인 달은 아예 나오면 안 된다.</b> 걸러낼 때 <code>업 + 다운 &gt; 0</code> 으로 써라.<br><code>업 != 0 AND 다운 != 0</code> 으로 쓰면 <b>한쪽만 있는 달이 사라진다.</b> 업그레이드만 5건 있는 달도 나와야 하는데 없어진다.</li><li>사람별로 묶는 걸(<code>PARTITION BY user_id</code>) 빼먹으면 다른 사람의 플랜과 비교해 버린다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 직전 행과 비교할 줄 아는가.</p><h3>풀이 순서</h3><ol><li>유저별 결제 순서로 <code>LAG(plan)</code>.</li><li>직전 플랜과 현재 플랜을 비교해 방향을 판정.</li><li>첫 결제는 직전이 NULL 이므로 제외.</li></ol><h3>정답 (MySQL)</h3><pre><code>WITH l AS (
+  SELECT user_id, paid_date, plan,
+         LAG(plan) OVER (PARTITION BY user_id ORDER BY paid_date) AS prev_plan
+  FROM payments
+)
+SELECT DATE_FORMAT(paid_date, &#x27;%Y-%m&#x27;) AS month,
+       SUM(CASE WHEN prev_plan=&#x27;basic&#x27; AND plan=&#x27;pro&#x27;   THEN 1 ELSE 0 END) AS upgrades,
+       SUM(CASE WHEN prev_plan=&#x27;pro&#x27;   AND plan=&#x27;basic&#x27; THEN 1 ELSE 0 END) AS downgrades
+FROM l
+WHERE prev_plan IS NOT NULL
+GROUP BY month
+HAVING upgrades + downgrades &gt; 0
+ORDER BY month;</code></pre><h3>함정</h3><div class="trap"><ul><li><code>PARTITION BY user_id</code> 누락 — 다른 유저의 플랜과 비교하게 된다.</li><li>첫 결제를 변경으로 세지 않도록 <code>prev_plan IS NOT NULL</code>.</li><li>MySQL 은 <b>HAVING 에서 SELECT 별칭을 쓸 수 있다</b>. 표준 SQL 은 안 된다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“상태가 바뀐 시점”, “가격이 인상된 건” 전부 같은 구조.</p><div class="pager"><a href="./6.html">← Q6. 채널별 첫 결제까지 일수의 중앙값</a><a class="r" href="./8.html">Q8. 3개월 이상 연속 결제한 유저 →</a></div>
+<footer>
+  <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
+  서버도 회원가입도 없습니다. ·
+  <a href="https://github.com/Haweee47/sql-drill">소스</a>
+</footer>
+</div></body></html>

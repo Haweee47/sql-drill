@@ -1,0 +1,110 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>골든크로스 발생일 — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="단기선이 장기선을 아래에서 위로 뚫는 날. 어제는 아래에 있었고 오늘 위로 올라온 바로 그 날 하나.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/q/13.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="골든크로스 발생일 — SQL 풀이">
+<meta property="og:description" content="단기선이 장기선을 아래에서 위로 뚫는 날. 어제는 아래에 있었고 오늘 위로 올라온 바로 그 날 하나.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/q/13.html">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:16px/1.78 "Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding-inline:18px;padding-block:0 70px}
+nav.bc{font-size:13px;color:var(--muted);padding-block:16px 0}
+nav.bc a{color:var(--accent);text-decoration:none}
+nav.bc a:hover{text-decoration:underline}
+h1{font-size:25px;line-height:1.4;margin:14px 0 6px;letter-spacing:-.4px;
+   word-break:keep-all;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+     border-radius:9px;padding:10px 20px;font-weight:700;font-size:15px;margin:4px 0 22px}
+h2{font-size:18px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line);
+   letter-spacing:-.2px}
+h3{font-size:14px;color:var(--muted);margin:20px 0 7px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+     padding:14px 16px;white-space:pre-wrap;word-break:keep-all;font-size:14.5px;
+     line-height:1.72}
+.spec{font-size:13.5px;color:var(--muted);margin-top:10px;word-break:break-all}
+code{font-family:Consolas,"D2Coding",monospace;font-size:.9em;background:var(--code);
+     padding:1px 5px;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.66}
+pre code{background:none;padding:0;font-size:inherit}
+ol,ul{padding-left:22px}li{margin-bottom:7px;word-break:keep-all}
+.oneline{font-size:17px;line-height:1.7;font-weight:600;word-break:keep-all;margin:0 0 14px}
+table.e,table.g{border-collapse:collapse;margin:6px 0 12px;font-size:13.5px}
+table.e th,table.e td,table.g th,table.g td{border:1px solid var(--line);padding:4px 11px;
+    text-align:left}
+table.e th,table.g th{background:var(--code);font-size:12.5px;color:var(--muted)}
+table.e td.x{color:var(--bad)}
+p.note{font-size:13.5px;color:var(--muted);margin:5px 0 12px;word-break:keep-all}
+.trap{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.trap ul{padding-left:34px;margin:0}
+.wt{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.wt ul{padding-left:34px;margin:0}
+.var{color:var(--muted);font-size:14px;word-break:keep-all}
+.pager{display:flex;gap:10px;margin-top:40px;padding-top:18px;
+       border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.pager a{color:var(--accent);text-decoration:none}
+.pager a:hover{text-decoration:underline}
+.pager .r{margin-left:auto}
+.list{list-style:none;padding:0}
+.list li{margin-bottom:0;border-bottom:1px solid var(--line)}
+.list a{display:block;padding:13px 4px;color:var(--fg);text-decoration:none}
+.list a:hover{background:var(--panel)}
+.list .lv{color:var(--muted);font-size:12.5px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+       color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head><body><div class="wrap">
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q13</nav><h1>골든크로스 발생일</h1><div class="meta">난이도 어려움 · 권장 18분 · 출력 컬럼 <code>stock_code, trade_date, ma5, ma20</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q13">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">종목별로 5일 이동평균이 20일 이동평균을 아래에서 위로 뚫고 올라간 날
+(골든크로스)을 모두 찾으세요.
+
+· 골든크로스 = 전일에는 ma5 &lt;= ma20 이었는데 당일 ma5 &gt; ma20 이 된 날
+· 이동평균은 구간이 모자라면 있는 만큼만 계산합니다.
+· 출력하는 ma5, ma20 은 소수점 둘째 자리까지 반올림합니다.
+  (교차 여부 판정은 반올림 전 값으로 합니다)
+· 비교할 전일이 없는 첫 거래일은 제외합니다.
+· 종목코드 오름차순, 날짜 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>stock_code ASC, trade_date ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">단기선이 장기선을 <b>아래에서 위로 뚫는 날</b>. 어제는 아래에 있었고 오늘 위로 올라온 바로 그 날 하나.</p><table class="e">
+<tr><th>날</th><th>ma5 vs ma20</th><th>판정</th></tr>
+<tr><td>월</td><td>ma5 &lt; ma20 (아래)</td><td></td></tr>
+<tr><td>화</td><td>ma5 &gt; ma20 (위)</td><td><b>골든크로스!</b></td></tr>
+<tr><td>수</td><td>ma5 &gt; ma20 (위)</td><td>이미 위 — 아니다</td></tr>
+<tr><td>목</td><td>ma5 &gt; ma20 (위)</td><td>이미 위 — 아니다</td></tr>
+</table>
+<p class="note">'위에 있는 날' 이 아니라 '<b>올라온 날</b>' 을 찾는 문제다.
+그래서 <b>어제와 비교</b>해야 한다.</p><h3>이렇게 푼다</h3><ol><li>먼저 ma5 와 ma20 을 만든다 (Q12 와 같은 방식).</li><li>그 결과를 한 번 감싸고, <b>어제의 ma5·ma20</b> 을 한 칸 위에서 끌어온다.</li><li>어제는 <code>ma5 &lt;= ma20</code> 이었고 오늘은 <code>ma5 &gt; ma20</code> 인 날만 남긴다.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>오늘만 보고 <code>ma5 &gt; ma20</code> 으로 하면 틀린다.</b> 계속 위에 있는 날이 전부 걸려서 결과가 몇 배로 많아진다.</li><li><b>비교는 반올림 전 값으로 한다.</b> 반올림한 값으로 비교하면 두 값이 같아져서 교차를 놓친다. 보여줄 때만 반올림한다.</li><li>종목마다 따로 (<code>PARTITION BY stock_code</code>). 그리고 첫 거래일은 어제가 없으니 빠진다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 윈도우 결과에 다시 LAG 를 거는가. 그리고 ‘교차’의 정의.</p><h3>풀이 순서</h3><ol><li>ma5, ma20 을 만든다 (CTE 1).</li><li>그 위에 <code>LAG</code> 로 전일 ma5, ma20 을 가져온다 (CTE 2).</li><li>전일 <code>ma5 &lt;= ma20</code> <b>그리고</b> 당일 <code>ma5 &gt; ma20</code>.</li></ol><h3>정답 (MySQL)</h3><pre><code>WITH m AS (
+  SELECT stock_code, trade_date,
+         AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
+               ROWS BETWEEN  4 PRECEDING AND CURRENT ROW) AS ma5,
+         AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
+               ROWS BETWEEN 19 PRECEDING AND CURRENT ROW) AS ma20
+  FROM prices
+),
+d AS (
+  SELECT m.*,
+         LAG(ma5)  OVER (PARTITION BY stock_code ORDER BY trade_date) AS prev_ma5,
+         LAG(ma20) OVER (PARTITION BY stock_code ORDER BY trade_date) AS prev_ma20
+  FROM m
+)
+SELECT stock_code, trade_date, ROUND(ma5, 2) AS ma5, ROUND(ma20, 2) AS ma20
+FROM d
+WHERE prev_ma5 IS NOT NULL AND prev_ma5 &lt;= prev_ma20 AND ma5 &gt; ma20
+ORDER BY stock_code, trade_date;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>당일 조건만 쓰면 안 된다.</b> <code>ma5 &gt; ma20</code> 만 보면 이미 올라가 있는 구간이 전부 걸린다. ‘뚫고 올라간 그 날’이어야 한다.</li><li><code>trade_date + INTERVAL 1 DAY</code> 로 전일을 찾으면 <b>월요일과 공휴일 다음날이 통째로 누락</b>된다. 실제로 거래일의 20% 가 빠진다. 반드시 LAG.</li><li>반올림은 <b>출력할 때만</b>. 비교는 반올림 전 값으로 해야 경계에서 안 틀린다.</li><li><code>WHERE</code> 에서 윈도우 함수를 못 쓰므로 CTE 2 단이 필요하다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">데드크로스는 부등호만 뒤집는다. “임계값을 상향 돌파한 날”도 같은 패턴.</p><div class="pager"><a href="./12.html">← Q12. 종목별 5일·20일 이동평균</a><a class="r" href="./14.html">Q14. 전 유저 결제 요약 (NULL 처리) →</a></div>
+<footer>
+  <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
+  서버도 회원가입도 없습니다. ·
+  <a href="https://github.com/Haweee47/sql-drill">소스</a>
+</footer>
+</div></body></html>

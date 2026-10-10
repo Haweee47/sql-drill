@@ -1,0 +1,104 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>채널별 ARPPU와 순위 변동 — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="반별 평균 점수로 등수를 매기고, 지난달 등수보다 올랐나 내렸나를 본다.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/q/10.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="채널별 ARPPU와 순위 변동 — SQL 풀이">
+<meta property="og:description" content="반별 평균 점수로 등수를 매기고, 지난달 등수보다 올랐나 내렸나를 본다.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/q/10.html">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:16px/1.78 "Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding-inline:18px;padding-block:0 70px}
+nav.bc{font-size:13px;color:var(--muted);padding-block:16px 0}
+nav.bc a{color:var(--accent);text-decoration:none}
+nav.bc a:hover{text-decoration:underline}
+h1{font-size:25px;line-height:1.4;margin:14px 0 6px;letter-spacing:-.4px;
+   word-break:keep-all;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+     border-radius:9px;padding:10px 20px;font-weight:700;font-size:15px;margin:4px 0 22px}
+h2{font-size:18px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line);
+   letter-spacing:-.2px}
+h3{font-size:14px;color:var(--muted);margin:20px 0 7px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+     padding:14px 16px;white-space:pre-wrap;word-break:keep-all;font-size:14.5px;
+     line-height:1.72}
+.spec{font-size:13.5px;color:var(--muted);margin-top:10px;word-break:break-all}
+code{font-family:Consolas,"D2Coding",monospace;font-size:.9em;background:var(--code);
+     padding:1px 5px;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.66}
+pre code{background:none;padding:0;font-size:inherit}
+ol,ul{padding-left:22px}li{margin-bottom:7px;word-break:keep-all}
+.oneline{font-size:17px;line-height:1.7;font-weight:600;word-break:keep-all;margin:0 0 14px}
+table.e,table.g{border-collapse:collapse;margin:6px 0 12px;font-size:13.5px}
+table.e th,table.e td,table.g th,table.g td{border:1px solid var(--line);padding:4px 11px;
+    text-align:left}
+table.e th,table.g th{background:var(--code);font-size:12.5px;color:var(--muted)}
+table.e td.x{color:var(--bad)}
+p.note{font-size:13.5px;color:var(--muted);margin:5px 0 12px;word-break:keep-all}
+.trap{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.trap ul{padding-left:34px;margin:0}
+.wt{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.wt ul{padding-left:34px;margin:0}
+.var{color:var(--muted);font-size:14px;word-break:keep-all}
+.pager{display:flex;gap:10px;margin-top:40px;padding-top:18px;
+       border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.pager a{color:var(--accent);text-decoration:none}
+.pager a:hover{text-decoration:underline}
+.pager .r{margin-left:auto}
+.list{list-style:none;padding:0}
+.list li{margin-bottom:0;border-bottom:1px solid var(--line)}
+.list a{display:block;padding:13px 4px;color:var(--fg);text-decoration:none}
+.list a:hover{background:var(--panel)}
+.list .lv{color:var(--muted);font-size:12.5px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+       color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head><body><div class="wrap">
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q10</nav><h1>채널별 ARPPU와 순위 변동</h1><div class="meta">난이도 어려움 · 권장 20분 · 출력 컬럼 <code>month, channel, arppu, rnk, prev_rnk, rank_change</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q10">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">월별·채널별 ARPPU(결제 유저 1인당 평균 결제액)를 구하고, 각 월 안에서
+ARPPU 순위를 매긴 뒤 전월 대비 순위 변동을 구하세요.
+
+· ARPPU = 그 달 결제액 합계 / 그 달 결제한 순 유저 수, 소수점 둘째 자리 반올림
+· 순위는 ARPPU 내림차순, 동점이면 같은 순위(RANK)
+· rank_change = 전월 순위 - 이번달 순위 (오르면 양수). 첫 달은 NULL
+· 월 오름차순, 순위 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>month ASC, rnk ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">반별 평균 점수로 등수를 매기고, 지난달 등수보다 올랐나 내렸나를 본다.</p><table class="e">
+<tr><th>월</th><th>채널</th><th>평균</th><th>등수</th><th>지난달 등수</th><th>변동</th></tr>
+<tr><td>1월</td><td>referral</td><td>23,000</td><td>1</td><td class="x">(없음)</td><td class="x">(없음)</td></tr>
+<tr><td>2월</td><td>referral</td><td>23,200</td><td>1</td><td>1</td><td>0</td></tr>
+<tr><td>2월</td><td>sns</td><td>16,900</td><td>4</td><td>3</td><td>-1 (내려감)</td></tr>
+</table>
+<p class="note">변동 = 지난달 등수 − 이번달 등수. 등수가 1→4 로 내려가면 음수.</p><h3>이렇게 푼다</h3><ol><li>월·채널별 평균을 먼저 만든다.</li><li><b>월 안에서</b> 등수를 매긴다 — <code>RANK() OVER (PARTITION BY 월 ORDER BY 평균 DESC)</code>.</li><li><b>채널별로</b> 지난달 등수를 끌어온다 — <code>LAG(등수) OVER (PARTITION BY 채널 ORDER BY 월)</code>.</li><li>지난달 등수 − 이번달 등수.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>묶는 기준이 두 번 바뀐다.</b> 등수를 매길 때는 <b>월</b>로 묶고, 지난달 등수를 끌어올 때는 <b>채널</b>로 묶는다. 둘을 같게 쓰면 전부 틀린다.</li><li>첫 달은 지난달 등수가 NULL 이고, 변동도 NULL 이다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 윈도우를 두 단계로 겹쳐 쓸 줄 아는가.</p><h3>풀이 순서</h3><ol><li>월×채널 ARPPU 를 먼저 집계.</li><li>월 안에서 <code>RANK()</code> → 파티션은 <b>월</b>.</li><li>채널 기준으로 <code>LAG(rnk)</code> → 파티션은 <b>채널</b>. 파티션 기준이 다르다.</li><li>윈도우 결과를 다시 윈도우에 넣으려면 한 단계 감싸야 한다.</li></ol><h3>정답 (MySQL)</h3><pre><code>WITH a AS (
+  SELECT DATE_FORMAT(p.paid_date, &#x27;%Y-%m-01&#x27;) AS mm, u.channel,
+         ROUND(SUM(p.amount) / COUNT(DISTINCT p.user_id), 2) AS arppu
+  FROM payments p JOIN users u ON u.user_id = p.user_id
+  GROUP BY mm, u.channel
+),
+r AS (
+  SELECT mm, channel, arppu,
+         RANK() OVER (PARTITION BY mm ORDER BY arppu DESC) AS rnk
+  FROM a
+)
+SELECT DATE_FORMAT(mm, &#x27;%Y-%m&#x27;) AS month, channel, arppu, rnk,
+       LAG(rnk) OVER (PARTITION BY channel ORDER BY mm)       AS prev_rnk,
+       LAG(rnk) OVER (PARTITION BY channel ORDER BY mm) - rnk AS rank_change
+FROM r
+ORDER BY mm, rnk;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>같은 SELECT 안에서 RANK 를 LAG 에 넣을 수 없다.</b> CTE 로 한 단계 감싼다. 이 문제가 묻는 게 바로 이것.</li><li>순위는 <b>월</b>로 파티션, 변동은 <b>채널</b>로 파티션. 둘을 같게 쓰면 전부 틀린다.</li><li><code>rank_change</code> 부호 방향을 문제대로. 여기서는 ‘전월 − 이번달’이라 오르면 양수.</li><li>ARPPU 분모는 <code>COUNT(DISTINCT user_id)</code>. 결제 건수가 아니다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“전월 대비 매출 순위 변동”, “주간 랭킹 변화” 전부 같은 2단 구조.</p><div class="pager"><a href="./9.html">← Q9. 채널별 결제 전환과 LTV</a><a class="r" href="./11.html">Q11. 5일 이동평균 (부분 구간) →</a></div>
+<footer>
+  <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
+  서버도 회원가입도 없습니다. ·
+  <a href="https://github.com/Haweee47/sql-drill">소스</a>
+</footer>
+</div></body></html>

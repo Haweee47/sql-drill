@@ -1,0 +1,104 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>채널별 첫 결제까지 일수의 중앙값 — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="반 애들 키를 작은 순서로 줄 세우고 딱 가운데 애의 키. 평균이 아니다.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/q/6.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="채널별 첫 결제까지 일수의 중앙값 — SQL 풀이">
+<meta property="og:description" content="반 애들 키를 작은 순서로 줄 세우고 딱 가운데 애의 키. 평균이 아니다.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/q/6.html">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:16px/1.78 "Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding-inline:18px;padding-block:0 70px}
+nav.bc{font-size:13px;color:var(--muted);padding-block:16px 0}
+nav.bc a{color:var(--accent);text-decoration:none}
+nav.bc a:hover{text-decoration:underline}
+h1{font-size:25px;line-height:1.4;margin:14px 0 6px;letter-spacing:-.4px;
+   word-break:keep-all;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+     border-radius:9px;padding:10px 20px;font-weight:700;font-size:15px;margin:4px 0 22px}
+h2{font-size:18px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line);
+   letter-spacing:-.2px}
+h3{font-size:14px;color:var(--muted);margin:20px 0 7px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+     padding:14px 16px;white-space:pre-wrap;word-break:keep-all;font-size:14.5px;
+     line-height:1.72}
+.spec{font-size:13.5px;color:var(--muted);margin-top:10px;word-break:break-all}
+code{font-family:Consolas,"D2Coding",monospace;font-size:.9em;background:var(--code);
+     padding:1px 5px;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.66}
+pre code{background:none;padding:0;font-size:inherit}
+ol,ul{padding-left:22px}li{margin-bottom:7px;word-break:keep-all}
+.oneline{font-size:17px;line-height:1.7;font-weight:600;word-break:keep-all;margin:0 0 14px}
+table.e,table.g{border-collapse:collapse;margin:6px 0 12px;font-size:13.5px}
+table.e th,table.e td,table.g th,table.g td{border:1px solid var(--line);padding:4px 11px;
+    text-align:left}
+table.e th,table.g th{background:var(--code);font-size:12.5px;color:var(--muted)}
+table.e td.x{color:var(--bad)}
+p.note{font-size:13.5px;color:var(--muted);margin:5px 0 12px;word-break:keep-all}
+.trap{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.trap ul{padding-left:34px;margin:0}
+.wt{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.wt ul{padding-left:34px;margin:0}
+.var{color:var(--muted);font-size:14px;word-break:keep-all}
+.pager{display:flex;gap:10px;margin-top:40px;padding-top:18px;
+       border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.pager a{color:var(--accent);text-decoration:none}
+.pager a:hover{text-decoration:underline}
+.pager .r{margin-left:auto}
+.list{list-style:none;padding:0}
+.list li{margin-bottom:0;border-bottom:1px solid var(--line)}
+.list a{display:block;padding:13px 4px;color:var(--fg);text-decoration:none}
+.list a:hover{background:var(--panel)}
+.list .lv{color:var(--muted);font-size:12.5px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+       color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head><body><div class="wrap">
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q6</nav><h1>채널별 첫 결제까지 일수의 중앙값</h1><div class="meta">난이도 어려움 · 권장 15분 · 출력 컬럼 <code>channel, payers, median_days</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q6">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">결제 경험이 있는 유저만 대상으로, 가입일부터 첫 결제일까지 걸린 일수의
+채널별 중앙값을 구하세요.
+
+· MySQL 8에는 MEDIAN 함수가 없습니다.
+· 대상 인원이 짝수면 가운데 두 값의 평균입니다.
+· 중앙값 오름차순, 같으면 channel 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>median_days ASC, channel ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">반 애들 키를 작은 순서로 줄 세우고 <b>딱 가운데 애</b>의 키. 평균이 아니다.</p><table class="e">
+<tr><th>인원</th><th>줄 세운 값</th><th>중앙값</th></tr>
+<tr><td>5명 (홀수)</td><td>1 · 2 · <b>3</b> · 4 · 5</td><td>3번째 = <b>3</b></td></tr>
+<tr><td>4명 (짝수)</td><td>1 · <b>2</b> · <b>3</b> · 4</td><td>2·3번째 평균 = <b>2.5</b></td></tr>
+</table>
+<p class="note">홀수면 가운데 하나, 짝수면 가운데 둘의 평균. MySQL 에는
+MEDIAN 함수가 없어서 직접 만들어야 한다.</p><h3>이렇게 푼다</h3><ol><li>채널 안에서 값을 작은 순서로 <b>번호를 매긴다</b> (1, 2, 3 …).</li><li>그 채널의 <b>전체 인원 수</b>도 같은 줄에 같이 붙여 둔다.</li><li>가운데 번호만 남긴다 — <code>(인원+1)/2</code> 와 <code>(인원+2)/2</code> 두 개를 소수점 버려서 쓴다.</li><li>남은 값의 평균을 낸다.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>왜 번호 두 개냐:</b> 5명이면 (5+1)/2=3, (5+2)/2=3(소수점 버림) → 둘 다 3번 → 한 개만 남는다. 4명이면 (4+1)/2=2, (4+2)/2=3 → 2번·3번 두 개가 남는다. <b>홀수·짝수를 따로 안 나누고 한 식으로 처리</b>하는 요령이다.</li><li>소수점 버림이 필요하다. 나눗셈이 소수로 나오는 환경에서는 <code>FLOOR</code> 를 꼭 씌워라.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · MySQL 에 MEDIAN 이 없을 때 직접 만들 줄 아는가.</p><h3>풀이 순서</h3><ol><li>유저별 첫 결제일 → 가입일과의 차이(일수).</li><li>채널 안에서 일수 오름차순으로 <code>ROW_NUMBER()</code>, 동시에 <code>COUNT() OVER</code> 로 인원수.</li><li>가운데 위치만 남긴다. 홀수면 1개, 짝수면 2개.</li><li>남은 값을 AVG 하면 짝수 평균까지 한 번에 처리된다.</li></ol><h3>정답 (MySQL)</h3><pre><code>WITH f AS (
+  SELECT p.user_id, u.channel,
+         DATEDIFF(MIN(p.paid_date), u.signup_date) AS d
+  FROM payments p JOIN users u ON u.user_id = p.user_id
+  GROUP BY p.user_id, u.channel, u.signup_date
+),
+r AS (
+  SELECT channel, d,
+         ROW_NUMBER() OVER (PARTITION BY channel ORDER BY d) AS rn,
+         COUNT(*)     OVER (PARTITION BY channel)            AS cnt
+  FROM f
+)
+SELECT channel, MAX(cnt) AS payers, AVG(d) AS median_days
+FROM r
+WHERE rn IN (FLOOR((cnt + 1) / 2), FLOOR((cnt + 2) / 2))
+GROUP BY channel
+ORDER BY median_days, channel;</code></pre><h3>함정</h3><div class="trap"><ul><li><code>DATEDIFF(끝, 시작)</code> — MySQL 은 인자 순서가 <b>끝이 먼저</b>다. TIMESTAMPDIFF 와 반대라 헷갈린다.</li><li>짝수 처리를 빼먹으면 값이 한쪽으로 치우친다. <code>FLOOR((cnt+1)/2)</code> 와 <code>FLOOR((cnt+2)/2)</code> 두 자리를 잡는 게 정석.</li><li>홀수면 두 식이 같은 값이 되어 자동으로 1개만 남는다. 분기할 필요 없다.</li><li>payers 는 <code>COUNT(*)</code> 가 아니라 <code>MAX(cnt)</code>. WHERE 로 이미 2행만 남았기 때문.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“상위 25% 지점”이면 <code>PERCENT_RANK() <= 0.25</code> 또는 <code>NTILE(4)=1</code>.</p><div class="pager"><a href="./5.html">← Q5. 월별 매출 분해 (신규/기존/복귀)</a><a class="r" href="./7.html">Q7. 월별 플랜 업그레이드 / 다운그레이드 →</a></div>
+<footer>
+  <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
+  서버도 회원가입도 없습니다. ·
+  <a href="https://github.com/Haweee47/sql-drill">소스</a>
+</footer>
+</div></body></html>

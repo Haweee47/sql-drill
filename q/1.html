@@ -1,0 +1,103 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>월별 신규 가입자와 결제 전환율 — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="반 인원 중에 몇 명이 학원에 등록했나 — 를 가입한 달마다 따로 센다. 등록 안 한 애도 반 인원에는 들어가야 한다.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/q/1.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="월별 신규 가입자와 결제 전환율 — SQL 풀이">
+<meta property="og:description" content="반 인원 중에 몇 명이 학원에 등록했나 — 를 가입한 달마다 따로 센다. 등록 안 한 애도 반 인원에는 들어가야 한다.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/q/1.html">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--code:#F3F4F6;--warn:#FFF8E6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --code:#23282D;--warn:#2A2416;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+     font:16px/1.78 "Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding-inline:18px;padding-block:0 70px}
+nav.bc{font-size:13px;color:var(--muted);padding-block:16px 0}
+nav.bc a{color:var(--accent);text-decoration:none}
+nav.bc a:hover{text-decoration:underline}
+h1{font-size:25px;line-height:1.4;margin:14px 0 6px;letter-spacing:-.4px;
+   word-break:keep-all;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+     border-radius:9px;padding:10px 20px;font-weight:700;font-size:15px;margin:4px 0 22px}
+h2{font-size:18px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line);
+   letter-spacing:-.2px}
+h3{font-size:14px;color:var(--muted);margin:20px 0 7px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+     padding:14px 16px;white-space:pre-wrap;word-break:keep-all;font-size:14.5px;
+     line-height:1.72}
+.spec{font-size:13.5px;color:var(--muted);margin-top:10px;word-break:break-all}
+code{font-family:Consolas,"D2Coding",monospace;font-size:.9em;background:var(--code);
+     padding:1px 5px;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.66}
+pre code{background:none;padding:0;font-size:inherit}
+ol,ul{padding-left:22px}li{margin-bottom:7px;word-break:keep-all}
+.oneline{font-size:17px;line-height:1.7;font-weight:600;word-break:keep-all;margin:0 0 14px}
+table.e,table.g{border-collapse:collapse;margin:6px 0 12px;font-size:13.5px}
+table.e th,table.e td,table.g th,table.g td{border:1px solid var(--line);padding:4px 11px;
+    text-align:left}
+table.e th,table.g th{background:var(--code);font-size:12.5px;color:var(--muted)}
+table.e td.x{color:var(--bad)}
+p.note{font-size:13.5px;color:var(--muted);margin:5px 0 12px;word-break:keep-all}
+.trap{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.trap ul{padding-left:34px;margin:0}
+.wt{background:var(--warn);border-radius:10px;padding:13px 16px 13px 0}
+.wt ul{padding-left:34px;margin:0}
+.var{color:var(--muted);font-size:14px;word-break:keep-all}
+.pager{display:flex;gap:10px;margin-top:40px;padding-top:18px;
+       border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.pager a{color:var(--accent);text-decoration:none}
+.pager a:hover{text-decoration:underline}
+.pager .r{margin-left:auto}
+.list{list-style:none;padding:0}
+.list li{margin-bottom:0;border-bottom:1px solid var(--line)}
+.list a{display:block;padding:13px 4px;color:var(--fg);text-decoration:none}
+.list a:hover{background:var(--panel)}
+.list .lv{color:var(--muted);font-size:12.5px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+       color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head><body><div class="wrap">
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q1</nav><h1>월별 신규 가입자와 결제 전환율</h1><div class="meta">난이도 쉬움 · 권장 6분 · 출력 컬럼 <code>signup_month, signups, converted, conversion_rate</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q1">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">가입 월별로 아래 세 가지를 구하세요.
+
+  signups          그 달의 신규 가입자 수
+  converted        그중 가입 후 30일 이내에 첫 결제를 한 사람 수
+  conversion_rate  converted / signups × 100
+
+· 분모는 그 달의 전체 가입자입니다. 결제 이력이 없는 유저도 포함합니다.
+· 가입 후 31일째 이후에 첫 결제한 사람은 converted 에서 제외합니다.
+· 전환율은 소수점 둘째 자리까지 반올림합니다.
+· 월 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>signup_month ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">반 인원 중에 몇 명이 학원에 등록했나 — 를 가입한 달마다 따로 센다. 등록 안 한 애도 반 인원에는 들어가야 한다.</p><table class="e">
+<tr><th>가입 월</th><th>가입자 (분모)</th><th>30일 안에 결제 (분자)</th><th>전환율</th></tr>
+<tr><td>1월</td><td>100명</td><td>23명</td><td>23.00</td></tr>
+<tr><td>2월</td><td>120명</td><td>31명</td><td>25.83</td></tr>
+</table>
+<p class="note">결제를 아예 안 한 사람도 <b>가입자 100명에는 포함</b>된다. 이게 핵심.</p><h3>이렇게 푼다</h3><ol><li>먼저 사람마다 <b>첫 결제일</b>이 언제인지 따로 구해 둔다.</li><li>유저 명단 <b>왼쪽에 두고</b> 그 첫 결제일을 옆에 붙인다 (LEFT JOIN).</li><li>가입한 달로 묶어서, 전체 인원을 세고 / 30일 안에 결제한 사람만 따로 센다.</li><li>나누고 ×100, 소수점 둘째 자리까지.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>그냥 JOIN 으로 붙이면 안 된다.</b> 결제 안 한 사람이 통째로 사라져서 분모가 줄어들고, 전환율이 실제보다 훨씬 높게 나온다. <b>LEFT JOIN</b> — '왼쪽 명단은 무조건 다 남긴다' 는 뜻이다.</li><li><code>100</code> 이 아니라 <code>100.0</code>. 정수끼리 나누면 소수점이 날아가서 0 이 나오는 환경이 있다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · ‘전체’가 분모인 비율을 구할 줄 아는가. 그리고 조건부 집계.</p><h3>풀이 순서</h3><ol><li>유저별 <b>첫</b> 결제일을 먼저 만든다 (MIN). payments 를 바로 조인하면 한 유저가 여러 행이 된다.</li><li>users 를 기준으로 <b>LEFT JOIN</b>. 결제 없는 유저가 분모에 남아야 한다.</li><li>converted 는 조건부 집계로 센다.</li><li>비율은 converted / signups × 100.</li></ol><h3>정답 (MySQL)</h3><pre><code>WITH first_pay AS (
+  SELECT user_id, MIN(paid_date) AS fp FROM payments GROUP BY user_id
+)
+SELECT DATE_FORMAT(u.signup_date, &#x27;%Y-%m&#x27;) AS signup_month,
+       COUNT(*) AS signups,
+       SUM(CASE WHEN f.fp &lt;= DATE_ADD(u.signup_date, INTERVAL 30 DAY)
+                THEN 1 ELSE 0 END) AS converted,
+       ROUND(100.0 * SUM(CASE WHEN f.fp &lt;= DATE_ADD(u.signup_date, INTERVAL 30 DAY)
+                THEN 1 ELSE 0 END) / COUNT(*), 2) AS conversion_rate
+FROM users u
+LEFT JOIN first_pay f ON f.user_id = u.user_id
+GROUP BY signup_month
+ORDER BY signup_month;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>INNER JOIN</b> 을 쓰면 결제 없는 유저가 사라져 전환율이 부풀려진다. 이 문제의 핵심 함정.</li><li>분자를 <b>전체 결제자</b>로 쓰기 쉽다. 30일 조건이 붙은 쪽이어야 한다.</li><li><code>×100</code> 누락. <code>*1.0</code> 만으로는 비율(0.23)이지 퍼센트가 아니다.</li><li><code>f.fp IS NOT NULL</code> 은 안 써도 된다. NULL 과의 비교는 NULL 이라 CASE 가 거짓으로 떨어진다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“가입 후 7일 이내 재방문율”, “첫 구매까지 N일 이내 비율” — 날짜 기준만 바뀐다.</p><div class="pager"><a class="r" href="./2.html">Q2. 채널별 퍼널 전환율 →</a></div>
+<footer>
+  <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
+  서버도 회원가입도 없습니다. ·
+  <a href="https://github.com/Haweee47/sql-drill">소스</a>
+</footer>
+</div></body></html>
