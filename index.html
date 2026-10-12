@@ -44,12 +44,23 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);
 #main{display:grid;grid-template-columns:var(--rail) 400px 1fr;min-height:0}
 body.norail #main{grid-template-columns:0 400px 1fr}
 body.norail #rail{display:none}
-@media(max-width:1100px){#main{grid-template-columns:var(--rail) 1fr}
-  body.norail #main{grid-template-columns:0 1fr}
-  #work{display:none}}
-@media(max-width:760px){#main{grid-template-columns:1fr;overflow-y:auto}
+/* 좁은 화면에서는 문제 목록을 띄우는 서랍으로 바꾼다.
+   예전에는 여기서 #work 를 숨겼는데, 그러면 태블릿에서 쿼리를 아예 못 쓴다. */
+@media(max-width:1100px){
+  #main{grid-template-columns:minmax(290px,42%) 1fr}
+  body.norail #main{grid-template-columns:minmax(290px,42%) 1fr}
+  #rail{position:fixed;left:0;top:0;bottom:0;width:272px;z-index:30;display:none;
+        padding-top:56px;box-shadow:2px 0 18px rgba(0,0,0,.28)}
+  body.railopen #rail{display:block}
+  body.railopen #scrim{display:block}
+}
+@media(max-width:760px){
   body{overflow:auto;height:auto}
-  #rail{display:none}#prob{border-right:0}#work{display:flex;height:80vh}}
+  #main{grid-template-columns:1fr}
+  #prob{border-right:0;max-height:none}
+  #work{display:flex;height:78vh;border-top:1px solid var(--line)}
+}
+#scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:29}
 
 #rail{border-right:1px solid var(--line);overflow-y:auto;background:var(--panel);
       padding:10px 8px 40px}
@@ -135,10 +146,12 @@ table.r th{background:var(--code);font-size:11.5px;color:var(--muted)}
     <option value="mysql">MySQL 문법</option>
     <option value="sqlite">SQLite 문법</option>
   </select>
+  <a href="./exam.html">시험 모드</a>
   <a href="./q/">문항 해설</a>
   <a href="https://github.com/Haweee47/sql-drill" target="_blank" rel="noopener">소스</a>
 </div>
 
+<div id="scrim"></div>
 <div id="main">
   <nav id="rail"></nav>
   <section id="prob"></section>
@@ -321,7 +334,10 @@ function drawRail() {
   });
   $("rail").innerHTML = h;
   Array.prototype.forEach.call($("rail").querySelectorAll(".ti"), function (b) {
-    b.onclick = function () { pick(+b.getAttribute("data-id")); };
+    b.onclick = function () {
+      pick(+b.getAttribute("data-id"));
+      document.body.classList.remove("railopen");
+    };
   });
 }
 
@@ -481,7 +497,12 @@ function boot() {
 
 $("brun").onclick = doRun;
 $("bsub").onclick = doSubmit;
-$("burger").onclick = function () { document.body.classList.toggle("norail"); };
+function toggleRail() {
+  if (window.innerWidth > 1100) document.body.classList.toggle("norail");
+  else document.body.classList.toggle("railopen");
+}
+$("burger").onclick = toggleRail;
+$("scrim").onclick = function () { document.body.classList.remove("railopen"); };
 $("eng").onchange = function () {
   try { localStorage.setItem("sqldrill-eng", $("eng").value); } catch (e) {}
 };

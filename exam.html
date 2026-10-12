@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SQL 시험 모드 — 6문항 90분 | SQL 드릴</title>
+<meta name="description" content="실제 쿼리 테스트와 같은 조건으로 봅니다. 6문항, 문항마다 제한 시간, 연장 풀 30분. 실행은 되지만 정답 여부는 끝나야 나옵니다.">
+<link rel="canonical" href="https://haweee47.github.io/sql-drill/exam.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SQL 드릴">
+<meta property="og:title" content="SQL 시험 모드 — 6문항 90분">
+<meta property="og:description" content="문항별 제한 시간, 연장 풀 30분, 채점은 끝나고. 실제 쿼리 테스트 조건 그대로.">
+<meta property="og:url" content="https://haweee47.github.io/sql-drill/exam.html">
+<meta property="og:locale" content="ko_KR">
+<style>
+:root{--bg:#F7F7F5;--panel:#fff;--fg:#1B1F23;--muted:#6B7280;--line:#E3E3DF;
+      --accent:#1B64DA;--ok:#0F7B4F;--bad:#C0392B;--warn:#B5742E;--code:#F3F4F6}
+@media(prefers-color-scheme:dark){:root{--bg:#15181B;--panel:#1C2024;--fg:#E8EAEC;
+      --muted:#99A1A9;--line:#2C3237;--accent:#6AA3F5;--ok:#4CC38A;--bad:#E57373;
+      --warn:#D9A062;--code:#23282D;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);overflow:hidden;
+     font:14px/1.65 "Malgun Gothic",system-ui,sans-serif;
+     display:grid;grid-template-rows:auto 1fr}
+
+#top{display:flex;align-items:center;gap:9px;padding:8px 14px;background:var(--panel);
+     border-bottom:1px solid var(--line);flex-wrap:wrap}
+#top .ttl{font-weight:700;white-space:nowrap}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:none;color:var(--fg);border-radius:7px;
+     padding:4px 9px;cursor:pointer;font:inherit;font-size:12.5px;line-height:1.4;
+     display:flex;gap:5px;align-items:baseline}
+.tab:hover{background:var(--code)}
+.tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tab .t{font-size:10.5px;opacity:.78;font-variant-numeric:tabular-nums}
+.tab.dot::before{content:"●";color:var(--ok);font-size:8px;position:relative;top:-3px}
+.tab.on.dot::before{color:#fff}
+.tab.dead{opacity:.45;text-decoration:line-through}
+#qclock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700;font-size:19px;
+        white-space:nowrap}
+#qclock.warn{color:var(--warn)}#qclock.over{color:var(--bad)}
+#gclock{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;
+        white-space:nowrap;text-align:right;line-height:1.3}
+#bext{border:1px solid var(--warn);background:none;color:var(--warn);border-radius:7px;
+      padding:5px 9px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+#bext[disabled]{opacity:.3;cursor:default}
+#end{border:0;background:var(--bad);color:#fff;border-radius:8px;padding:6px 14px;
+     font:inherit;font-weight:700;cursor:pointer}
+select{background:var(--panel);color:var(--fg);border:1px solid var(--line);
+       border-radius:8px;padding:6px 9px;font:inherit;font-size:12.5px}
+
+#main{display:grid;grid-template-columns:400px 1fr;min-height:0}
+@media(max-width:900px){#main{grid-template-columns:1fr}
+  body{overflow:auto;height:auto}#work{height:78vh}}
+#prob{border-right:1px solid var(--line);overflow-y:auto;padding:14px 16px 40px;min-width:0}
+#prob h2{font-size:16px;margin:0 0 4px}
+.lvl{font-size:11.5px;color:var(--muted);margin:0 0 9px}
+.prompt{background:var(--panel);border:1px solid var(--line);border-radius:9px;
+        padding:11px 13px;white-space:pre-wrap;word-break:keep-all;font-size:13.2px}
+.spec{font-size:12.3px;color:var(--muted);margin:8px 0 0;word-break:break-all}
+.spec code{background:var(--code);padding:2px 5px;border-radius:4px;color:var(--fg)}
+.sec{margin-top:16px}.sec h3{font-size:11.5px;margin:0 0 6px;color:var(--muted)}
+.lt{border-collapse:collapse;margin:0 0 9px;font-size:12px}
+.lt th,.lt td{border:1px solid var(--line);padding:2px 8px;white-space:nowrap}
+.lt th{background:var(--code);font-size:11.5px}
+.tname{font-family:Consolas,monospace;font-weight:700;font-size:12.5px;margin:8px 0 3px}
+.tnote{font-size:11.5px;color:var(--muted)}.tnote ul{margin:3px 0 0;padding-left:15px}
+.arrow{color:var(--muted);margin:2px 0 5px;font-size:12px}
+
+#work{display:flex;flex-direction:column;padding:14px 16px;gap:9px;min-width:0;overflow:hidden}
+textarea{flex:1 1 58%;min-height:190px;resize:none;background:var(--panel);color:var(--fg);
+         border:1px solid var(--line);border-radius:9px;padding:12px;
+         font:13.5px/1.6 Consolas,"D2Coding",monospace;tab-size:2}
+textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+textarea[readonly]{opacity:.55}
+.bar{display:flex;gap:8px;align-items:center;flex:0 0 auto;flex-wrap:wrap}
+.go{border:0;border-radius:8px;padding:9px 17px;font:inherit;font-weight:700;cursor:pointer}
+.go[disabled]{opacity:.4;cursor:default}
+.run{background:var(--code);color:var(--fg);border:1px solid var(--line)}
+.save{background:var(--accent);color:#fff}
+.next{background:none;color:var(--muted);border:1px solid var(--line)}
+.hint{color:var(--muted);font-size:11.7px;margin-left:auto;text-align:right}
+#out{flex:1 1 42%;min-height:150px;overflow:auto;background:var(--panel);
+     border:1px solid var(--line);border-radius:9px;padding:12px;font-size:12.5px}
+table.r{border-collapse:collapse;font-size:12.3px;font-variant-numeric:tabular-nums}
+table.r th,table.r td{border:1px solid var(--line);padding:3px 9px;white-space:nowrap}
+table.r th{background:var(--code);font-size:11.5px;color:var(--muted)}
+.ok{color:var(--ok);font-weight:700}.bad{color:var(--bad);font-weight:700}
+.wt{color:var(--warn);font-weight:700}.msg{margin:3px 0}
+
+#cover{position:fixed;inset:0;background:var(--bg);z-index:50;overflow:auto;
+       display:flex;align-items:center;justify-content:center;padding:28px}
+#cover .box{max-width:680px;width:100%}
+#cover h1{font-size:23px;margin:0 0 10px}
+#cover p{color:var(--muted);margin:0 0 8px}
+#cover ul{color:var(--muted);font-size:13.5px;padding-left:19px;margin:0}
+#cover li{margin-bottom:6px;word-break:keep-all}
+#cover a{color:var(--accent)}
+.rtab{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.3px}
+.rtab th,.rtab td{border:0;border-bottom:1px solid var(--line);padding:7px 9px;
+                  text-align:left;white-space:normal}
+.rtab th{color:var(--muted);font-size:12px}
+.score{font-size:31px;font-weight:700;margin:4px 0 2px}
+#start{border:0;background:var(--accent);color:#fff;border-radius:8px;padding:9px 22px;
+       font:inherit;font-weight:700;cursor:pointer}
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:60;
+       background:var(--fg);color:var(--bg);padding:9px 18px;border-radius:999px;
+       font-size:13px;font-weight:700;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.show{opacity:.94}
+.spin{width:22px;height:22px;border:2px solid var(--line);border-top-color:var(--accent);
+      border-radius:50%;animation:sp .8s linear infinite;margin:0 auto 10px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.spin{animation:none}#toast{transition:none}}
+</style>
+</head>
+<body>
+
+<div id="top">
+  <span class="ttl">SQL 시험</span>
+  <div class="tabs" id="tabs"></div>
+  <button id="bext" title="이 문항에 연장 풀에서 시간을 추가합니다">+5분</button>
+  <select id="eng">
+    <option value="mysql">MySQL 문법</option>
+    <option value="sqlite">SQLite 문법</option>
+  </select>
+  <span id="qclock">--:--</span>
+  <span id="gclock"></span>
+  <button id="end">종료</button>
+</div>
+
+<div id="main">
+  <section id="prob"></section>
+  <section id="work">
+    <textarea id="sql" spellcheck="false" placeholder="쿼리를 쓰고 [답안 저장]"></textarea>
+    <div class="bar">
+      <button class="go run" id="brun">실행</button>
+      <button class="go save" id="bsave">답안 저장</button>
+      <button class="go next" id="bnext">다음 문항</button>
+      <span class="hint">실행 결과만 볼 수 있습니다.<br>정답 여부는 시험이 끝나야 나옵니다.</span>
+    </div>
+    <div id="out">실행하면 결과가 여기 표시됩니다.</div>
+  </section>
+</div>
+
+<div id="cover"><div class="box" id="coverbox">
+  <div class="spin"></div>
+  <p style="text-align:center">시험 환경을 준비하는 중…</p>
+</div></div>
+<div id="toast"></div>
+
+<script src="./sql-wasm.js"></script>
+<script src="./sqlmy.js"></script>
+<script>
+"use strict";
+var $ = function (i) { return document.getElementById(i); };
+var esc = function (s) {
+  return String(s).replace(/[&<>]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
+  });
+};
+var mmss = function (n) {
+  var a = Math.abs(n);
+  return String(Math.floor(a / 60)).padStart(2, "0") + ":" + String(a % 60).padStart(2, "0");
+};
+
+var TARGET = 90, RESERVE = 30, STEP = 5 * 60, NQ = 6;
+var SQL = null, DB = null, TASKS = [], SCHEMA = [], EX = {}, EXPECT = {}, DS = { ddl: {}, sets: [] };
+var IDS = [], LIMIT = {}, ANS = {}, SPENT = {}, EXTRA = {}, DEAD = {};
+var reserve = RESERVE * 60, cur = null, tick = null, ended = false, started = false;
+
+function toast(m) {
+  var t = $("toast"); t.textContent = m; t.className = "show";
+  clearTimeout(toast._t); toast._t = setTimeout(function () { t.className = ""; }, 2300);
+}
+
+/* ── 출제: 난이도를 섞어 6문항 ─────────────────────────────── */
+function shuffle(a) {
+  for (var i = a.length - 1; i > 0; i--) {
+    var k = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[k]; a[k] = t;
+  }
+  return a;
+}
+function pickSix() {
+  var by = {};
+  TASKS.forEach(function (t) { (by[t.level] = by[t.level] || []).push(t.id); });
+  Object.keys(by).forEach(function (k) { shuffle(by[k]); });
+  var out = (by["쉬움"] || []).slice(0, 1)
+            .concat((by["보통"] || []).slice(0, 2))
+            .concat((by["어려움"] || []).slice(0, 3));
+  var rest = shuffle(TASKS.map(function (t) { return t.id; })
+                          .filter(function (i) { return out.indexOf(i) < 0; }));
+  return out.concat(rest).slice(0, NQ).sort(function (a, b) { return a - b; });
+}
+/* 문항별 제한 시간(초). 난이도(minutes)에 비례해 TARGET 분을 나눈다. */
+function budgets(ids) {
+  var raw = ids.map(function (id) {
+    var t = TASKS.filter(function (x) { return x.id === id; })[0];
+    return Math.max(3, t.minutes || 8);
+  });
+  var sum = raw.reduce(function (a, b) { return a + b; }, 0) || 1;
+  var mins = raw.map(function (r) { return Math.max(3, Math.round(r / sum * TARGET)); });
+  var diff = TARGET - mins.reduce(function (a, b) { return a + b; }, 0);
+  for (var i = 0; diff !== 0 && i < 2000; i++) {
+    var k = i % mins.length, step = diff > 0 ? 1 : -1;
+    if (mins[k] + step >= 3) { mins[k] += step; diff -= step; }
+  }
+  var out = {};
+  ids.forEach(function (id, k) { out[id] = mins[k] * 60; });
+  return out;
+}
+
+/* ── 채점(index.html 과 동일) ──────────────────────────────── */
+function norm(v) {
+  if (v === null || v === undefined) return "∅";
+  var s = String(v).trim();
+  if (s === "" || s === "None") return "∅";
+  var f = Number(s);
+  if (!Number.isNaN(f) && Number.isFinite(f)) return String(Number(f.toPrecision(9)));
+  return s;
+}
+var rowKey = function (r) { return r.map(norm).join("\u0001"); };
+
+function runSQL(db, raw) {
+  if ($("eng").value === "sqlite") {
+    var body = raw.split("\n").filter(function (l) { return l.trim().slice(0, 2) !== "--"; })
+                  .join("\n").trim();
+    if (!body) throw new Error("쿼리가 비어 있습니다.");
+    var st = db.prepare(body), c = null, rs = [];
+    try {
+      while (st.step()) {
+        if (!c) c = st.getColumnNames();
+        rs.push(st.get().map(function (v) { return v === null ? null : String(v); }));
+      }
+      if (!c) c = st.getColumnNames();
+    } finally { st.free(); }
+    return { cols: c || [], rows: rs };
+  }
+  return SQLMy.run(db, raw);
+}
+function buildDataset(spec) {
+  var db = new SQL.Database();
+  Object.keys(DS.ddl).forEach(function (t) {
+    db.run("CREATE TABLE " + t + " (" + DS.ddl[t] + ")");
+    var d = spec.tables[t];
+    if (!d || !d.rows.length) return;
+    var st = db.prepare("INSERT INTO " + t + " (" + d.cols.join(",") + ") VALUES ("
+      + d.cols.map(function () { return "?"; }).join(",") + ")");
+    d.rows.forEach(function (r) { st.run(r); });
+    st.free();
+  });
+  SQLMy.install(db);
+  return db;
+}
+function judge(task, sql) {
+  var got;
+  try { got = runSQL(DB, sql); }
+  catch (e) { return { passed: false, why: "오류 — " + String(e.message || e).split("\n")[0].slice(0, 80) }; }
+  var exp = EXPECT[task.id].main;
+  var want = task.columns.split(",").map(function (s) { return s.trim().toLowerCase(); });
+  if (got.cols.map(function (c) { return c.toLowerCase(); }).join("|") !== want.join("|"))
+    return { passed: false, why: "컬럼 이름 또는 순서가 다릅니다" };
+  if (got.rows.length !== exp.rows.length)
+    return { passed: false, why: "행 수가 다릅니다 — 정답 " + exp.rows.length + "행 / 제출 " + got.rows.length + "행" };
+  for (var i = 0; i < got.rows.length; i++)
+    if (rowKey(got.rows[i]) !== rowKey(exp.rows[i]))
+      return { passed: false, why: "값이 다른 행이 있습니다 (" + (i + 1) + "행째)" };
+  for (var k = 0; k < DS.sets.length; k++) {
+    var s = DS.sets[k], e = EXPECT[task.id][s.name];
+    if (!e || e.error) continue;
+    var db = null;
+    try {
+      db = buildDataset(s);
+      var g = runSQL(db, sql);
+      if (g.rows.length !== e.rows.length)
+        return { passed: false, why: "「" + s.name + "」 데이터셋 — 행 수가 다릅니다" };
+      if (g.rows.map(rowKey).sort().join("\u0002") !== e.rows.map(rowKey).sort().join("\u0002"))
+        return { passed: false, why: "「" + s.name + "」 데이터셋 — 결과가 다릅니다" };
+    } catch (err) {
+      return { passed: false, why: "「" + s.name + "」 데이터셋 — 오류" };
+    } finally { if (db) db.close(); }
+  }
+  return { passed: true, why: "통과" };
+}
+
+/* ── 화면 ───────────────────────────────────────────────── */
+function ltable(cols, rows) {
+  var h = '<table class="lt"><tr>';
+  cols.forEach(function (c) { h += "<th>" + esc(c) + "</th>"; });
+  h += "</tr>";
+  rows.forEach(function (r) {
+    h += "<tr>"; r.forEach(function (v) { h += "<td>" + esc(v) + "</td>"; }); h += "</tr>";
+  });
+  return h + "</table>";
+}
+function schemaBlock(use) {
+  var list = (use && use.length)
+    ? SCHEMA.filter(function (t) { return use.indexOf(t.name) >= 0; }) : SCHEMA;
+  var h = '<div class="sec"><h3>테이블</h3>';
+  list.forEach(function (t) {
+    h += '<div class="tname">' + esc(t.name) + "</div>" + ltable(["Column Name", "Type"], t.cols)
+       + '<div class="tnote"><ul>'
+       + t.notes.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") + "</ul></div>";
+  });
+  return h + "</div>";
+}
+function exampleBlock(id) {
+  var e = EX[String(id)];
+  if (!e) return "";
+  var h = '<div class="sec"><h3>예시</h3><div style="color:var(--muted);font-size:12px">입력</div>';
+  Object.keys(e.input).forEach(function (n) {
+    h += '<div class="tname">' + esc(n) + "</div>" + ltable(e.input[n].cols, e.input[n].rows);
+  });
+  return h + '<div class="arrow">↓ 출력</div>' + ltable(e.output.cols, e.output.rows) + "</div>";
+}
+var T = function (id) { return TASKS.filter(function (x) { return x.id === id; })[0]; };
+var left = function (id) { return LIMIT[id] + (EXTRA[id] || 0) - (SPENT[id] || 0); };
+var limOf = function (id) { return LIMIT[id] + (EXTRA[id] || 0); };
+
+function drawTabs() {
+  var h = "";
+  IDS.forEach(function (id, i) {
+    var c = "tab";
+    if (cur && cur.id === id) c += " on";
+    if ((ANS[id] || "").trim()) c += " dot";
+    if (DEAD[id]) c += " dead";
+    h += '<button class="' + c + '" data-id="' + id + '" title="Q' + id
+       + ' · 제한 ' + Math.round(limOf(id) / 60) + '분">' + (i + 1)
+       + ' <span class="t">' + (DEAD[id] ? "종료" : mmss(Math.max(0, left(id)))) + "</span></button>";
+  });
+  $("tabs").innerHTML = h;
+  Array.prototype.forEach.call($("tabs").children, function (b) {
+    b.onclick = function () { go(+b.getAttribute("data-id")); };
+  });
+}
+function lvlLine(id) {
+  return "난이도 " + T(id).level + " · 제한 " + Math.round(LIMIT[id] / 60) + "분"
+    + ((EXTRA[id] || 0) ? " (+" + Math.round(EXTRA[id] / 60) + "분 연장)" : "")
+    + (DEAD[id] ? " · 시간 종료 — 잠김" : "");
+}
+function go(id) {
+  if (DEAD[id] && cur) { toast("Q" + id + " 은 시간이 끝나 잠겼습니다"); return; }
+  if (cur && !DEAD[cur.id]) ANS[cur.id] = $("sql").value;
+  cur = T(id);
+  var dead = !!DEAD[id];
+  $("prob").innerHTML = "<h2>" + (IDS.indexOf(id) + 1) + ". " + esc(cur.title) + "</h2>"
+    + '<div class="lvl">' + esc(lvlLine(id)) + "</div>"
+    + '<div class="prompt">' + esc(cur.prompt) + "</div>"
+    + '<div class="spec">출력 컬럼 <code>' + esc(cur.columns) + "</code> · 정렬 <code>"
+    + esc(cur.order_note) + "</code></div>"
+    + exampleBlock(cur.id) + schemaBlock(cur.tables);
+  $("prob").scrollTop = 0;
+  $("sql").value = ANS[id] || "";
+  $("sql").readOnly = dead;
+  $("brun").disabled = dead; $("bsave").disabled = dead;
+  $("out").textContent = dead ? "시간이 끝난 문항입니다. 저장된 답안으로 채점됩니다."
+                              : "실행하면 결과가 여기 표시됩니다.";
+  clocks(); drawTabs();
+  if (!dead && window.innerWidth > 900) $("sql").focus();
+}
+function nextAlive(from) {
+  var i = IDS.indexOf(from);
+  for (var k = 1; k <= IDS.length; k++) {
+    var id = IDS[(i + k) % IDS.length];
+    if (!DEAD[id]) return id;
+  }
+  return null;
+}
+function clocks() {
+  if (!cur) return;
+  var l = left(cur.id);
+  $("qclock").textContent = DEAD[cur.id] ? "종료" : "문항 " + mmss(Math.max(0, l));
+  $("qclock").className = DEAD[cur.id] ? "over" : (l <= 60 ? "over" : (l <= 180 ? "warn" : ""));
+  var sp = IDS.reduce(function (a, id) { return a + (SPENT[id] || 0); }, 0);
+  $("gclock").innerHTML = "전체 " + mmss(sp) + " 경과<br>연장 풀 " + mmss(reserve);
+  $("bext").disabled = !!DEAD[cur.id] || reserve < STEP;
+}
+function expire(id) {
+  if (cur && cur.id === id) ANS[id] = $("sql").value;
+  DEAD[id] = true;
+  var nx = nextAlive(id);
+  drawTabs();
+  if (nx === null) { toast("모든 문항의 시간이 끝났습니다"); finish(true); return; }
+  toast("Q" + id + " 시간 종료 — 다음 문항으로 넘어갑니다");
+  cur = null; go(nx);
+}
+function second() {
+  if (!cur || ended || DEAD[cur.id]) return;
+  SPENT[cur.id] = (SPENT[cur.id] || 0) + 1;
+  var l = left(cur.id);
+  if (l === 300 || l === 60) toast("Q" + cur.id + " 남은 시간 " + (l / 60) + "분");
+  if (l <= 0) { expire(cur.id); return; }
+  clocks(); drawTabs();
+}
+
+$("bext").onclick = function () {
+  if (!cur || DEAD[cur.id]) return;
+  if (reserve < STEP) { toast("연장 풀이 비었습니다"); return; }
+  reserve -= STEP; EXTRA[cur.id] = (EXTRA[cur.id] || 0) + STEP;
+  toast("Q" + cur.id + " 에 5분 추가 — 연장 풀 " + mmss(reserve) + " 남음");
+  $("prob").querySelector(".lvl").textContent = lvlLine(cur.id);
+  clocks(); drawTabs();
+};
+$("brun").onclick = function () {
+  if (!cur || DEAD[cur.id]) return;
+  ANS[cur.id] = $("sql").value; drawTabs();
+  var d;
+  try { d = runSQL(DB, $("sql").value); }
+  catch (e) {
+    $("out").innerHTML = '<div class="bad">쿼리 오류</div><pre style="white-space:pre-wrap;margin:6px 0 0">'
+      + esc(String(e.message || e)) + "</pre>";
+    return;
+  }
+  var h = '<div style="color:var(--muted);margin-bottom:6px">내 결과 — ' + d.rows.length + "행</div>";
+  if (d.cols.length) {
+    h += '<table class="r"><tr>';
+    d.cols.forEach(function (c) { h += "<th>" + esc(c) + "</th>"; });
+    h += "</tr>";
+    d.rows.slice(0, 40).forEach(function (r) {
+      h += "<tr>";
+      r.forEach(function (v) { h += "<td>" + esc(v === null ? "∅" : v) + "</td>"; });
+      h += "</tr>";
+    });
+    h += "</table>";
+    if (d.rows.length > 40) h += '<div style="color:var(--muted);margin-top:5px">… '
+      + (d.rows.length - 40) + "행 더</div>";
+  }
+  var want = cur.columns.split(",").map(function (s) { return s.trim().toLowerCase(); });
+  if (d.cols.map(function (c) { return c.toLowerCase(); }).join("|") !== want.join("|"))
+    h = '<div class="bad msg">컬럼 이름/개수가 요구사항과 다릅니다 — 요구: ' + esc(cur.columns) + "</div>" + h;
+  $("out").innerHTML = h;
+};
+$("bsave").onclick = function () {
+  if (!cur || DEAD[cur.id]) return;
+  ANS[cur.id] = $("sql").value; drawTabs();
+  $("out").innerHTML = '<div class="ok">답안 저장됨</div><div class="msg" style="color:var(--muted)">'
+    + "정답 여부는 시험이 끝나야 나옵니다. 넘어가기 전에 한 번만 더 보세요 — "
+    + "컬럼 이름/순서, 정렬 기준, 반올림 자리, 0으로 나누기, NULL, 빈 그룹.</div>";
+};
+$("bnext").onclick = function () {
+  if (!cur) return;
+  var nx = nextAlive(cur.id);
+  if (nx === null || nx === cur.id) { toast("넘어갈 문항이 없습니다"); return; }
+  go(nx);
+};
+$("end").onclick = function () {
+  var blank = IDS.filter(function (id) { return !(ANS[id] || "").trim(); }).length;
+  if (confirm("시험을 끝내고 채점할까요? 되돌릴 수 없습니다."
+      + (blank ? "\n\n답안이 비어 있는 문항이 " + blank + "개 있습니다." : ""))) finish(false);
+};
+document.addEventListener("keydown", function (e) {
+  if (e.ctrlKey && e.key === "Enter") { e.preventDefault(); $("brun").click(); }
+  if (e.ctrlKey && (e.key === "s" || e.key === "S")) { e.preventDefault(); $("bsave").click(); }
+});
+
+function finish(auto) {
+  if (ended) return;
+  ended = true; clearInterval(tick);
+  if (cur && !DEAD[cur.id]) ANS[cur.id] = $("sql").value;
+  var total = IDS.reduce(function (a, id) { return a + (SPENT[id] || 0); }, 0);
+  $("coverbox").innerHTML = '<h1>채점 중…</h1><p>여러 데이터셋으로 돌립니다. 잠깐 걸립니다.</p>';
+  $("cover").style.display = "flex";
+
+  setTimeout(function () {
+    var rows = [], pass = 0;
+    IDS.forEach(function (id) {
+      var t = T(id), sql = (ANS[id] || "").trim();
+      if (!sql) { rows.push([id, t, "미작성", false]); return; }
+      var r = judge(t, sql);
+      if (r.passed) pass++;
+      rows.push([id, t, r.why, r.passed]);
+    });
+    var f = function (n) { return Math.floor(n / 60) + "분 " + String(n % 60).padStart(2, "0") + "초"; };
+    var h = "<h1>시험 종료</h1><div class=\"score\">" + pass + " / " + IDS.length + "</div>";
+    h += "<p>소요 " + f(total) + (auto ? " · 시간 종료로 자동 제출" : "")
+       + " · 연장 " + f(RESERVE * 60 - reserve) + " 사용</p>";
+    h += '<table class="rtab"><tr><th>#</th><th>문항</th><th>시간</th><th>결과</th></tr>';
+    rows.forEach(function (r, i) {
+      var sp = SPENT[r[0]] || 0, lim = limOf(r[0]);
+      h += "<tr><td>" + (i + 1) + "</td><td>Q" + r[0] + ". " + esc(r[1].title)
+         + '<br><span style="color:var(--muted);font-size:11.5px">' + esc(r[1].level) + "</span></td>"
+         + '<td style="font-variant-numeric:tabular-nums;color:'
+         + (sp >= lim ? "var(--bad)" : "var(--muted)") + '">' + mmss(sp)
+         + '<br><span style="font-size:11px">/' + mmss(lim) + "</span></td>"
+         + '<td class="' + (r[3] ? "ok" : "bad") + '">' + (r[3] ? "✓ " : "✗ ") + esc(r[2]) + "</td></tr>";
+    });
+    h += "</table>";
+    var fails = rows.filter(function (r) { return !r[3]; });
+    if (fails.length) h += '<p style="font-size:13px">틀린 문항 해설: '
+      + fails.map(function (r) { return '<a href="./q/' + r[0] + '.html" target="_blank">Q' + r[0] + "</a>"; })
+             .join(" · ") + "</p>";
+    h += '<p style="font-size:13px;margin-top:12px"><a href="./exam.html">새 시험</a> · '
+       + '<a href="./">연습 모드</a> · <a href="./q/">전체 해설</a></p>';
+    $("coverbox").innerHTML = h;
+  }, 50);
+}
+
+/* ── 부팅 ───────────────────────────────────────────────── */
+Promise.all([
+  initSqlJs({ locateFile: function (f) { return "./" + f; } }),
+  fetch("./data/tasks.json").then(function (r) { return r.json(); }),
+  fetch("./data/schema.json").then(function (r) { return r.json(); }),
+  fetch("./data/examples.json").then(function (r) { return r.json(); }),
+  fetch("./data/expected.json").then(function (r) { return r.json(); }),
+  fetch("./data/datasets.json").then(function (r) { return r.json(); }),
+  fetch("./data/practice.sqlite").then(function (r) { return r.arrayBuffer(); })
+]).then(function (a) {
+  SQL = a[0]; TASKS = a[1]; SCHEMA = a[2]; EX = a[3]; EXPECT = a[4]; DS = a[5];
+  DB = new SQL.Database(new Uint8Array(a[6]));
+  SQLMy.install(DB);
+  try { var sv = localStorage.getItem("sqldrill-eng"); if (sv) $("eng").value = sv; } catch (e) {}
+  $("eng").onchange = function () {
+    try { localStorage.setItem("sqldrill-eng", $("eng").value); } catch (e) {}
+  };
+
+  IDS = pickSix(); LIMIT = budgets(IDS);
+  var plan = IDS.map(function (id, i) {
+    return (i + 1) + "번 " + T(id).level + " " + Math.round(LIMIT[id] / 60) + "분";
+  }).join(" · ");
+  $("coverbox").innerHTML = "<h1>SQL 시험</h1>"
+    + "<p>실제 쿼리 테스트와 같은 조건으로 맞췄습니다.</p><ul>"
+    + "<li><b>" + IDS.length + "문항 · 문항마다 제한 시간이 따로 있습니다</b><br>"
+    + '<span style="font-size:12.5px">' + esc(plan) + " — 합계 " + TARGET + "분</span></li>"
+    + "<li><b>연장 풀 " + RESERVE + "분</b>이 따로 있습니다. 모자란 문항에서 [+5분] 을 눌러 "
+    + "꺼내 쓰세요 (최대 " + (TARGET + RESERVE) + "분)</li>"
+    + "<li>타이머는 <b>지금 열려 있는 문항만</b> 돌아갑니다. 막히면 일단 넘기고 돌아오세요</li>"
+    + "<li><b>시간이 끝난 문항은 잠깁니다.</b> 그때 저장돼 있던 답안으로 채점됩니다</li>"
+    + "<li><b>실행은 되지만 정답 여부는 끝나야 나옵니다</b> — 스스로 검산하세요</li>"
+    + "<li>컬럼 이름·순서·정렬·반올림 자리까지 정확히 맞아야 합니다</li>"
+    + "<li>여러 데이터셋으로 채점됩니다. 논리에 빈틈이 있으면 떨어집니다</li>"
+    + '<li style="color:var(--fg)">Ctrl+Enter 실행 · Ctrl+S 저장</li>'
+    + '</ul><p style="margin-top:16px"><button id="start">시작</button> '
+    + '<a href="./" style="margin-left:10px;font-size:13px">연습 모드로</a></p>';
+  $("start").onclick = function () {
+    $("cover").style.display = "none"; started = true;
+    IDS.forEach(function (id) { SPENT[id] = 0; EXTRA[id] = 0; });
+    tick = setInterval(second, 1000);
+    go(IDS[0]);
+  };
+}).catch(function (e) {
+  $("coverbox").innerHTML = '<h1 class="bad">불러오지 못했습니다</h1><p>'
+    + esc(String(e.message || e)) + "</p>";
+});
+addEventListener("beforeunload", function (e) {
+  if (started && !ended) { e.preventDefault(); e.returnValue = ""; }
+});
+</script>
+</body>
+</html>
