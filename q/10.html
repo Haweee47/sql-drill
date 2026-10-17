@@ -95,7 +95,7 @@ SELECT DATE_FORMAT(mm, &#x27;%Y-%m&#x27;) AS month, channel, arppu, rnk,
        LAG(rnk) OVER (PARTITION BY channel ORDER BY mm)       AS prev_rnk,
        LAG(rnk) OVER (PARTITION BY channel ORDER BY mm) - rnk AS rank_change
 FROM r
-ORDER BY mm, rnk;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>같은 SELECT 안에서 RANK 를 LAG 에 넣을 수 없다.</b> CTE 로 한 단계 감싼다. 이 문제가 묻는 게 바로 이것.</li><li>순위는 <b>월</b>로 파티션, 변동은 <b>채널</b>로 파티션. 둘을 같게 쓰면 전부 틀린다.</li><li><code>rank_change</code> 부호 방향을 문제대로. 여기서는 ‘전월 − 이번달’이라 오르면 양수.</li><li>ARPPU 분모는 <code>COUNT(DISTINCT user_id)</code>. 결제 건수가 아니다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“전월 대비 매출 순위 변동”, “주간 랭킹 변화” 전부 같은 2단 구조.</p><div class="pager"><a href="./9.html">← Q9. 채널별 결제 전환과 LTV</a><a class="r" href="./11.html">Q11. 5일 이동평균 (부분 구간) →</a></div>
+ORDER BY mm, rnk;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>같은 SELECT 안에서 RANK 를 LAG 에 넣을 수 없다.</b> CTE 로 한 단계 감싼다. 이 문제가 묻는 게 바로 이것.</li><li>순위는 <b>월</b>로 파티션, 변동은 <b>채널</b>로 파티션. 둘을 같게 쓰면 전부 틀린다.</li><li><code>rank_change</code> 부호 방향을 문제대로. 여기서는 ‘전월 − 이번달’이라 오르면 양수.</li><li>ARPPU 분모는 <code>COUNT(DISTINCT user_id)</code>. 결제 건수가 아니다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“전월 대비 매출 순위 변동”, “주간 랭킹 변화” 전부 같은 2단 구조.</p><div class="pager"><a href="./9.html">← Q9. 채널별 결제 전환과 LTV</a><a class="r" href="./11.html">Q11. 전 유저 결제 요약 (NULL 처리) →</a></div>
 <footer>
   <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
   서버도 회원가입도 없습니다. ·

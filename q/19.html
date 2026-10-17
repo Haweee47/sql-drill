@@ -1,12 +1,12 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>A/B 테스트 그룹 집계 (상위 1% 제외) — SQL 문제 풀이와 함정 | SQL 드릴</title>
-<meta name="description" content="반 평균 낼 때 혼자 만점인 애를 빼고 계산. 단, 빼는 순서가 중요하다.">
+<title>한 번도 결제하지 않은 유저 수 — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="명단에서 &#x27;숙제 안 낸 사람&#x27; 찾기. 쉬워 보이는데 함정이 하나 있고, 그것만 보는 문제다.">
 <link rel="canonical" href="https://haweee47.github.io/sql-drill/q/19.html">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="SQL 드릴">
-<meta property="og:title" content="A/B 테스트 그룹 집계 (상위 1% 제외) — SQL 풀이">
-<meta property="og:description" content="반 평균 낼 때 혼자 만점인 애를 빼고 계산. 단, 빼는 순서가 중요하다.">
+<meta property="og:title" content="한 번도 결제하지 않은 유저 수 — SQL 풀이">
+<meta property="og:description" content="명단에서 &#x27;숙제 안 낸 사람&#x27; 찾기. 쉬워 보이는데 함정이 하나 있고, 그것만 보는 문제다.">
 <meta property="og:url" content="https://haweee47.github.io/sql-drill/q/19.html">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary">
@@ -68,42 +68,40 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
 footer a{color:var(--accent)}
 </style>
 </head><body><div class="wrap">
-<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q19</nav><h1>A/B 테스트 그룹 집계 (상위 1% 제외)</h1><div class="meta">난이도 보통 · 권장 14분 · 출력 컬럼 <code>group_name, user_count, group_total_amount, arpu</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q19">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">experiment_users 의 모든 참가자를 대상으로 그룹별 지표를 구하세요.
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q19</nav><h1>한 번도 결제하지 않은 유저 수</h1><div class="meta">난이도 쉬움 · 권장 7분 · 출력 컬럼 <code>channel, never_paid</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q19">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">채널별로 &#x27;결제 이력이 한 건도 없는 유저 수&#x27; 를 구하세요.
 
-  group_name
-  user_count          이상치를 뺀 유저 수
-  group_total_amount  이상치를 뺀 총 거래 금액 합계
-  arpu                group_total_amount / user_count, 소수점 없이 반올림
+  channel
+  never_paid   그 채널에서 결제 이력이 없는 유저 수
 
-· user_trades_summary 에 행이 없는 참가자는 거래 금액 0 으로 봅니다.
-· 이상치 판정은 &#x27;거래 금액 0 처리까지 끝낸 뒤&#x27; 그룹별로 합니다.
-  PERCENT_RANK() OVER (PARTITION BY group_name ORDER BY 금액) &gt; 0.99 인 유저를 뺍니다.
-· group_name 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>group_name ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">반 평균 낼 때 혼자 만점인 애를 빼고 계산. 단, <b>빼는 순서</b>가 중요하다.</p><p class="note">이 순서를 바꾸면 답이 달라진다.</p>
+· payments 테이블에는 user_id 가 비어 있는(NULL) 행이 섞여 있을 수 있습니다.
+  그 행은 &#x27;누구의 결제인지 알 수 없는 행&#x27; 이므로 결제 이력으로 치지 않습니다.
+· 결제 이력이 없는 유저가 0 명인 채널도 0 으로 한 행 나와야 합니다.
+· never_paid 내림차순, 같으면 channel 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>never_paid DESC, channel ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">명단에서 '숙제 안 낸 사람' 찾기. 쉬워 보이는데 <b>함정이 하나 있고, 그것만 보는 문제</b>다.</p><p class="note"><b>이게 함정이다.</b></p>
 <table class="e">
-<tr><td>①</td><td>거래 없는 참가자를 <b>0 으로 채운다</b></td></tr>
-<tr><td>②</td><td>그 상태에서 그룹별로 <b>등수를 매긴다</b></td></tr>
-<tr><td>③</td><td>맨 위를 <b>자른다</b></td></tr>
-<tr><td>④</td><td>남은 사람으로 <b>평균</b></td></tr>
+<tr><td><code>SELECT 5 WHERE 5 NOT IN (1, 2, NULL)</code></td>
+    <td class="x"><b>0행</b></td></tr>
 </table>
-<p class="note">①을 빼고 ②를 하면 모집단이 달라져서 잘려나갈 사람도 달라진다.</p><h3>이렇게 푼다</h3><ol><li>참가자 명단을 왼쪽에 두고 거래 금액을 붙이고 <code>COALESCE(금액, 0)</code>.</li><li>그 결과 위에서 <code>PERCENT_RANK() OVER (PARTITION BY 그룹 ORDER BY 금액)</code>.</li><li><b>한 번 더 감싸서</b> 바깥에서 <code>WHERE 등수 &lt;= 0.99</code>.</li><li>남은 것으로 인원·합계·평균.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>등수 함수는 <code>WHERE</code> 에 못 쓴다.</b> <code>WHERE PERCENT_RANK() OVER (…) &lt;= 0.99</code> 는 문법 오류다. 실행 순서가 WHERE 먼저, 등수 나중이라서 그렇다. <b>한 단 감싸는 것 외에 방법이 없다.</b></li><li><b>거래 없는 참가자를 빼면 안 된다.</b> 실험에 참가한 사람은 거래를 안 했어도 참가자다. 분모를 임의로 줄이면 A/B 결과를 못 쓴다.</li><li><b>알아 둘 것:</b> <code>PERCENT_RANK</code> 는 맨 위가 <b>항상 정확히 1.0</b> 이다. 그래서 <code>&gt; 0.99</code> 는 '상위 1%' 가 아니라 거의 항상 <b>맨 위 한 명</b>만 자른다. 문제가 그렇게 시켰으니 그대로 풀되, 이게 허술한 정의라는 건 알고 있어라. 면접에서 물으면 '진짜 상위 1% 는 NTILE(100) 로 자른다' 고 답하면 된다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 순서가 생명인 문제. ①0 채우기 → ②순위 매기기 → ③자르기 → ④집계. 이 순서를 바꾸면 답이 달라진다.</p><h3>풀이 순서</h3><ol><li><b>실험 참가자 테이블을 왼쪽에 두고</b> 거래 요약을 LEFT JOIN, <code>COALESCE(금액, 0)</code> 으로 0 을 채운다. 분모는 참가자 수여야 한다.</li><li>그 결과 위에서 <code>PERCENT_RANK() OVER (PARTITION BY group_name ORDER BY amt)</code>. 0 을 채운 <b>뒤에</b> 순위를 매기는 것이 중요하다 — 0 인 유저도 모집단의 일부다.</li><li><code>WHERE pr &lt;= 0.99</code> 로 이상치를 떨어뜨린다. 윈도우 함수는 WHERE 에서 못 쓰므로 반드시 서브쿼리/CTE 로 한 단 감싸야 한다.</li><li>남은 행으로 <code>COUNT(*)</code>, <code>SUM(amt)</code>, 그리고 <code>ROUND(SUM(amt)/COUNT(*), 0)</code>.</li></ol><h3>정답 (MySQL)</h3><pre><code>WITH j AS (
-  SELECT e.user_id, e.group_name,
-         COALESCE(s.total_trading_amount, 0) AS amt
-  FROM experiment_users e
-  LEFT JOIN user_trades_summary s ON s.user_id = e.user_id
-),
-p AS (
-  SELECT group_name, amt,
-         PERCENT_RANK() OVER (PARTITION BY group_name ORDER BY amt) AS pr
-  FROM j
-)
-SELECT group_name,
-       COUNT(*) AS user_count,
-       SUM(amt) AS group_total_amount,
-       ROUND(SUM(amt) / COUNT(*), 0) AS arpu
-FROM p
-WHERE pr &lt;= 0.99
-GROUP BY group_name
-ORDER BY group_name;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>윈도우 함수는 WHERE 에 못 쓴다.</b> <code>WHERE PERCENT_RANK() OVER (...) &lt;= 0.99</code> 는 문법 오류다. 실행 순서가 WHERE → 윈도우 함수이기 때문이다. 한 단 감싸는 것 외에 방법이 없다.</li><li><b>LEFT JOIN 을 INNER JOIN 으로 쓰면 유저 수가 깎인다.</b> 거래가 없는 참가자도 실험 참가자다. A/B 테스트에서 분모를 임의로 줄이면 그 결과는 못 쓴다. 「결제없음」 데이터셋이 이걸 잡는다.</li><li><b>0 을 채우기 전에 순위를 매기면 다른 답이 나온다.</b> 거래 없는 유저를 빼고 순위를 매기면 모집단이 달라지고 잘려 나가는 사람도 달라진다. 문제가 지정한 순서를 따르라.</li><li><b>PERCENT_RANK 의 정의를 알고 써라.</b> <code>(순위 − 1) / (전체 − 1)</code> 이므로 <b>최솟값은 항상 0, 최댓값은 항상 1</b> 이다. 그래서 <code>&gt; 0.99</code> 는 '상위 1%' 가 아니라 거의 항상 <b>최댓값 행만</b> 떨어뜨린다. 그룹에 2명뿐이면 1명이 날아간다. 면접에서 물으면 '진짜 상위 1% 는 <code>NTILE(100)</code> 이나 <code>PERCENTILE_CONT</code> 로 임계값을 구해 자른다' 고 답하라.</li><li><b>최댓값이 동점이면 둘 다 빠진다.</b> PERCENT_RANK 는 동점에 같은 값을 주므로 공동 1위가 둘이면 둘 다 1.0 이다. 「동점」 데이터셋이 이걸 잡는다.</li><li><b>ROUND(..., 0) 은 정수가 아니라 소수 0자리다.</b> 엔진에 따라 <code>150</code> 또는 <code>150.0</code> 으로 보인다. 정수형으로 받아야 하면 <code>CAST(ROUND(...) AS SIGNED)</code> 까지 써라.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“상·하위 1% 양쪽 제거”면 <code>pr BETWEEN 0.01 AND 0.99</code>. “중앙값 비교”면 <code>ROW_NUMBER</code> + <code>COUNT() OVER</code> 패턴. “전환율 비교”면 <code>COUNT(DISTINCT 전환유저)/COUNT(DISTINCT 참가자)</code> 로 분모를 참가자 전체로 둔다 (intention-to-treat).</p><div class="pager"><a href="./18.html">← Q18. 유저별 최장 연속 거래일수</a><a class="r" href="./20.html">Q20. 3일 이상 연속 상승 구간 모두 찾기 →</a></div>
+<p class="note">왜 그런가 — 이 식은 이렇게 풀린다.<br>
+<code>5≠1</code>(참) <b>그리고</b> <code>5≠2</code>(참) <b>그리고</b>
+<code>5≠NULL</code>(<b>모름</b>)<br>
+마지막을 모르니까 전체가 '모름' 이 되고, 조건에서 '모름' 은 거짓 취급이라
+<b>전부 탈락</b>한다. 한 줄도 안 나온다.</p><h3>이렇게 푼다</h3><ol><li><b>방법 1</b> — <code>NOT EXISTS (SELECT 1 FROM payments p WHERE p.user_id = u.user_id)</code></li><li><b>방법 2</b> — 결제자 목록을 왼쪽 붙이기 하고 <b>안 붙은 것</b>만 센다 (<code>p.user_id IS NULL</code>).</li><li>채널별로 <code>SUM(CASE WHEN p.user_id IS NULL THEN 1 ELSE 0 END)</code>.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b><code>NOT IN</code> 에 빈칸이 하나라도 섞이면 결과가 전부 사라진다.</b> 본 데이터에는 빈칸이 없어서 통과하고, 다른 데이터셋에서 터진다. 실제 시험이 데이터셋을 여러 개 쓰는 이유가 이것이다.</li><li><b><code>NOT EXISTS</code> 는 이 문제에 안전하다.</b> 빈칸인 줄은 '같다' 비교가 성립하지 않아서 알아서 무시된다. <b>'없는 것 찾기' 는 NOT EXISTS 를 기본으로 삼아라.</b></li><li><b><code>IN</code> 은 괜찮다.</b> 하나만 맞으면 참이니까. 부정형만 문제다.</li><li><code>COUNT(*)</code> 로 세면 그 채널 전체 인원이 나온다. <code>SUM(CASE WHEN … IS NULL THEN 1 ELSE 0 END)</code> 이 맞다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · '존재하지 않는 것 찾기'. 쉬워 보이지만 <code>NOT IN</code> 을 쓰면 데이터에 NULL 이 하나 섞인 순간 <b>결과가 0행</b>이 된다. 이 함정 하나만 아는지 보는 문제다.</p><h3>풀이 순서</h3><ol><li>결제한 유저 목록을 만든다. <b>user_id 가 NULL 인 행은 뺀다</b> (누구의 결제인지 모르는 행이므로).</li><li><code>users LEFT JOIN 그 목록</code> → 붙지 않은 유저가 '결제 없음' 이다.</li><li><code>SUM(CASE WHEN p.user_id IS NULL THEN 1 ELSE 0 END)</code> 으로 센다. <code>COUNT(*)</code> 로 세면 전체 유저 수가 나온다.</li><li>0 명인 채널도 한 행 나와야 하므로 <code>WHERE</code> 로 걸러내지 말고 <code>CASE</code> 로 센다.</li></ol><h3>정답 (MySQL)</h3><pre><code>-- 방법 1. LEFT JOIN ... IS NULL (0명인 채널도 행이 남는다)
+SELECT u.channel,
+       SUM(CASE WHEN p.user_id IS NULL THEN 1 ELSE 0 END) AS never_paid
+FROM users u
+LEFT JOIN (SELECT DISTINCT user_id FROM payments WHERE user_id IS NOT NULL) p
+       ON p.user_id = u.user_id
+GROUP BY u.channel
+ORDER BY never_paid DESC, u.channel ASC;
+
+-- 방법 2. NOT EXISTS — NULL 에 면역이라 IS NOT NULL 을 안 써도 된다
+SELECT u.channel,
+       SUM(CASE WHEN NOT EXISTS (SELECT 1 FROM payments p
+                                  WHERE p.user_id = u.user_id)
+                THEN 1 ELSE 0 END) AS never_paid
+FROM users u
+GROUP BY u.channel
+ORDER BY never_paid DESC, u.channel ASC;</code></pre><h3>함정</h3><div class="trap"><ul><li><b><code>NOT IN</code> + NULL = 결과 전멸.</b> 이게 이 문제의 핵심이다.<br><code>WHERE u.user_id NOT IN (SELECT user_id FROM payments)</code> 는 payments 에 NULL 이 <b>한 행이라도</b> 있으면 <b>0행</b>을 돌려준다.<br><code>5 NOT IN (1, 2, NULL)</code> 은 <code>5&lt;&gt;1 AND 5&lt;&gt;2 AND 5&lt;&gt;NULL</code> 이고, 마지막 항이 NULL 이라 전체가 NULL → WHERE 에서 거짓 취급 → 전부 탈락.<br>본 데이터에는 NULL 이 없어서 통과하고, 「NULL섞임」 데이터셋에서 터진다. 실제 시험이 여러 데이터셋으로 채점하는 이유가 바로 이것이다.</li><li><b><code>NOT EXISTS</code> 는 NULL 에 면역이다.</b> <code>p.user_id = u.user_id</code> 가 NULL 이면 매칭 실패로 처리되어 그 행은 조용히 무시된다. '존재하지 않는 것 찾기' 는 <b>NOT EXISTS 를 기본값</b>으로 삼으면 이 사고가 안 난다.</li><li><b><code>IN</code> 은 멀쩡하다.</b> 하나만 맞으면 참이므로 NULL 이 섞여도 된다. 문제는 부정형(<code>NOT IN</code>)뿐이다.</li><li><b><code>COUNT(*)</code> 로 세면 안 된다.</b> LEFT JOIN 후 <code>COUNT(*)</code> 는 그 채널의 전체 유저 수다. <code>SUM(CASE WHEN ... IS NULL THEN 1 ELSE 0 END)</code> 이 정확하다.</li><li><b>서브쿼리에 <code>DISTINCT</code> 를 넣어라.</b> 안 넣으면 한 유저의 결제가 여러 건일 때 LEFT JOIN 으로 행이 불어난다. 여기서는 IS NULL 만 세니 결과가 같지만, 금액을 같이 구하는 변형에서 바로 깨진다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“이탈 유저 찾기”, “한 번도 로그인 안 한 유저”, “재구매 없는 유저” 전부 같은 패턴. 반대로 “결제한 유저만”이면 <code>EXISTS</code> 또는 <code>INNER JOIN + DISTINCT</code>.</p><div class="pager"><a href="./18.html">← Q18. 채널별 ARPU 와 ARPPU</a><a class="r" href="./20.html">Q20. 유저별 결제 요약 (NULL 표시와 정렬 분리) →</a></div>
 <footer>
   <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
   서버도 회원가입도 없습니다. ·

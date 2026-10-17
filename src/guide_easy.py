@@ -258,82 +258,6 @@ MEDIAN 함수가 없어서 직접 만들어야 한다.</p>""",
 },
 {
  "id": 11,
- "oneline": "<b>최근 5일 평균</b>. 아직 5일이 안 모인 날은 있는 날만 가지고 평균.",
- "idea": """<table class="e">
-<tr><th>날</th><th>종가</th><th>평균에 쓰는 개수</th><th>ma5</th></tr>
-<tr><td>1일차</td><td>100</td><td>1개</td><td>100.00</td></tr>
-<tr><td>2일차</td><td>200</td><td>2개</td><td>150.00</td></tr>
-<tr><td>5일차</td><td>…</td><td>5개</td><td>…</td></tr>
-<tr><td>6일차</td><td>…</td><td>5개 (1일차는 빠짐)</td><td>…</td></tr>
-</table>
-<p class="note">창문이 5칸이고, 날짜가 가면 창문도 같이 미끄러진다.
-시작할 때는 창문이 아직 다 안 찼다.</p>""",
- "how": [
-  "<code>AVG(close_price) OVER (ORDER BY trade_date "
-  "ROWS BETWEEN 4 PRECEDING AND CURRENT ROW)</code> — 이 한 줄이 전부다.",
-  "소수점 둘째 자리까지 반올림.",
- ],
- "watch": [
-  "<b><code>ROWS BETWEEN …</code> 을 빼면 전혀 다른 값이 나온다.</b> "
-  "안 쓰면 기본값이 '처음부터 이번 줄까지' 라서 <b>누적 평균</b>이 되어 버린다. "
-  "이게 이동평균 문제에서 가장 많이 틀리는 부분이다.",
-  "<b><code>4 PRECEDING</code> 이다. 5 가 아니다.</b> "
-  "오늘을 포함해서 5개니까 앞으로 4칸이다.",
-  "<b>날짜를 빼서 구하면 안 된다.</b> 주말에는 데이터가 없어서 "
-  "'5일 전' 자리가 비어 있다. <b>줄 개수</b>로 세야 한다.",
- ],
-},
-{
- "id": 12,
- "oneline": "Q11 과 똑같은데 <b>종목마다 따로</b>. 종목이 바뀌는 지점에서 섞이면 안 된다.",
- "idea": """<p class="note">삼성 마지막 날 다음 줄이 하이닉스 첫날이다.
-종목으로 묶어 주지 않으면 삼성 종가와 하이닉스 종가를 같이 평균 낸다.</p>
-<table class="e">
-<tr><th>종목</th><th>날</th><th>묶어주면</th><th>안 묶으면</th></tr>
-<tr><td>005930</td><td>마지막</td><td>삼성만</td><td>삼성만</td></tr>
-<tr><td>000660</td><td>첫날</td><td>하이닉스만 (1개)</td><td class="x">삼성 4개 + 하이닉스 1개</td></tr>
-</table>""",
- "how": [
-  "Q11 식에 <code>PARTITION BY stock_code</code> 를 넣는다.",
-  "<code>AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date "
-  "ROWS BETWEEN 4 PRECEDING AND CURRENT ROW)</code>",
-  "20일선은 <code>19 PRECEDING</code> 으로 하나 더 만든다.",
- ],
- "watch": [
-  "<b><code>PARTITION BY</code> 를 두 식 <b>모두</b>에 넣어라.</b> "
-  "ma5 에만 넣고 ma20 에 빼먹는 실수가 흔하다.",
-  "정렬도 <code>종목 ASC, 날짜 ASC</code> 둘 다 써야 한다.",
- ],
-},
-{
- "id": 13,
- "oneline": "단기선이 장기선을 <b>아래에서 위로 뚫는 날</b>. "
-            "어제는 아래에 있었고 오늘 위로 올라온 바로 그 날 하나.",
- "idea": """<table class="e">
-<tr><th>날</th><th>ma5 vs ma20</th><th>판정</th></tr>
-<tr><td>월</td><td>ma5 &lt; ma20 (아래)</td><td></td></tr>
-<tr><td>화</td><td>ma5 &gt; ma20 (위)</td><td><b>골든크로스!</b></td></tr>
-<tr><td>수</td><td>ma5 &gt; ma20 (위)</td><td>이미 위 — 아니다</td></tr>
-<tr><td>목</td><td>ma5 &gt; ma20 (위)</td><td>이미 위 — 아니다</td></tr>
-</table>
-<p class="note">'위에 있는 날' 이 아니라 '<b>올라온 날</b>' 을 찾는 문제다.
-그래서 <b>어제와 비교</b>해야 한다.</p>""",
- "how": [
-  "먼저 ma5 와 ma20 을 만든다 (Q12 와 같은 방식).",
-  "그 결과를 한 번 감싸고, <b>어제의 ma5·ma20</b> 을 한 칸 위에서 끌어온다.",
-  "어제는 <code>ma5 &lt;= ma20</code> 이었고 오늘은 <code>ma5 &gt; ma20</code> 인 날만 남긴다.",
- ],
- "watch": [
-  "<b>오늘만 보고 <code>ma5 &gt; ma20</code> 으로 하면 틀린다.</b> "
-  "계속 위에 있는 날이 전부 걸려서 결과가 몇 배로 많아진다.",
-  "<b>비교는 반올림 전 값으로 한다.</b> 반올림한 값으로 비교하면 "
-  "두 값이 같아져서 교차를 놓친다. 보여줄 때만 반올림한다.",
-  "종목마다 따로 (<code>PARTITION BY stock_code</code>). "
-  "그리고 첫 거래일은 어제가 없으니 빠진다.",
- ],
-},
-{
- "id": 14,
  "oneline": "전교생 명단에 성적을 붙이는데, <b>시험 안 본 애도 명단에 남아야</b> 한다. "
             "점수 칸은 0 으로, 시험 날짜 칸은 빈칸으로.",
  "idea": """<p class="note"><b>더할 게 하나도 없을 때 뭐가 나오나</b> — 이걸 알아야 풀린다.</p>
@@ -360,7 +284,7 @@ MEDIAN 함수가 없어서 직접 만들어야 한다.</p>""",
  ],
 },
 {
- "id": 15,
+ "id": 12,
  "oneline": "결제한 사람 중에 비싼 요금제 쓴 비율. "
             "결제한 사람이 <b>0명</b>인 채널은 계산이 불가능하니 빈칸이어야 한다.",
  "idea": """<table class="e">
@@ -385,7 +309,7 @@ MEDIAN 함수가 없어서 직접 만들어야 한다.</p>""",
  ],
 },
 {
- "id": 16,
+ "id": 13,
  "oneline": "들어온 사람 → 구경한 사람 → 장바구니에 담은 사람 → 산 사람. 각 칸에 몇 명.",
  "idea": """<table class="e">
 <tr><th>단계</th><th>사람 수</th><th>앞 단계 대비</th></tr>
@@ -411,7 +335,7 @@ MEDIAN 함수가 없어서 직접 만들어야 한다.</p>""",
  ],
 },
 {
- "id": 17,
+ "id": 14,
  "oneline": "첫 거래한 날로부터 <b>딱 7일 뒤</b> 다시 왔나. 첫 거래일마다 따로 센다.",
  "idea": """<table class="e">
 <tr><th>첫 거래</th><th>확인할 날</th><th>왔으면</th></tr>
@@ -438,7 +362,7 @@ MEDIAN 함수가 없어서 직접 만들어야 한다.</p>""",
  ],
 },
 {
- "id": 18,
+ "id": 15,
  "oneline": "Q8 의 출석 도장 트릭과 <b>똑같다</b>. 단위가 '달' 에서 '날' 로 바뀐 것뿐.",
  "idea": """<table class="e">
 <tr><th>거래한 날</th><th>날 번호</th><th>줄 번호</th><th>차이</th></tr>
@@ -463,7 +387,7 @@ MEDIAN 함수가 없어서 직접 만들어야 한다.</p>""",
  ],
 },
 {
- "id": 19,
+ "id": 16,
  "oneline": "반 평균 낼 때 혼자 만점인 애를 빼고 계산. 단, <b>빼는 순서</b>가 중요하다.",
  "idea": """<p class="note">이 순서를 바꾸면 답이 달라진다.</p>
 <table class="e">
@@ -493,7 +417,7 @@ MEDIAN 함수가 없어서 직접 만들어야 한다.</p>""",
  ],
 },
 {
- "id": 20,
+ "id": 17,
  "oneline": "Q8 출석 도장 트릭 + 어제와 비교. <b>두 개를 겹쳐 쓰는 문제</b>다. "
             "이게 풀리면 시계열 문제는 거의 다 풀린다.",
  "idea": """<table class="e">
@@ -523,7 +447,7 @@ MEDIAN 함수가 없어서 직접 만들어야 한다.</p>""",
  ],
 },
 {
- "id": 21,
+ "id": 18,
  "oneline": "같은 매출을 <b>전교생으로 나누면 ARPU</b>, <b>돈 낸 애들로만 나누면 ARPPU</b>. "
             "분자는 같고 분모만 다르다.",
  "idea": """<table class="e">
@@ -553,7 +477,7 @@ ARPU = 2만원, ARPPU = 10만원. 다섯 배 차이가 난다.</p>""",
  ],
 },
 {
- "id": 22,
+ "id": 19,
  "oneline": "명단에서 '숙제 안 낸 사람' 찾기. "
             "쉬워 보이는데 <b>함정이 하나 있고, 그것만 보는 문제</b>다.",
  "idea": """<p class="note"><b>이게 함정이다.</b></p>
@@ -585,7 +509,7 @@ ARPU = 2만원, ARPPU = 10만원. 다섯 배 차이가 난다.</p>""",
  ],
 },
 {
- "id": 23,
+ "id": 20,
  "oneline": "성적표에 '미응시' 라고 <b>써 넣는 것</b>은 된다. "
             "그런데 그걸로 <b>줄을 세우면</b> 망한다.",
  "idea": """<p class="note"><code>COALESCE(날짜, '없음')</code> 을 쓰면

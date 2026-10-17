@@ -1,12 +1,12 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>코호트별 D7 리텐션율 — SQL 문제 풀이와 함정 | SQL 드릴</title>
-<meta name="description" content="첫 거래한 날로부터 딱 7일 뒤 다시 왔나. 첫 거래일마다 따로 센다.">
+<title>3일 이상 연속 상승 구간 모두 찾기 — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="Q8 출석 도장 트릭 + 어제와 비교. 두 개를 겹쳐 쓰는 문제다. 이게 풀리면 시계열 문제는 거의 다 풀린다.">
 <link rel="canonical" href="https://haweee47.github.io/sql-drill/q/17.html">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="SQL 드릴">
-<meta property="og:title" content="코호트별 D7 리텐션율 — SQL 풀이">
-<meta property="og:description" content="첫 거래한 날로부터 딱 7일 뒤 다시 왔나. 첫 거래일마다 따로 센다.">
+<meta property="og:title" content="3일 이상 연속 상승 구간 모두 찾기 — SQL 풀이">
+<meta property="og:description" content="Q8 출석 도장 트릭 + 어제와 비교. 두 개를 겹쳐 쓰는 문제다. 이게 풀리면 시계열 문제는 거의 다 풀린다.">
 <meta property="og:url" content="https://haweee47.github.io/sql-drill/q/17.html">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary">
@@ -68,35 +68,47 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
 footer a{color:var(--accent)}
 </style>
 </head><body><div class="wrap">
-<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q17</nav><h1>코호트별 D7 리텐션율</h1><div class="meta">난이도 보통 · 권장 12분 · 출력 컬럼 <code>first_trade_date, cohort_size, d7_active_users, d7_retention_rate</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q17">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">first_trade_date 가 2026-02-01 ~ 2026-02-07 인 유저를 코호트로 봅니다.
-첫 거래일자별로 아래를 구하세요.
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q17</nav><h1>3일 이상 연속 상승 구간 모두 찾기</h1><div class="meta">난이도 어려움 · 권장 22분 · 출력 컬럼 <code>stock_code, streak_start_date, streak_end_date, streak_days</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q17">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">stock_daily_prices 에서 종목별로 &#x27;3일 이상 연속 상승한 구간&#x27; 을
+모두 찾으세요.
 
-  cohort_size         그 날 첫 거래한 유저 수
-  d7_active_users     그 유저 중 &#x27;첫 거래일 + 정확히 7일&#x27; 에 앱을 연 유저 수
-  d7_retention_rate   d7_active_users / cohort_size x 100
+  stock_code
+  streak_start_date  그 구간의 첫 상승일
+  streak_end_date    그 구간의 마지막 상승일
+  streak_days        그 구간의 연속 상승 일수
 
-· +7일 &#x27;이내&#x27; 가 아니라 &#x27;정확히 그 날&#x27; 입니다.
-· daily_app_visits 는 같은 유저가 같은 날 여러 행을 남길 수 있습니다.
-· 재방문자가 0 명인 날도 0 으로 한 행 나와야 합니다.
-· 리텐션율은 소수점 첫째 자리까지 반올림합니다.
-· first_trade_date 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>first_trade_date ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">첫 거래한 날로부터 <b>딱 7일 뒤</b> 다시 왔나. 첫 거래일마다 따로 센다.</p><table class="e">
-<tr><th>첫 거래</th><th>확인할 날</th><th>왔으면</th></tr>
-<tr><td>2월 1일</td><td><b>2월 8일</b></td><td>재방문 1명</td></tr>
-<tr><td>2월 2일</td><td><b>2월 9일</b></td><td>아무도 안 옴 → 0</td></tr>
+· 상승일 = 전 거래일 종가보다 당일 종가가 &#x27;더 높은&#x27; 날 (같으면 상승이 아닙니다).
+· 전 거래일은 하루 전이 아니라 그 종목의 데이터상 바로 앞 행입니다.
+· streak_days 는 상승일의 개수입니다. 상승이 시작되기 전 날은 세지 않습니다.
+· 구간이 3일 미만이면 출력하지 않습니다.
+· stock_code 오름차순, 같으면 streak_start_date 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>stock_code ASC, streak_start_date ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">Q8 출석 도장 트릭 + 어제와 비교. <b>두 개를 겹쳐 쓰는 문제</b>다. 이게 풀리면 시계열 문제는 거의 다 풀린다.</p><table class="e">
+<tr><th>줄번호</th><th>날</th><th>종가</th><th>어제</th><th>올랐나</th><th>오른날 줄번호</th><th>차이</th></tr>
+<tr><td>1</td><td>1일</td><td>100</td><td class="x">-</td><td>-</td><td></td><td></td></tr>
+<tr><td>2</td><td>2일</td><td>110</td><td>100</td><td>O</td><td>1</td><td><b>1</b></td></tr>
+<tr><td>3</td><td>3일</td><td>120</td><td>110</td><td>O</td><td>2</td><td><b>1</b></td></tr>
+<tr><td>4</td><td>4일</td><td>130</td><td>120</td><td>O</td><td>3</td><td><b>1</b></td></tr>
+<tr><td>5</td><td>5일</td><td>125</td><td>130</td><td class="x">X</td><td></td><td></td></tr>
+<tr><td>6</td><td>6일</td><td>130</td><td>125</td><td>O</td><td>4</td><td class="x">2</td></tr>
 </table>
-<p class="note">'7일 안에' 가 아니라 '<b>딱 그 날</b>'. 2월 7일에 왔어도 안 세고,
-2월 9일에 왔어도 안 센다. 재방문 0명인 날도 0 으로 한 줄 나와야 한다.</p><h3>이렇게 푼다</h3><ol><li>코호트 명단(first_trades)을 <b>왼쪽에</b> 둔다. 분모가 여기서 나온다.</li><li>방문 기록을 붙이는데, <b>조건을 ON 안에</b> 쓴다 — <code>ON 같은사람 AND 방문일 = 첫거래일 + 7일</code>.</li><li>분모 = 명단 사람 수, 분자 = 붙은 사람 수. 둘 다 중복 지우고 센다.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>조건을 WHERE 에 쓰면 LEFT JOIN 이 그냥 JOIN 이 되어 버린다.</b> 안 온 사람은 방문일이 빈칸인데, WHERE 가 그 빈칸을 걸러내서 <b>분모에서까지 사라진다.</b> → 오른쪽 테이블 조건은 <b>반드시 ON 에</b>. 이 한 줄이 리텐션 문제의 핵심이다.</li><li><b>분자에 중복 제거를 빼면 100% 를 넘는다.</b> 같은 사람이 같은 날 여러 번 방문 기록을 남길 수 있다. 리텐션이 100 을 넘으면 거의 항상 이 실수다.</li><li>분모를 <code>COUNT(*)</code> 로 쓰면 안 된다. 붙이면서 늘어난 줄 수가 나온다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 코호트 테이블을 왼쪽에 두고 활동 로그를 LEFT JOIN 한다. 코호트 문제의 90% 가 이 모양이다.</p><h3>풀이 순서</h3><ol><li>코호트 테이블(<code>first_trades</code>)을 <b>왼쪽</b>에 둔다. 분모가 여기서 나온다.</li><li>활동 로그를 <code>LEFT JOIN</code> 하고, 조인 조건에 <code>visit_date = first_trade_date + 7일</code> 을 넣는다.</li><li>분모는 <code>COUNT(DISTINCT f.user_id)</code>, 분자는 <code>COUNT(DISTINCT v.user_id)</code>. 둘 다 DISTINCT 다.</li><li>범위 조건은 <code>WHERE</code> 에 쓴다 (왼쪽 테이블 조건이므로 안전하다).</li></ol><h3>정답 (MySQL)</h3><pre><code>SELECT f.first_trade_date,
-       COUNT(DISTINCT f.user_id) AS cohort_size,
-       COUNT(DISTINCT v.user_id) AS d7_active_users,
-       ROUND(100.0 * COUNT(DISTINCT v.user_id)
-             / NULLIF(COUNT(DISTINCT f.user_id), 0), 1) AS d7_retention_rate
-FROM first_trades f
-LEFT JOIN daily_app_visits v
-       ON v.user_id = f.user_id
-      AND v.visit_date = DATE_ADD(f.first_trade_date, INTERVAL 7 DAY)
-WHERE f.first_trade_date BETWEEN &#x27;2026-02-01&#x27; AND &#x27;2026-02-07&#x27;
-GROUP BY f.first_trade_date
-ORDER BY f.first_trade_date;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>JOIN 조건을 WHERE 로 옮기면 LEFT JOIN 이 INNER JOIN 이 된다.</b> <code>WHERE v.visit_date = ...</code> 로 쓰면 재방문 안 한 유저의 NULL 행이 조건에 걸려 사라지고, 분모까지 같이 깎인다. <b>오른쪽 테이블 조건은 반드시 ON 에</b> — 이 한 줄이 리텐션 문제의 핵심이다.</li><li><b>'정확히 7일' 과 '7일 이내' 는 다른 문제다.</b> <code>=</code> 로 쓸 자리에 <code>&lt;=</code> 를 쓰면 숫자가 크게 부풀어 오른다. 문제를 다시 읽어라.</li><li><b>분자에 DISTINCT 를 빼면 100% 를 넘는다.</b> 방문 로그는 같은 유저가 같은 날 여러 행을 남길 수 있다. 리텐션율이 100 을 넘으면 거의 항상 이 실수다.</li><li><b>분모를 COUNT(*) 로 쓰면 안 된다.</b> LEFT JOIN 후의 <code>COUNT(*)</code> 는 조인으로 불어난 행 수다. 코호트 크기가 아니다.</li><li><b>재방문자 0 명인 날도 한 행 나와야 한다.</b> LEFT JOIN 이면 자동으로 0 이 된다. <code>COUNT</code> 는 빈 입력에서 0 을 돌려주기 때문이다 (<code>SUM</code> 은 NULL 이 된다 — 다른 문제에서 자주 나오는 함정).</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“D1/D7/D30 을 한 번에”면 조인 조건을 <code>visit_date IN (+1일, +7일, +30일)</code> 로 바꾸고 <code>COUNT(DISTINCT CASE WHEN ... END)</code> 를 세 개 만든다. “월 코호트 매트릭스”면 <code>TIMESTAMPDIFF(MONTH, 코호트월, 활동월)</code> 을 경과 개월로 쓰고 그걸로 피벗한다.</p><div class="pager"><a href="./16.html">← Q16. 퍼널 단계별 유저 수와 단계 전환율</a><a class="r" href="./18.html">Q18. 유저별 최장 연속 거래일수 →</a></div>
+<p class="note">차이 1 이 세 개 → 2일~4일이 한 덩어리(3일 연속). 6일은 차이가 2 라서 다른 덩어리.</p><h3>이렇게 푼다</h3><ol><li><b>전체 줄에 먼저 번호를 매기고</b>, 어제 종가도 같이 끌어온다.</li><li>오른 날만 남긴다 (<code>오늘 &gt; 어제</code>).</li><li><b>남은 것에 번호를 새로 매기고</b>, (전체 줄번호 − 새 번호).</li><li>그 값으로 묶어서 시작일·끝일·개수, 3 이상만.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>번호는 거르기 <u>전에</u> 매겨야 한다.</b> 거른 다음에 매기면 빠진 자리가 메워져서 <b>끊긴 구간이 붙어 버린다.</b> 이게 핵심이고 여기서 대부분 틀린다.</li><li><b>날짜 차이로 묶으면 틀린다.</b> 금요일과 월요일은 날짜로는 3일 차이지만 거래일로는 바로 연속이다. 주말에 데이터가 없으니까. <b>줄 번호</b>를 써야 한다.</li><li><b>같은 가격은 상승이 아니다.</b> <code>&gt;</code> 지 <code>&gt;=</code> 가 아니다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · LAG 로 상승일을 가리고, 그 위에 gaps and islands 를 한 번 더 얹는다. 두 패턴을 포개는 문제. 이게 풀리면 시계열 문제는 거의 다 풀린다.</p><h3>풀이 순서</h3><ol><li>먼저 <b>모든 행에 행 번호</b>를 매긴다: <code>ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY trade_date) AS rn</code>. 이게 '몇 번째 거래일인가' 다. 날짜가 아니라 이 번호가 기준이 된다.</li><li>같은 단에서 <code>LAG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date)</code> 로 전 거래일 종가를 끌어온다.</li><li><code>WHERE prev IS NOT NULL AND close_price &gt; prev</code> 로 상승일만 남긴다.</li><li>남은 상승일에 <b>새로 행 번호를 매기고</b> <code>rn − 새 행번호</code> → 연속 상승 구간마다 같은 값.</li><li>그 값으로 묶어 <code>MIN/MAX/COUNT</code>, <code>HAVING COUNT(*) &gt;= 3</code>.</li></ol><h3>정답 (MySQL)</h3><pre><code>WITH p AS (
+  SELECT stock_code, trade_date, close_price,
+         ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY trade_date) AS rn,
+         LAG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date) AS prev
+  FROM stock_daily_prices
+),
+u AS (
+  SELECT stock_code, trade_date,
+         rn - ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY trade_date) AS grp
+  FROM p
+  WHERE prev IS NOT NULL AND close_price &gt; prev
+)
+SELECT stock_code,
+       MIN(trade_date) AS streak_start_date,
+       MAX(trade_date) AS streak_end_date,
+       COUNT(*) AS streak_days
+FROM u
+GROUP BY stock_code, grp
+HAVING COUNT(*) &gt;= 3
+ORDER BY stock_code, streak_start_date;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>날짜 차이로 구간을 묶으면 틀린다.</b> 주말이 비어 있어서 금요일과 월요일은 날짜로는 3일 차이지만 거래일로는 연속이다. <code>DATEDIFF</code> 대신 <b>행 번호</b>를 일련번호로 써야 한다. 「끊김복귀」·「동점」 데이터셋이 이걸 잡는다.</li><li><b>rn 은 상승일만 걸러낸 뒤에 매기면 안 된다.</b> 전체 행에 먼저 매겨 둬야 '거래일 순서' 가 보존된다. 걸러낸 뒤 매기면 하락일이 사라진 자리가 메워져 끊긴 구간이 붙어 버린다.</li><li><b>&gt; 와 &gt;= 는 다른 문제다.</b> 전일과 같은 가격은 상승이 아니다. 「경계값」 데이터셋에 같은 가격이 들어 있다.</li><li><b>prev IS NOT NULL 을 빼면 첫 행이 섞인다.</b> 각 종목의 첫 거래일은 전일이 없어서 LAG 가 NULL 이다. <code>close_price &gt; NULL</code> 은 NULL(거짓 취급)이라 대부분 자동으로 빠지지만, 명시하는 편이 안전하고 읽기도 낫다.</li><li><b>streak_days 는 상승일의 개수다.</b> 상승이 시작되기 전 날(기준이 된 날)은 세지 않는다. 세어야 하는 문제면 <code>COUNT(*) + 1</code> 이고 시작일도 하루 앞이 된다. 문제를 다시 읽어라 — 출제자가 어느 쪽을 묻는지가 갈린다.</li><li><b>PARTITION BY stock_code 를 LAG 와 ROW_NUMBER 양쪽에 다 써라.</b> 하나라도 빠지면 종목이 넘어가는 지점에서 앞 종목의 마지막 가격과 비교해 버린다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“N일 연속 하락”이면 부등호만 뒤집는다. “최장 구간 하나만”이면 마지막에 <code>ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY COUNT(*) DESC)</code> 로 1등만. “연속 상승률”이면 구간 양 끝 종가가 필요하므로 <code>FIRST_VALUE/LAST_VALUE</code> 를 쓰거나 시작일 하루 전 종가를 따로 끌어온다.</p><div class="pager"><a href="./16.html">← Q16. A/B 테스트 그룹 집계 (상위 1% 제외)</a><a class="r" href="./18.html">Q18. 채널별 ARPU 와 ARPPU →</a></div>
 <footer>
   <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
   서버도 회원가입도 없습니다. ·

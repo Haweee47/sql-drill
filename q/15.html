@@ -1,12 +1,12 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>채널별 pro 비중 (0 나누기) — SQL 문제 풀이와 함정 | SQL 드릴</title>
-<meta name="description" content="결제한 사람 중에 비싼 요금제 쓴 비율. 결제한 사람이 0명인 채널은 계산이 불가능하니 빈칸이어야 한다.">
+<title>유저별 최장 연속 거래일수 — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="Q8 의 출석 도장 트릭과 똑같다. 단위가 &#x27;달&#x27; 에서 &#x27;날&#x27; 로 바뀐 것뿐.">
 <link rel="canonical" href="https://haweee47.github.io/sql-drill/q/15.html">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="SQL 드릴">
-<meta property="og:title" content="채널별 pro 비중 (0 나누기) — SQL 풀이">
-<meta property="og:description" content="결제한 사람 중에 비싼 요금제 쓴 비율. 결제한 사람이 0명인 채널은 계산이 불가능하니 빈칸이어야 한다.">
+<meta property="og:title" content="유저별 최장 연속 거래일수 — SQL 풀이">
+<meta property="og:description" content="Q8 의 출석 도장 트릭과 똑같다. 단위가 &#x27;달&#x27; 에서 &#x27;날&#x27; 로 바뀐 것뿐.">
 <meta property="og:url" content="https://haweee47.github.io/sql-drill/q/15.html">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary">
@@ -68,31 +68,43 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
 footer a{color:var(--accent)}
 </style>
 </head><body><div class="wrap">
-<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q15</nav><h1>채널별 pro 비중 (0 나누기)</h1><div class="meta">난이도 보통 · 권장 9분 · 출력 컬럼 <code>channel, paying_users, pro_users, pro_ratio</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q15">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">채널별로 결제 유저 가운데 pro 플랜을 쓴 적 있는 유저의 비중을
-구하세요.
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q15</nav><h1>유저별 최장 연속 거래일수</h1><div class="meta">난이도 어려움 · 권장 18분 · 출력 컬럼 <code>user_id, max_streak_days</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q15">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">stock_orders 에서 유저별 &#x27;가장 길게 연속으로 거래한 일수&#x27; 를 구하고,
+그 값이 3 이상인 유저만 뽑으세요.
 
-  channel      채널
-  paying_users 그 채널에서 결제 이력이 1건 이상인 유저 수
-  pro_users    그중 pro 플랜 결제가 1건 이상인 유저 수
-  pro_ratio    pro_users / paying_users × 100 (소수점 둘째 자리 반올림)
+  user_id
+  max_streak_days   최장 연속 거래일수
 
-· 모든 채널이 결과에 나와야 합니다. 결제 유저가 한 명도 없는 채널도 포함합니다.
-· 결제 유저가 0 명인 채널의 pro_ratio 는 NULL 이어야 합니다. 0 이나 에러가 아닙니다.
-· pro_ratio 내림차순, 같으면 channel 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>pro_ratio DESC, channel ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">결제한 사람 중에 비싼 요금제 쓴 비율. 결제한 사람이 <b>0명</b>인 채널은 계산이 불가능하니 빈칸이어야 한다.</p><table class="e">
-<tr><th>채널</th><th>결제 유저</th><th>pro 유저</th><th>비중</th></tr>
-<tr><td>organic</td><td>371</td><td>130</td><td>35.04</td></tr>
-<tr><td>newsletter</td><td><b>0</b></td><td>0</td><td class="x"><b>NULL</b></td></tr>
+· status = &#x27;COMPLETED&#x27; 인 주문만 셉니다.
+· 하루에 여러 번 거래했어도 그 날은 1일입니다.
+· 그 날 주문이 전부 CANCELLED 면 거래하지 않은 날입니다 (연속이 끊깁니다).
+· 날짜가 하루씩 이어진 구간만 연속입니다. 주말·공휴일은 따지지 않습니다.
+· max_streak_days 내림차순, 같으면 user_id 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>max_streak_days DESC, user_id ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">Q8 의 출석 도장 트릭과 <b>똑같다</b>. 단위가 '달' 에서 '날' 로 바뀐 것뿐.</p><table class="e">
+<tr><th>거래한 날</th><th>날 번호</th><th>줄 번호</th><th>차이</th></tr>
+<tr><td>3월 2일</td><td>60</td><td>1</td><td><b>59</b></td></tr>
+<tr><td>3월 3일</td><td>61</td><td>2</td><td><b>59</b></td></tr>
+<tr><td>3월 4일</td><td>62</td><td>3</td><td><b>59</b></td></tr>
+<tr><td>3월 8일</td><td>66</td><td>4</td><td class="x">62</td></tr>
 </table>
-<p class="note">0 ÷ 0 은 '0%' 가 아니다. <b>계산할 수 없음</b> 이다.
-그래서 0 이 아니라 빈칸(NULL)이 맞다. 그리고 그 채널도 결과에 <b>나와야</b> 한다.</p><h3>이렇게 푼다</h3><ol><li>채널을 <b>전부 남긴다</b> (결제 유저가 0명인 채널도).</li><li>채널별로 결제한 사람 수, 그중 pro 쓴 사람 수를 센다.</li><li><code>pro수 * 100.0 / NULLIF(결제수, 0)</code>.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b><code>NULLIF(분모, 0)</code> 이 이 문제의 전부다.</b> '분모가 0 이면 NULL 로 바꿔라' 는 뜻이고, NULL 로 나누면 결과가 NULL 이 된다. 이름이 헷갈리는데, <b>NULLIF 는 NULL 을 <u>만드는</u> 함수</b>다.</li><li><b><code>IFNULL</code> 과 반대다.</b> <code>IFNULL(분모, 0)</code> 은 NULL 을 0 으로 바꿔서 <b>0 나누기를 일부러 만든다.</b> 정반대다.</li><li>결제 유저 0명인 채널을 <code>WHERE</code> 로 걸러내면 안 된다. 그 줄도 나와야 한다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 분모가 0 이 될 수 있는 상황을 아는가.</p><h3>풀이 순서</h3><ol><li>결제 유저 수와 pro 유저 수를 조건부 DISTINCT 집계로.</li><li>비율 계산에서 분모를 <code>NULLIF(분모, 0)</code> 로 감싼다.</li></ol><h3>정답 (MySQL)</h3><pre><code>SELECT u.channel,
-       COUNT(DISTINCT p.user_id) AS paying_users,
-       COUNT(DISTINCT CASE WHEN p.plan=&#x27;pro&#x27; THEN p.user_id END) AS pro_users,
-       ROUND(100.0 * COUNT(DISTINCT CASE WHEN p.plan=&#x27;pro&#x27; THEN p.user_id END)
-             / NULLIF(COUNT(DISTINCT p.user_id), 0), 2) AS pro_ratio
-FROM users u
-LEFT JOIN payments p ON p.user_id = u.user_id
-GROUP BY u.channel
-ORDER BY pro_ratio DESC, u.channel;</code></pre><h3>함정</h3><div class="trap"><ul><li><b><code>IFNULL(분모, 0)</code> 은 정반대다.</b> 0 나누기를 막는 게 아니라 만든다. 방어는 <code>NULLIF(분모, 0)</code>.</li><li>결제 유저가 0 명인 채널도 결과에 나와야 하므로 LEFT JOIN.</li><li><code>CASE WHEN ... THEN user_id END</code> 에 <b>ELSE 를 쓰지 않는다</b>. ELSE 0 을 넣으면 0 도 값이라 DISTINCT 집계에 섞인다.</li><li>이 데이터로는 ‘분모 0’ 이 드물다. <b>안 걸린다고 맞는 게 아니다</b> — 여러 데이터셋으로 채점되면 그때 터진다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“환불률”, “쿠폰 사용률” 처럼 모집단이 비어 있을 수 있는 비율 전부.</p><div class="pager"><a href="./14.html">← Q14. 전 유저 결제 요약 (NULL 처리)</a><a class="r" href="./16.html">Q16. 퍼널 단계별 유저 수와 단계 전환율 →</a></div>
+<p class="note">차이 59 가 세 개 → 3연속. 그 다음은 끊긴 것.</p><h3>이렇게 푼다</h3><ol><li><b>성공한 주문만</b> 남기고, <b>하루는 1번으로</b> 중복을 지운다. 이 한 줄에 문제 조건 두 개가 다 들어 있다.</li><li>날짜를 숫자로 바꾼다.</li><li>날 숫자 − 줄 번호 → 묶어서 개수 → 사람별 최대값 → 3 이상만.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>취소된 주문을 빼라.</b> 그 날 주문이 <b>전부 취소</b>면 거래 안 한 날이고, 연속이 거기서 끊겨야 한다.</li><li><b>하루 여러 건을 1건으로 지워라.</b> 하루에 3건 거래했으면 줄 번호가 3칸 가는데 날짜는 그대로여서 연속일수가 부풀어 오른다.</li><li>동점이 아주 많은 문제다. <code>최장일수 DESC, user_id ASC</code> 둘 다 써라.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · gaps and islands. 알면 2분, 모르면 못 푼다. 반드시 외워 둘 패턴.</p><h3>풀이 순서</h3><ol><li>먼저 <b>조건을 걸고 하루 단위로 중복을 지운다</b>: <code>SELECT DISTINCT user_id, order_date ... WHERE status='COMPLETED'</code>. 이 한 줄에 문제의 조건 두 개가 다 들어 있다.</li><li>날짜를 일련번호로 바꾼다: <code>DATEDIFF(order_date, '기준일')</code>.</li><li><code>일련번호 − ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY order_date)</code> → 연속 구간마다 같은 값이 나온다.</li><li>그 값으로 묶어 <code>COUNT(*)</code> → 구간 길이. 유저별 <code>MAX()</code> → 최장 길이. <code>HAVING</code> 으로 3 이상만.</li></ol><h3>정답 (MySQL)</h3><pre><code>WITH d AS (
+  SELECT DISTINCT user_id, order_date
+  FROM stock_orders
+  WHERE status = &#x27;COMPLETED&#x27;
+),
+g AS (
+  SELECT user_id, order_date,
+         DATEDIFF(order_date, &#x27;2026-01-01&#x27;)
+         - ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY order_date) AS grp
+  FROM d
+),
+runs AS (
+  SELECT user_id, grp, COUNT(*) AS run_len
+  FROM g GROUP BY user_id, grp
+)
+SELECT user_id, MAX(run_len) AS max_streak_days
+FROM runs
+GROUP BY user_id
+HAVING MAX(run_len) &gt;= 3
+ORDER BY max_streak_days DESC, user_id ASC;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>왜 되는가.</b> 연속이면 날짜 일련번호와 행 번호가 같은 보폭으로 늘어나 차이가 고정된다. 끊기면 차이가 점프한다.<br><code>3/2,3/3,3/4 → 60,61,62 − 1,2,3 = 59,59,59</code> (한 구간)<br><code>3/2, 3/6 → 60,64 − 1,2 = 59,62</code> (다른 구간)</li><li><b>DISTINCT 를 빼면 연속일수가 부풀어 오른다.</b> 하루에 3건 거래했으면 ROW_NUMBER 가 세 칸 가는데 날짜는 그대로라 차이가 틀어진다.</li><li><b>status 필터를 빼면 끊겨야 할 구간이 이어진다.</b> 그 날 주문이 전부 CANCELLED 면 거래하지 않은 날이다. 「끊김복귀」 데이터셋이 이걸 잡는다.</li><li><b>HAVING 에 MAX(run_len) 을 그대로 쓴다.</b> <code>WHERE run_len &gt;= 3</code> 으로 미리 걸러도 같은 답이 나오지만, 그러면 '최장 구간이 3 미만인 유저' 와 '3 이상 구간만 남긴 유저' 의 MAX 가 달라질 수 있는 변형 문제에서 틀린다.</li><li><b>정렬 두 개를 다 쓴다.</b> 동점이 많은 문제다. <code>max_streak_days DESC</code> 만 쓰면 같은 값들 사이 순서가 실행마다 바뀐다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“연속 출석일수”, “N일 연속 접속”, “연속 결제 개월수” 전부 같은 패턴이다. 월 단위면 일련번호를 <code>TIMESTAMPDIFF(MONTH, 기준월, 그달)</code> 로 바꾼다. “현재 진행 중인 연속일수”면 마지막 구간만 (<code>MAX(order_date) = 오늘</code> 인 구간) 남긴다.</p><div class="pager"><a href="./14.html">← Q14. 코호트별 D7 리텐션율</a><a class="r" href="./16.html">Q16. A/B 테스트 그룹 집계 (상위 1% 제외) →</a></div>
 <footer>
   <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
   서버도 회원가입도 없습니다. ·

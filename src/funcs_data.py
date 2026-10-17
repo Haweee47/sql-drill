@@ -350,7 +350,7 @@ NULL_DEEP = {
          "NULL 판정은 <b>이것뿐이다.</b> <code>x = NULL</code> 은 참이 아니라 NULL 이라 "
          "WHERE 에서 항상 걸러진다.", ""),
     ],
-    "demo": """-- 1) 집계 함수의 빈 입력 반환값 (틀리면 Q14 처럼 행 수가 어긋난다)
+    "demo": """-- 1) 집계 함수의 빈 입력 반환값 (틀리면 Q11 처럼 행 수가 어긋난다)
 SELECT COUNT(*)  AS cnt_star,   -- 0
        COUNT(x)  AS cnt_col,    -- 0
        SUM(x)    AS sum_x,      -- NULL  ← 0 이 아니다

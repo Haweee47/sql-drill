@@ -346,77 +346,7 @@ ORDER BY mm, rnk;""",
    ],
    variants="“전월 대비 매출 순위 변동”, “주간 랭킹 변화” 전부 같은 2단 구조."),
 
- dict(id=11, title="5일 이동평균 (부분 구간)", level="보통",
-   asks="프레임을 쓸 줄 아는가. 날짜가 아니라 행으로 세는가.",
-   steps=[
-     "<code>AVG(x) OVER (ORDER BY 날짜 ROWS BETWEEN 4 PRECEDING AND CURRENT ROW)</code>.",
-     "끝.",
-   ],
-   sql="""SELECT trade_date, close_price,
-       ROUND(AVG(close_price) OVER (ORDER BY trade_date
-             ROWS BETWEEN 4 PRECEDING AND CURRENT ROW), 2) AS ma5
-FROM prices
-WHERE stock_code = '005930'
-ORDER BY trade_date;""",
-   traps=[
-     "<b><code>ROWS</code> 누락</b> — 기본 프레임이 <code>RANGE UNBOUNDED PRECEDING</code> 이라 <b>누적평균</b>이 된다. 가장 흔한 실수.",
-     "<code>5 PRECEDING</code> 으로 쓰면 6일 평균. 당일이 포함되므로 <code>4 PRECEDING</code>.",
-     "<b>날짜 조인으로 풀려고 하면 안 된다.</b> <code>INTERVAL 4 DAY</code> 는 달력 4일이라 주말이 끼면 거래일 수가 맞지 않는다.",
-     "부분 구간 처리는 <b>따로 할 필요가 없다</b>. 앞 행이 모자라면 윈도우가 알아서 줄어든다. CASE 분기는 오히려 틀린다.",
-     "반대로 “초반 4일은 NULL” 이라는 문제면 <code>CASE WHEN ROW_NUMBER() OVER (...) >= 5 THEN ... END</code> 를 덧붙인다.",
-   ],
-   variants="“최근 7일 합계”, “최근 3건 평균” 전부 같은 프레임."),
-
- dict(id=12, title="종목별 5일·20일 이동평균", level="보통",
-   asks="Q11 에 PARTITION 을 추가할 줄 아는가.",
-   steps=["Q11 과 같되 <code>PARTITION BY stock_code</code> 를 넣는다."],
-   sql="""SELECT stock_code, trade_date, close_price,
-       ROUND(AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-             ROWS BETWEEN  4 PRECEDING AND CURRENT ROW), 2) AS ma5,
-       ROUND(AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-             ROWS BETWEEN 19 PRECEDING AND CURRENT ROW), 2) AS ma20
-FROM prices
-ORDER BY stock_code, trade_date;""",
-   traps=[
-     "<b>PARTITION 누락</b> — 종목 경계를 넘어 평균이 섞인다. 삼성전자 첫날 ma5 에 SK하이닉스 종가가 들어간다.",
-     "WHERE 로 한 종목만 거르는 Q11 과 달리 여기서는 전 종목이 섞여 있다. 반드시 파티션.",
-   ],
-   variants="“지점별 7일 평균 매출”, “유저별 최근 3건 평균” 전부 동일."),
-
- dict(id=13, title="골든크로스 발생일", level="어려움",
-   asks="윈도우 결과에 다시 LAG 를 거는가. 그리고 ‘교차’의 정의.",
-   steps=[
-     "ma5, ma20 을 만든다 (CTE 1).",
-     "그 위에 <code>LAG</code> 로 전일 ma5, ma20 을 가져온다 (CTE 2).",
-     "전일 <code>ma5 &lt;= ma20</code> <b>그리고</b> 당일 <code>ma5 &gt; ma20</code>.",
-   ],
-   sql="""WITH m AS (
-  SELECT stock_code, trade_date,
-         AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-               ROWS BETWEEN  4 PRECEDING AND CURRENT ROW) AS ma5,
-         AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-               ROWS BETWEEN 19 PRECEDING AND CURRENT ROW) AS ma20
-  FROM prices
-),
-d AS (
-  SELECT m.*,
-         LAG(ma5)  OVER (PARTITION BY stock_code ORDER BY trade_date) AS prev_ma5,
-         LAG(ma20) OVER (PARTITION BY stock_code ORDER BY trade_date) AS prev_ma20
-  FROM m
-)
-SELECT stock_code, trade_date, ROUND(ma5, 2) AS ma5, ROUND(ma20, 2) AS ma20
-FROM d
-WHERE prev_ma5 IS NOT NULL AND prev_ma5 <= prev_ma20 AND ma5 > ma20
-ORDER BY stock_code, trade_date;""",
-   traps=[
-     "<b>당일 조건만 쓰면 안 된다.</b> <code>ma5 &gt; ma20</code> 만 보면 이미 올라가 있는 구간이 전부 걸린다. ‘뚫고 올라간 그 날’이어야 한다.",
-     "<code>trade_date + INTERVAL 1 DAY</code> 로 전일을 찾으면 <b>월요일과 공휴일 다음날이 통째로 누락</b>된다. 실제로 거래일의 20% 가 빠진다. 반드시 LAG.",
-     "반올림은 <b>출력할 때만</b>. 비교는 반올림 전 값으로 해야 경계에서 안 틀린다.",
-     "<code>WHERE</code> 에서 윈도우 함수를 못 쓰므로 CTE 2 단이 필요하다.",
-   ],
-   variants="데드크로스는 부등호만 뒤집는다. “임계값을 상향 돌파한 날”도 같은 패턴."),
-
- dict(id=14, title="전 유저 결제 요약 (NULL 처리)", level="보통",
+ dict(id=11, title="전 유저 결제 요약 (NULL 처리)", level="보통",
    asks="LEFT JOIN 후 NULL 을 어떻게 다루는가. 그리고 NULL 정렬.",
    steps=[
      "users 기준 LEFT JOIN.",
@@ -441,7 +371,7 @@ LIMIT 20;""",
    ],
    variants="“주문 없는 고객 포함 요약”, “미거래 종목 포함” 전부 동일."),
 
- dict(id=15, title="채널별 pro 비중 (0 나누기)", level="보통",
+ dict(id=12, title="채널별 pro 비중 (0 나누기)", level="보통",
    asks="분모가 0 이 될 수 있는 상황을 아는가.",
    steps=[
      "결제 유저 수와 pro 유저 수를 조건부 DISTINCT 집계로.",
@@ -465,10 +395,10 @@ ORDER BY pro_ratio DESC, u.channel;""",
    variants="“환불률”, “쿠폰 사용률” 처럼 모집단이 비어 있을 수 있는 비율 전부."),
 ]
 
-# ── Q16~Q20 해설 ─────────────────────────────────────────────────────
+# ── Q13~Q17 해설 ─────────────────────────────────────────────────────
 GUIDE_EXTRA = [
     {
-        "id": 16,
+        "id": 13,
         "title": "퍼널 단계별 유저 수와 단계 전환율",
         "level": "쉬움",
         "asks": "한 테이블을 한 번만 읽어 네 숫자를 뽑고, 그 숫자끼리 나눈다. "
@@ -517,7 +447,7 @@ FROM (
                     "<code>MIN(cart) &gt; MIN(view)</code> 처럼 비교한다.",
     },
     {
-        "id": 17,
+        "id": 14,
         "title": "코호트별 D7 리텐션율",
         "level": "보통",
         "asks": "코호트 테이블을 왼쪽에 두고 활동 로그를 LEFT JOIN 한다. "
@@ -564,7 +494,7 @@ ORDER BY f.first_trade_date;""",
                     "경과 개월로 쓰고 그걸로 피벗한다.",
     },
     {
-        "id": 18,
+        "id": 15,
         "title": "유저별 최장 연속 거래일수",
         "level": "어려움",
         "asks": "gaps and islands. 알면 2분, 모르면 못 푼다. 반드시 외워 둘 패턴.",
@@ -619,7 +549,7 @@ ORDER BY max_streak_days DESC, user_id ASC;""",
                     "(<code>MAX(order_date) = 오늘</code> 인 구간) 남긴다.",
     },
     {
-        "id": 19,
+        "id": 16,
         "title": "A/B 테스트 그룹 집계 (상위 1% 제외)",
         "level": "보통",
         "asks": "순서가 생명인 문제. ①0 채우기 → ②순위 매기기 → ③자르기 → ④집계. "
@@ -680,7 +610,7 @@ ORDER BY group_name;""",
                     "분모를 참가자 전체로 둔다 (intention-to-treat).",
     },
     {
-        "id": 20,
+        "id": 17,
         "title": "3일 이상 연속 상승 구간 모두 찾기",
         "level": "어려움",
         "asks": "LAG 로 상승일을 가리고, 그 위에 gaps and islands 를 한 번 더 얹는다. "
@@ -745,10 +675,10 @@ ORDER BY stock_code, streak_start_date;""",
 
 GUIDE = GUIDE + GUIDE_EXTRA
 
-# ── Q21~Q23 해설 (NULL·COALESCE 집중) ────────────────────────────────
+# ── Q18~Q20 해설 (NULL·COALESCE 집중) ────────────────────────────────
 GUIDE_NULL = [
     {
-        "id": 21, "title": "채널별 ARPU 와 ARPPU", "level": "보통",
+        "id": 18, "title": "채널별 ARPU 와 ARPPU", "level": "보통",
         "asks": "분모가 다른 두 평균을 한 쿼리에서 만든다. "
                 "실무에서 가장 자주 틀리는 지표 쌍이고, 면접에서도 묻는다.",
         "steps": [
@@ -798,7 +728,7 @@ ORDER BY arpu DESC, u.channel ASC;""",
                     "문제에서 확인하라 — 여기서 정의가 갈린다.",
     },
     {
-        "id": 22, "title": "한 번도 결제하지 않은 유저 수", "level": "쉬움",
+        "id": 19, "title": "한 번도 결제하지 않은 유저 수", "level": "쉬움",
         "asks": "'존재하지 않는 것 찾기'. 쉬워 보이지만 <code>NOT IN</code> 을 쓰면 "
                 "데이터에 NULL 이 하나 섞인 순간 <b>결과가 0행</b>이 된다. "
                 "이 함정 하나만 아는지 보는 문제다.",
@@ -855,7 +785,7 @@ ORDER BY never_paid DESC, u.channel ASC;""",
                     "<code>INNER JOIN + DISTINCT</code>.",
     },
     {
-        "id": 23, "title": "유저별 결제 요약 (NULL 표시와 정렬 분리)", "level": "보통",
+        "id": 20, "title": "유저별 결제 요약 (NULL 표시와 정렬 분리)", "level": "보통",
         "asks": "토스 쿼리 테스트에 나온 '데이터 타입 문제' 가 정확히 이 유형이다. "
                 "<b>보여 줄 값</b>과 <b>정렬할 값</b>을 분리할 수 있는지를 본다.",
         "steps": [

@@ -1,12 +1,12 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>골든크로스 발생일 — SQL 문제 풀이와 함정 | SQL 드릴</title>
-<meta name="description" content="단기선이 장기선을 아래에서 위로 뚫는 날. 어제는 아래에 있었고 오늘 위로 올라온 바로 그 날 하나.">
+<title>퍼널 단계별 유저 수와 단계 전환율 — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="들어온 사람 → 구경한 사람 → 장바구니에 담은 사람 → 산 사람. 각 칸에 몇 명.">
 <link rel="canonical" href="https://haweee47.github.io/sql-drill/q/13.html">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="SQL 드릴">
-<meta property="og:title" content="골든크로스 발생일 — SQL 풀이">
-<meta property="og:description" content="단기선이 장기선을 아래에서 위로 뚫는 날. 어제는 아래에 있었고 오늘 위로 올라온 바로 그 날 하나.">
+<meta property="og:title" content="퍼널 단계별 유저 수와 단계 전환율 — SQL 풀이">
+<meta property="og:description" content="들어온 사람 → 구경한 사람 → 장바구니에 담은 사람 → 산 사람. 각 칸에 몇 명.">
 <meta property="og:url" content="https://haweee47.github.io/sql-drill/q/13.html">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary">
@@ -68,40 +68,43 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
 footer a{color:var(--accent)}
 </style>
 </head><body><div class="wrap">
-<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q13</nav><h1>골든크로스 발생일</h1><div class="meta">난이도 어려움 · 권장 18분 · 출력 컬럼 <code>stock_code, trade_date, ma5, ma20</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q13">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">종목별로 5일 이동평균이 20일 이동평균을 아래에서 위로 뚫고 올라간 날
-(골든크로스)을 모두 찾으세요.
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q13</nav><h1>퍼널 단계별 유저 수와 단계 전환율</h1><div class="meta">난이도 쉬움 · 권장 8분 · 출력 컬럼 <code>app_open_users, item_view_users, cart_users, purchase_users, view_conversion_rate, cart_conversion_rate, purchase_conversion_rate</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q13">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">user_event_logs 로 아래를 한 행으로 구하세요.
 
-· 골든크로스 = 전일에는 ma5 &lt;= ma20 이었는데 당일 ma5 &gt; ma20 이 된 날
-· 이동평균은 구간이 모자라면 있는 만큼만 계산합니다.
-· 출력하는 ma5, ma20 은 소수점 둘째 자리까지 반올림합니다.
-  (교차 여부 판정은 반올림 전 값으로 합니다)
-· 비교할 전일이 없는 첫 거래일은 제외합니다.
-· 종목코드 오름차순, 날짜 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>stock_code ASC, trade_date ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">단기선이 장기선을 <b>아래에서 위로 뚫는 날</b>. 어제는 아래에 있었고 오늘 위로 올라온 바로 그 날 하나.</p><table class="e">
-<tr><th>날</th><th>ma5 vs ma20</th><th>판정</th></tr>
-<tr><td>월</td><td>ma5 &lt; ma20 (아래)</td><td></td></tr>
-<tr><td>화</td><td>ma5 &gt; ma20 (위)</td><td><b>골든크로스!</b></td></tr>
-<tr><td>수</td><td>ma5 &gt; ma20 (위)</td><td>이미 위 — 아니다</td></tr>
-<tr><td>목</td><td>ma5 &gt; ma20 (위)</td><td>이미 위 — 아니다</td></tr>
+  app_open_users           app_open 을 남긴 순 유저 수
+  item_view_users          item_view 를 남긴 순 유저 수
+  cart_users               add_to_cart 를 남긴 순 유저 수
+  purchase_users           purchase 를 남긴 순 유저 수
+  view_conversion_rate     item_view_users / app_open_users x 100
+  cart_conversion_rate     cart_users / item_view_users x 100
+  purchase_conversion_rate purchase_users / cart_users x 100
+
+· 유저 수는 전부 중복을 지운 수입니다 (한 유저가 같은 행동을 여러 번 남깁니다).
+· 단계 순서를 따지지 않습니다. 그 행동을 남겼으면 그 단계에 셉니다.
+· 전환율은 소수점 첫째 자리까지 반올림합니다.
+· 분모가 0 이면 전환율은 NULL 이어야 합니다.
+  MySQL·SQLite 는 0 으로 나누면 그냥 NULL 을 주지만, 다른 DB 는 오류가 납니다.
+  NULLIF(분모, 0) 를 쓰는 습관을 들이세요.
+· 결과는 한 행입니다.</div><div class="spec">정렬 <code>(한 행)</code></div><h2>쉽게 설명하면</h2><p class="oneline">들어온 사람 → 구경한 사람 → 장바구니에 담은 사람 → 산 사람. 각 칸에 몇 명.</p><table class="e">
+<tr><th>단계</th><th>사람 수</th><th>앞 단계 대비</th></tr>
+<tr><td>app_open</td><td>2,834</td><td></td></tr>
+<tr><td>item_view</td><td>1,872</td><td>66.1%</td></tr>
+<tr><td>add_to_cart</td><td>837</td><td>44.7%</td></tr>
+<tr><td>purchase</td><td>320</td><td>38.2%</td></tr>
 </table>
-<p class="note">'위에 있는 날' 이 아니라 '<b>올라온 날</b>' 을 찾는 문제다.
-그래서 <b>어제와 비교</b>해야 한다.</p><h3>이렇게 푼다</h3><ol><li>먼저 ma5 와 ma20 을 만든다 (Q12 와 같은 방식).</li><li>그 결과를 한 번 감싸고, <b>어제의 ma5·ma20</b> 을 한 칸 위에서 끌어온다.</li><li>어제는 <code>ma5 &lt;= ma20</code> 이었고 오늘은 <code>ma5 &gt; ma20</code> 인 날만 남긴다.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>오늘만 보고 <code>ma5 &gt; ma20</code> 으로 하면 틀린다.</b> 계속 위에 있는 날이 전부 걸려서 결과가 몇 배로 많아진다.</li><li><b>비교는 반올림 전 값으로 한다.</b> 반올림한 값으로 비교하면 두 값이 같아져서 교차를 놓친다. 보여줄 때만 반올림한다.</li><li>종목마다 따로 (<code>PARTITION BY stock_code</code>). 그리고 첫 거래일은 어제가 없으니 빠진다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 윈도우 결과에 다시 LAG 를 거는가. 그리고 ‘교차’의 정의.</p><h3>풀이 순서</h3><ol><li>ma5, ma20 을 만든다 (CTE 1).</li><li>그 위에 <code>LAG</code> 로 전일 ma5, ma20 을 가져온다 (CTE 2).</li><li>전일 <code>ma5 &lt;= ma20</code> <b>그리고</b> 당일 <code>ma5 &gt; ma20</code>.</li></ol><h3>정답 (MySQL)</h3><pre><code>WITH m AS (
-  SELECT stock_code, trade_date,
-         AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-               ROWS BETWEEN  4 PRECEDING AND CURRENT ROW) AS ma5,
-         AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-               ROWS BETWEEN 19 PRECEDING AND CURRENT ROW) AS ma20
-  FROM prices
-),
-d AS (
-  SELECT m.*,
-         LAG(ma5)  OVER (PARTITION BY stock_code ORDER BY trade_date) AS prev_ma5,
-         LAG(ma20) OVER (PARTITION BY stock_code ORDER BY trade_date) AS prev_ma20
-  FROM m
-)
-SELECT stock_code, trade_date, ROUND(ma5, 2) AS ma5, ROUND(ma20, 2) AS ma20
-FROM d
-WHERE prev_ma5 IS NOT NULL AND prev_ma5 &lt;= prev_ma20 AND ma5 &gt; ma20
-ORDER BY stock_code, trade_date;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>당일 조건만 쓰면 안 된다.</b> <code>ma5 &gt; ma20</code> 만 보면 이미 올라가 있는 구간이 전부 걸린다. ‘뚫고 올라간 그 날’이어야 한다.</li><li><code>trade_date + INTERVAL 1 DAY</code> 로 전일을 찾으면 <b>월요일과 공휴일 다음날이 통째로 누락</b>된다. 실제로 거래일의 20% 가 빠진다. 반드시 LAG.</li><li>반올림은 <b>출력할 때만</b>. 비교는 반올림 전 값으로 해야 경계에서 안 틀린다.</li><li><code>WHERE</code> 에서 윈도우 함수를 못 쓰므로 CTE 2 단이 필요하다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">데드크로스는 부등호만 뒤집는다. “임계값을 상향 돌파한 날”도 같은 패턴.</p><div class="pager"><a href="./12.html">← Q12. 종목별 5일·20일 이동평균</a><a class="r" href="./14.html">Q14. 전 유저 결제 요약 (NULL 처리) →</a></div>
+<p class="note">표 하나에 한 줄로 나와야 한다. 테이블은 한 번만 읽으면 된다.</p><h3>이렇게 푼다</h3><ol><li>한 번 읽으면서 네 숫자를 동시에 만든다 — <code>COUNT(DISTINCT CASE WHEN 행동='app_open' THEN user_id END)</code> 식으로 네 개.</li><li>그 네 개를 <b>서브쿼리로 감싸서</b> 바깥에서 이름으로 다시 쓴다. 안 감싸면 전환율 식에 같은 걸 또 써야 해서 쿼리가 네 배로 길어진다.</li><li><code>ROUND(100.0 * 뒤 / NULLIF(앞, 0), 1)</code>.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b><code>DISTINCT</code> 를 빼면 안 된다.</b> 한 사람이 app_open 을 네 번 남기면 4 로 세어진다. 묻는 건 사람 수다.</li><li><b><code>CASE</code> 에 <code>ELSE 0</code> 을 쓰지 마라.</b> 0 도 값이라서 '0 번 사람' 한 명으로 세어진다. ELSE 를 안 쓰면 NULL 이 되고, COUNT 는 NULL 을 안 센다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 한 테이블을 한 번만 읽어 네 숫자를 뽑고, 그 숫자끼리 나눈다. JOIN 도 GROUP BY 도 필요 없다. 여기서 시간을 쓰면 안 되는 문제다.</p><h3>풀이 순서</h3><ol><li><code>COUNT(DISTINCT CASE WHEN ... THEN user_id END)</code> 로 단계별 순 유저 수를 한 줄씩 만든다. 테이블을 네 번 읽을 필요가 없다.</li><li>그 네 숫자를 <b>서브쿼리로 감싸서</b> 바깥에서 이름으로 다시 쓴다. 그러지 않으면 전환율 식에 COUNT(DISTINCT CASE...) 를 또 써야 해서 길이가 네 배가 된다.</li><li>전환율은 <code>100.0 *</code> 을 앞에 붙이고 <code>ROUND(..., 1)</code>.</li><li>분모에 <code>NULLIF(분모, 0)</code> 을 씌운다.</li></ol><h3>정답 (MySQL)</h3><pre><code>SELECT a AS app_open_users,
+       v AS item_view_users,
+       k AS cart_users,
+       p AS purchase_users,
+       ROUND(100.0 * v / NULLIF(a, 0), 1) AS view_conversion_rate,
+       ROUND(100.0 * k / NULLIF(v, 0), 1) AS cart_conversion_rate,
+       ROUND(100.0 * p / NULLIF(k, 0), 1) AS purchase_conversion_rate
+FROM (
+  SELECT COUNT(DISTINCT CASE WHEN event_name = &#x27;app_open&#x27;    THEN user_id END) AS a,
+         COUNT(DISTINCT CASE WHEN event_name = &#x27;item_view&#x27;   THEN user_id END) AS v,
+         COUNT(DISTINCT CASE WHEN event_name = &#x27;add_to_cart&#x27; THEN user_id END) AS k,
+         COUNT(DISTINCT CASE WHEN event_name = &#x27;purchase&#x27;    THEN user_id END) AS p
+  FROM user_event_logs
+) c;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>DISTINCT 를 빼면 틀린다.</b> 한 유저가 app_open 을 네 번 남기면 <code>COUNT(CASE ...)</code> 는 4 를 센다. 묻는 건 유저 수이지 이벤트 수가 아니다.</li><li><b>CASE 에 ELSE 를 쓰지 마라.</b> <code>ELSE 0</code> 을 붙이면 0 도 값이라서 <code>COUNT(DISTINCT ...)</code> 가 0 을 하나의 유저로 센다. ELSE 를 안 쓰면 NULL 이 되고 COUNT 는 NULL 을 세지 않는다.</li><li><b>100.0 의 소수점이 핵심이다.</b> <code>100 * v / a</code> 는 정수 나눗셈이 되는 엔진에서 0 이 나온다. 토스 테스트돔에서 실제로 이걸로 틀린 적이 있다.</li><li><b>이 문제의 NULLIF 는 채점으로 확인할 수 없다.</b> MySQL·SQLite 는 0 으로 나누면 오류 없이 NULL 을 준다. PostgreSQL·MS SQL 은 오류가 난다. 즉 여기서는 있어도 없어도 같은 답이 나오지만, 습관을 안 들이면 다른 엔진에서 터진다.</li><li><b>이 문제의 '퍼널' 은 진짜 퍼널이 아니다.</b> 단계 순서를 안 따지므로, 장바구니를 안 거치고 구매한 유저가 있으면 뒤 단계가 앞 단계보다 많아져 전환율이 100% 를 넘을 수 있다. 면접에서 이걸 물으면 '순서를 강제하려면 단계별 첫 시각을 비교해야 한다' 고 답하면 된다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“단계별 이탈률”은 <code>100 − 전환율</code>. “채널별 퍼널”이면 <code>GROUP BY channel</code> 만 추가되고 구조는 그대로다. 순서를 강제하는 진짜 퍼널은 단계별 <code>MIN(created_at)</code> 을 구해 <code>MIN(cart) &gt; MIN(view)</code> 처럼 비교한다.</p><div class="pager"><a href="./12.html">← Q12. 채널별 pro 비중 (0 나누기)</a><a class="r" href="./14.html">Q14. 코호트별 D7 리텐션율 →</a></div>
 <footer>
   <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
   서버도 회원가입도 없습니다. ·

@@ -128,7 +128,7 @@ DATASETS = [
     }),
 ]
 
-# ── 추가 문항(Q16~Q20) 용 행 ─────────────────────────────────────────
+# ── 추가 문항(Q13~Q17) 용 행 ─────────────────────────────────────────
 L = ["event_id", "user_id", "event_name", "created_at"]
 FT = ["user_id", "first_trade_date"]
 AV = ["user_id", "visit_date"]

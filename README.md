@@ -27,9 +27,9 @@
 
 ## 담긴 것
 
-- **23문항** — 퍼널, 코호트 리텐션, 매출 분해, 윈도우 함수, 이동평균, 골든크로스,
+- **20문항** — 퍼널, 코호트 리텐션, 매출 분해, 윈도우 함수,
   gaps and islands, 중앙값, A/B 집계, NULL·타입 처리
-- **11개 테이블** — 문항마다 필요한 테이블만 보여줍니다
+- **10개 테이블** — 문항마다 필요한 테이블만 보여줍니다
 - **문항별 해설** — 같은 내용을 `쉬운 설명`과 `자세한 설명` 두 버전으로 썼습니다.
   상단에서 전환하거나 나란히 비교할 수 있습니다
 - **함수 레퍼런스 13개** — `OVER()` 계열, 프레임, NULL 함수, gaps and islands 등
@@ -61,7 +61,7 @@ cd src
 python seed.py          # 연습용 데이터 생성 (DuckDB)
 python make_sqlite.py   # SQLite 로 복제
 python gen_examples.py  # 문항별 예시 입력/출력 생성
-python regress.py       # 모범답안 21개 × 데이터셋 7개 회귀 테스트
+python regress.py       # 모범답안 18개 × 데이터셋 7개 회귀 테스트
 python export_web.py    # 정적 사이트용 JSON + DB 내보내기
 ```
 

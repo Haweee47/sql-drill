@@ -1,12 +1,12 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>종목별 5일·20일 이동평균 — SQL 문제 풀이와 함정 | SQL 드릴</title>
-<meta name="description" content="Q11 과 똑같은데 종목마다 따로. 종목이 바뀌는 지점에서 섞이면 안 된다.">
+<title>채널별 pro 비중 (0 나누기) — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="결제한 사람 중에 비싼 요금제 쓴 비율. 결제한 사람이 0명인 채널은 계산이 불가능하니 빈칸이어야 한다.">
 <link rel="canonical" href="https://haweee47.github.io/sql-drill/q/12.html">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="SQL 드릴">
-<meta property="og:title" content="종목별 5일·20일 이동평균 — SQL 풀이">
-<meta property="og:description" content="Q11 과 똑같은데 종목마다 따로. 종목이 바뀌는 지점에서 섞이면 안 된다.">
+<meta property="og:title" content="채널별 pro 비중 (0 나누기) — SQL 풀이">
+<meta property="og:description" content="결제한 사람 중에 비싼 요금제 쓴 비율. 결제한 사람이 0명인 채널은 계산이 불가능하니 빈칸이어야 한다.">
 <meta property="og:url" content="https://haweee47.github.io/sql-drill/q/12.html">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary">
@@ -68,24 +68,31 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
 footer a{color:var(--accent)}
 </style>
 </head><body><div class="wrap">
-<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q12</nav><h1>종목별 5일·20일 이동평균</h1><div class="meta">난이도 보통 · 권장 10분 · 출력 컬럼 <code>stock_code, trade_date, close_price, ma5, ma20</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q12">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">모든 종목에 대해 5일 이동평균과 20일 이동평균을 함께 구하세요.
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q12</nav><h1>채널별 pro 비중 (0 나누기)</h1><div class="meta">난이도 보통 · 권장 9분 · 출력 컬럼 <code>channel, paying_users, pro_users, pro_ratio</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q12">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">채널별로 결제 유저 가운데 pro 플랜을 쓴 적 있는 유저의 비중을
+구하세요.
 
-· 각 종목의 이동평균은 그 종목 안에서만 계산합니다.
-· 구간이 모자라는 날은 있는 만큼만 평균을 냅니다.
-· 소수점 둘째 자리까지 반올림합니다.
-· 종목코드 오름차순, 그 안에서 날짜 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>stock_code ASC, trade_date ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">Q11 과 똑같은데 <b>종목마다 따로</b>. 종목이 바뀌는 지점에서 섞이면 안 된다.</p><p class="note">삼성 마지막 날 다음 줄이 하이닉스 첫날이다.
-종목으로 묶어 주지 않으면 삼성 종가와 하이닉스 종가를 같이 평균 낸다.</p>
-<table class="e">
-<tr><th>종목</th><th>날</th><th>묶어주면</th><th>안 묶으면</th></tr>
-<tr><td>005930</td><td>마지막</td><td>삼성만</td><td>삼성만</td></tr>
-<tr><td>000660</td><td>첫날</td><td>하이닉스만 (1개)</td><td class="x">삼성 4개 + 하이닉스 1개</td></tr>
-</table><h3>이렇게 푼다</h3><ol><li>Q11 식에 <code>PARTITION BY stock_code</code> 를 넣는다.</li><li><code>AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date ROWS BETWEEN 4 PRECEDING AND CURRENT ROW)</code></li><li>20일선은 <code>19 PRECEDING</code> 으로 하나 더 만든다.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b><code>PARTITION BY</code> 를 두 식 <b>모두</b>에 넣어라.</b> ma5 에만 넣고 ma20 에 빼먹는 실수가 흔하다.</li><li>정렬도 <code>종목 ASC, 날짜 ASC</code> 둘 다 써야 한다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · Q11 에 PARTITION 을 추가할 줄 아는가.</p><h3>풀이 순서</h3><ol><li>Q11 과 같되 <code>PARTITION BY stock_code</code> 를 넣는다.</li></ol><h3>정답 (MySQL)</h3><pre><code>SELECT stock_code, trade_date, close_price,
-       ROUND(AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-             ROWS BETWEEN  4 PRECEDING AND CURRENT ROW), 2) AS ma5,
-       ROUND(AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-             ROWS BETWEEN 19 PRECEDING AND CURRENT ROW), 2) AS ma20
-FROM prices
-ORDER BY stock_code, trade_date;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>PARTITION 누락</b> — 종목 경계를 넘어 평균이 섞인다. 삼성전자 첫날 ma5 에 SK하이닉스 종가가 들어간다.</li><li>WHERE 로 한 종목만 거르는 Q11 과 달리 여기서는 전 종목이 섞여 있다. 반드시 파티션.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“지점별 7일 평균 매출”, “유저별 최근 3건 평균” 전부 동일.</p><div class="pager"><a href="./11.html">← Q11. 5일 이동평균 (부분 구간)</a><a class="r" href="./13.html">Q13. 골든크로스 발생일 →</a></div>
+  channel      채널
+  paying_users 그 채널에서 결제 이력이 1건 이상인 유저 수
+  pro_users    그중 pro 플랜 결제가 1건 이상인 유저 수
+  pro_ratio    pro_users / paying_users × 100 (소수점 둘째 자리 반올림)
+
+· 모든 채널이 결과에 나와야 합니다. 결제 유저가 한 명도 없는 채널도 포함합니다.
+· 결제 유저가 0 명인 채널의 pro_ratio 는 NULL 이어야 합니다. 0 이나 에러가 아닙니다.
+· pro_ratio 내림차순, 같으면 channel 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>pro_ratio DESC, channel ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">결제한 사람 중에 비싼 요금제 쓴 비율. 결제한 사람이 <b>0명</b>인 채널은 계산이 불가능하니 빈칸이어야 한다.</p><table class="e">
+<tr><th>채널</th><th>결제 유저</th><th>pro 유저</th><th>비중</th></tr>
+<tr><td>organic</td><td>371</td><td>130</td><td>35.04</td></tr>
+<tr><td>newsletter</td><td><b>0</b></td><td>0</td><td class="x"><b>NULL</b></td></tr>
+</table>
+<p class="note">0 ÷ 0 은 '0%' 가 아니다. <b>계산할 수 없음</b> 이다.
+그래서 0 이 아니라 빈칸(NULL)이 맞다. 그리고 그 채널도 결과에 <b>나와야</b> 한다.</p><h3>이렇게 푼다</h3><ol><li>채널을 <b>전부 남긴다</b> (결제 유저가 0명인 채널도).</li><li>채널별로 결제한 사람 수, 그중 pro 쓴 사람 수를 센다.</li><li><code>pro수 * 100.0 / NULLIF(결제수, 0)</code>.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b><code>NULLIF(분모, 0)</code> 이 이 문제의 전부다.</b> '분모가 0 이면 NULL 로 바꿔라' 는 뜻이고, NULL 로 나누면 결과가 NULL 이 된다. 이름이 헷갈리는데, <b>NULLIF 는 NULL 을 <u>만드는</u> 함수</b>다.</li><li><b><code>IFNULL</code> 과 반대다.</b> <code>IFNULL(분모, 0)</code> 은 NULL 을 0 으로 바꿔서 <b>0 나누기를 일부러 만든다.</b> 정반대다.</li><li>결제 유저 0명인 채널을 <code>WHERE</code> 로 걸러내면 안 된다. 그 줄도 나와야 한다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 분모가 0 이 될 수 있는 상황을 아는가.</p><h3>풀이 순서</h3><ol><li>결제 유저 수와 pro 유저 수를 조건부 DISTINCT 집계로.</li><li>비율 계산에서 분모를 <code>NULLIF(분모, 0)</code> 로 감싼다.</li></ol><h3>정답 (MySQL)</h3><pre><code>SELECT u.channel,
+       COUNT(DISTINCT p.user_id) AS paying_users,
+       COUNT(DISTINCT CASE WHEN p.plan=&#x27;pro&#x27; THEN p.user_id END) AS pro_users,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN p.plan=&#x27;pro&#x27; THEN p.user_id END)
+             / NULLIF(COUNT(DISTINCT p.user_id), 0), 2) AS pro_ratio
+FROM users u
+LEFT JOIN payments p ON p.user_id = u.user_id
+GROUP BY u.channel
+ORDER BY pro_ratio DESC, u.channel;</code></pre><h3>함정</h3><div class="trap"><ul><li><b><code>IFNULL(분모, 0)</code> 은 정반대다.</b> 0 나누기를 막는 게 아니라 만든다. 방어는 <code>NULLIF(분모, 0)</code>.</li><li>결제 유저가 0 명인 채널도 결과에 나와야 하므로 LEFT JOIN.</li><li><code>CASE WHEN ... THEN user_id END</code> 에 <b>ELSE 를 쓰지 않는다</b>. ELSE 0 을 넣으면 0 도 값이라 DISTINCT 집계에 섞인다.</li><li>이 데이터로는 ‘분모 0’ 이 드물다. <b>안 걸린다고 맞는 게 아니다</b> — 여러 데이터셋으로 채점되면 그때 터진다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“환불률”, “쿠폰 사용률” 처럼 모집단이 비어 있을 수 있는 비율 전부.</p><div class="pager"><a href="./11.html">← Q11. 전 유저 결제 요약 (NULL 처리)</a><a class="r" href="./13.html">Q13. 퍼널 단계별 유저 수와 단계 전환율 →</a></div>
 <footer>
   <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
   서버도 회원가입도 없습니다. ·

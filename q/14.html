@@ -1,12 +1,12 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>전 유저 결제 요약 (NULL 처리) — SQL 문제 풀이와 함정 | SQL 드릴</title>
-<meta name="description" content="전교생 명단에 성적을 붙이는데, 시험 안 본 애도 명단에 남아야 한다. 점수 칸은 0 으로, 시험 날짜 칸은 빈칸으로.">
+<title>코호트별 D7 리텐션율 — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="첫 거래한 날로부터 딱 7일 뒤 다시 왔나. 첫 거래일마다 따로 센다.">
 <link rel="canonical" href="https://haweee47.github.io/sql-drill/q/14.html">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="SQL 드릴">
-<meta property="og:title" content="전 유저 결제 요약 (NULL 처리) — SQL 풀이">
-<meta property="og:description" content="전교생 명단에 성적을 붙이는데, 시험 안 본 애도 명단에 남아야 한다. 점수 칸은 0 으로, 시험 날짜 칸은 빈칸으로.">
+<meta property="og:title" content="코호트별 D7 리텐션율 — SQL 풀이">
+<meta property="og:description" content="첫 거래한 날로부터 딱 7일 뒤 다시 왔나. 첫 거래일마다 따로 센다.">
 <meta property="og:url" content="https://haweee47.github.io/sql-drill/q/14.html">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary">
@@ -68,32 +68,35 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
 footer a{color:var(--accent)}
 </style>
 </head><body><div class="wrap">
-<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q14</nav><h1>전 유저 결제 요약 (NULL 처리)</h1><div class="meta">난이도 보통 · 권장 10분 · 출력 컬럼 <code>user_id, channel, pay_count, total_amount, last_paid</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q14">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">모든 유저에 대해 결제 요약을 만드세요. 결제 이력이 없는 유저도
-빠짐없이 포함해야 합니다.
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q14</nav><h1>코호트별 D7 리텐션율</h1><div class="meta">난이도 보통 · 권장 12분 · 출력 컬럼 <code>first_trade_date, cohort_size, d7_active_users, d7_retention_rate</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q14">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">first_trade_date 가 2026-02-01 ~ 2026-02-07 인 유저를 코호트로 봅니다.
+첫 거래일자별로 아래를 구하세요.
 
-  user_id       유저 ID
-  channel       유입 채널
-  pay_count     결제 건수 (없으면 0)
-  total_amount  결제 금액 합계 (없으면 0)
-  last_paid     마지막 결제일 (없으면 NULL 그대로 둘 것)
+  cohort_size         그 날 첫 거래한 유저 수
+  d7_active_users     그 유저 중 &#x27;첫 거래일 + 정확히 7일&#x27; 에 앱을 연 유저 수
+  d7_retention_rate   d7_active_users / cohort_size x 100
 
-· total_amount 는 숫자여야 합니다. 문자로 바꾸지 마세요.
-· 결제가 있는 유저를 먼저, 없는 유저를 뒤로 보내세요.
-· 그 안에서는 total_amount 내림차순, 같으면 user_id 오름차순입니다.
-· 상위 20행만 출력하세요.</div><div class="spec">정렬 <code>결제없음 뒤로, total_amount DESC, user_id ASC / LIMIT 20</code></div><h2>쉽게 설명하면</h2><p class="oneline">전교생 명단에 성적을 붙이는데, <b>시험 안 본 애도 명단에 남아야</b> 한다. 점수 칸은 0 으로, 시험 날짜 칸은 빈칸으로.</p><p class="note"><b>더할 게 하나도 없을 때 뭐가 나오나</b> — 이걸 알아야 풀린다.</p>
-<table class="e">
-<tr><th>함수</th><th>아무것도 없을 때</th></tr>
-<tr><td>COUNT(*) · COUNT(칸)</td><td><b>0</b></td></tr>
-<tr><td>SUM · AVG · MAX · MIN</td><td class="x"><b>NULL</b> (0 이 아니다!)</td></tr>
-</table><h3>이렇게 푼다</h3><ol><li>유저 명단을 <b>왼쪽에 두고</b> 결제를 붙인다 (LEFT JOIN).</li><li>건수는 <code>COUNT</code> — 결제가 없으면 자동으로 0 이 된다.</li><li>금액은 <code>COALESCE(SUM(금액), 0)</code> — <b>SUM 밖에</b> 씌운다.</li><li>마지막 결제일은 <b>NULL 그대로</b> 둔다.</li><li>결제 없는 사람을 뒤로 보내고, 금액 많은 순, 상위 20명만.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b><code>SUM</code> 은 더할 게 없으면 0 이 아니라 NULL 이다.</b> 그래서 <code>COALESCE(…, 0)</code> 이 필요하다. 이것 때문에 금액 칸이 빈칸으로 나오는 실수가 가장 흔하다.</li><li><b>결제 없는 사람을 뒤로 보내는 요령:</b> <code>ORDER BY (마지막결제일 IS NULL), 금액 DESC, user_id ASC</code> — <code>IS NULL</code> 은 0 또는 1 이라서, 결제 있는 사람(0)이 먼저 온다.</li><li><code>LIMIT 20</code> 빼먹지 마라. 안 쓰면 3,000줄이 다 나온다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · LEFT JOIN 후 NULL 을 어떻게 다루는가. 그리고 NULL 정렬.</p><h3>풀이 순서</h3><ol><li>users 기준 LEFT JOIN.</li><li>건수는 <code>COUNT(p.user_id)</code> — NULL 을 안 세므로 0 이 된다.</li><li>합계는 <code>COALESCE(SUM(...), 0)</code> — SUM 은 대상이 없으면 NULL 을 반환한다.</li><li>마지막 결제일은 NULL 그대로 두되, 정렬에서 뒤로 보낸다.</li></ol><h3>정답 (MySQL)</h3><pre><code>SELECT u.user_id, u.channel,
-       COUNT(p.user_id)           AS pay_count,
-       COALESCE(SUM(p.amount), 0) AS total_amount,
-       MAX(p.paid_date)           AS last_paid
-FROM users u
-LEFT JOIN payments p ON p.user_id = u.user_id
-GROUP BY u.user_id, u.channel
-ORDER BY (MAX(p.paid_date) IS NULL), COALESCE(SUM(p.amount),0) DESC, u.user_id
-LIMIT 20;</code></pre><h3>함정</h3><div class="trap"><ul><li><code>COUNT(*)</code> 를 쓰면 결제 없는 유저도 <b>1</b> 이 된다. LEFT JOIN 으로 행은 하나 생기기 때문. <code>COUNT(p.user_id)</code> 여야 0.</li><li><code>SUM</code> 은 대상 행이 없으면 0 이 아니라 <b>NULL</b>. COALESCE 로 감싼다.</li><li>MySQL 에 <code>NULLS LAST</code> 가 없다. <code>ORDER BY (컬럼 IS NULL), 컬럼</code> 로 쓴다. 조건식이 0/1 이 되어 NULL 이 뒤로 간다.</li><li><code>COALESCE(total, '없음')</code> 처럼 <b>문자 기본값을 넣으면 컬럼 전체가 문자열</b>이 되어 정렬이 사전순으로 깨진다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“주문 없는 고객 포함 요약”, “미거래 종목 포함” 전부 동일.</p><div class="pager"><a href="./13.html">← Q13. 골든크로스 발생일</a><a class="r" href="./15.html">Q15. 채널별 pro 비중 (0 나누기) →</a></div>
+· +7일 &#x27;이내&#x27; 가 아니라 &#x27;정확히 그 날&#x27; 입니다.
+· daily_app_visits 는 같은 유저가 같은 날 여러 행을 남길 수 있습니다.
+· 재방문자가 0 명인 날도 0 으로 한 행 나와야 합니다.
+· 리텐션율은 소수점 첫째 자리까지 반올림합니다.
+· first_trade_date 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>first_trade_date ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline">첫 거래한 날로부터 <b>딱 7일 뒤</b> 다시 왔나. 첫 거래일마다 따로 센다.</p><table class="e">
+<tr><th>첫 거래</th><th>확인할 날</th><th>왔으면</th></tr>
+<tr><td>2월 1일</td><td><b>2월 8일</b></td><td>재방문 1명</td></tr>
+<tr><td>2월 2일</td><td><b>2월 9일</b></td><td>아무도 안 옴 → 0</td></tr>
+</table>
+<p class="note">'7일 안에' 가 아니라 '<b>딱 그 날</b>'. 2월 7일에 왔어도 안 세고,
+2월 9일에 왔어도 안 센다. 재방문 0명인 날도 0 으로 한 줄 나와야 한다.</p><h3>이렇게 푼다</h3><ol><li>코호트 명단(first_trades)을 <b>왼쪽에</b> 둔다. 분모가 여기서 나온다.</li><li>방문 기록을 붙이는데, <b>조건을 ON 안에</b> 쓴다 — <code>ON 같은사람 AND 방문일 = 첫거래일 + 7일</code>.</li><li>분모 = 명단 사람 수, 분자 = 붙은 사람 수. 둘 다 중복 지우고 센다.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b>조건을 WHERE 에 쓰면 LEFT JOIN 이 그냥 JOIN 이 되어 버린다.</b> 안 온 사람은 방문일이 빈칸인데, WHERE 가 그 빈칸을 걸러내서 <b>분모에서까지 사라진다.</b> → 오른쪽 테이블 조건은 <b>반드시 ON 에</b>. 이 한 줄이 리텐션 문제의 핵심이다.</li><li><b>분자에 중복 제거를 빼면 100% 를 넘는다.</b> 같은 사람이 같은 날 여러 번 방문 기록을 남길 수 있다. 리텐션이 100 을 넘으면 거의 항상 이 실수다.</li><li>분모를 <code>COUNT(*)</code> 로 쓰면 안 된다. 붙이면서 늘어난 줄 수가 나온다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 코호트 테이블을 왼쪽에 두고 활동 로그를 LEFT JOIN 한다. 코호트 문제의 90% 가 이 모양이다.</p><h3>풀이 순서</h3><ol><li>코호트 테이블(<code>first_trades</code>)을 <b>왼쪽</b>에 둔다. 분모가 여기서 나온다.</li><li>활동 로그를 <code>LEFT JOIN</code> 하고, 조인 조건에 <code>visit_date = first_trade_date + 7일</code> 을 넣는다.</li><li>분모는 <code>COUNT(DISTINCT f.user_id)</code>, 분자는 <code>COUNT(DISTINCT v.user_id)</code>. 둘 다 DISTINCT 다.</li><li>범위 조건은 <code>WHERE</code> 에 쓴다 (왼쪽 테이블 조건이므로 안전하다).</li></ol><h3>정답 (MySQL)</h3><pre><code>SELECT f.first_trade_date,
+       COUNT(DISTINCT f.user_id) AS cohort_size,
+       COUNT(DISTINCT v.user_id) AS d7_active_users,
+       ROUND(100.0 * COUNT(DISTINCT v.user_id)
+             / NULLIF(COUNT(DISTINCT f.user_id), 0), 1) AS d7_retention_rate
+FROM first_trades f
+LEFT JOIN daily_app_visits v
+       ON v.user_id = f.user_id
+      AND v.visit_date = DATE_ADD(f.first_trade_date, INTERVAL 7 DAY)
+WHERE f.first_trade_date BETWEEN &#x27;2026-02-01&#x27; AND &#x27;2026-02-07&#x27;
+GROUP BY f.first_trade_date
+ORDER BY f.first_trade_date;</code></pre><h3>함정</h3><div class="trap"><ul><li><b>JOIN 조건을 WHERE 로 옮기면 LEFT JOIN 이 INNER JOIN 이 된다.</b> <code>WHERE v.visit_date = ...</code> 로 쓰면 재방문 안 한 유저의 NULL 행이 조건에 걸려 사라지고, 분모까지 같이 깎인다. <b>오른쪽 테이블 조건은 반드시 ON 에</b> — 이 한 줄이 리텐션 문제의 핵심이다.</li><li><b>'정확히 7일' 과 '7일 이내' 는 다른 문제다.</b> <code>=</code> 로 쓸 자리에 <code>&lt;=</code> 를 쓰면 숫자가 크게 부풀어 오른다. 문제를 다시 읽어라.</li><li><b>분자에 DISTINCT 를 빼면 100% 를 넘는다.</b> 방문 로그는 같은 유저가 같은 날 여러 행을 남길 수 있다. 리텐션율이 100 을 넘으면 거의 항상 이 실수다.</li><li><b>분모를 COUNT(*) 로 쓰면 안 된다.</b> LEFT JOIN 후의 <code>COUNT(*)</code> 는 조인으로 불어난 행 수다. 코호트 크기가 아니다.</li><li><b>재방문자 0 명인 날도 한 행 나와야 한다.</b> LEFT JOIN 이면 자동으로 0 이 된다. <code>COUNT</code> 는 빈 입력에서 0 을 돌려주기 때문이다 (<code>SUM</code> 은 NULL 이 된다 — 다른 문제에서 자주 나오는 함정).</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“D1/D7/D30 을 한 번에”면 조인 조건을 <code>visit_date IN (+1일, +7일, +30일)</code> 로 바꾸고 <code>COUNT(DISTINCT CASE WHEN ... END)</code> 를 세 개 만든다. “월 코호트 매트릭스”면 <code>TIMESTAMPDIFF(MONTH, 코호트월, 활동월)</code> 을 경과 개월로 쓰고 그걸로 피벗한다.</p><div class="pager"><a href="./13.html">← Q13. 퍼널 단계별 유저 수와 단계 전환율</a><a class="r" href="./15.html">Q15. 유저별 최장 연속 거래일수 →</a></div>
 <footer>
   <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
   서버도 회원가입도 없습니다. ·

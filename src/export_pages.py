@@ -6,7 +6,7 @@
 
 그래서 문항마다 '읽을 수 있는 페이지'를 따로 만든다.
   web/q/5.html   ← 문제 + 쉬운 해설 + 자세한 해설 + 정답 쿼리
-  web/q/        ← 23개 목록
+  web/q/        ← 20개 목록
 각 페이지는 롱테일 검색어("SQL 코호트 리텐션 쿼리" 같은)를 노린다.
 """
 import html
@@ -170,13 +170,13 @@ def q_page(g, task, prev_g, next_g):
 
 def index_page():
     url = SITE + "/q/"
-    desc = ("SQL 쿼리 테스트에 나오는 23개 유형의 문제와 풀이. 퍼널, 코호트 리텐션, "
-            "윈도우 함수, 이동평균, gaps and islands, NULL 처리까지 함정과 함께 정리했습니다.")
-    h = HEAD.format(title="SQL 문항 해설 23선 — 쿼리 테스트 유형 정리 | SQL 드릴",
+    desc = ("SQL 쿼리 테스트에 나오는 20개 유형의 문제와 풀이. 퍼널, 코호트 리텐션, "
+            "윈도우 함수, gaps and islands, NULL 처리까지 함정과 함께 정리했습니다.")
+    h = HEAD.format(title="SQL 문항 해설 20선 — 쿼리 테스트 유형 정리 | SQL 드릴",
                     desc=e(desc), url=e(url),
-                    ogtitle="SQL 문항 해설 23선", css=CSS)
+                    ogtitle="SQL 문항 해설 20선", css=CSS)
     h += '<nav class="bc"><a href="%s/">SQL 드릴</a> › 문항 해설</nav>' % SITE
-    h += "<h1>SQL 문항 해설 23선</h1>"
+    h += "<h1>SQL 문항 해설 20선</h1>"
     h += '<p class="meta">데이터 분석 채용 전형의 쿼리 테스트에 실제로 나오는 유형들입니다. '
     h += '각 문항마다 <b>쉬운 설명</b>과 <b>자세한 설명</b>을 함께 적었습니다.</p>'
     h += '<a class="cta" href="%s/">직접 풀어보기 →</a>' % SITE

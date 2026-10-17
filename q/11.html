@@ -1,12 +1,12 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>5일 이동평균 (부분 구간) — SQL 문제 풀이와 함정 | SQL 드릴</title>
-<meta name="description" content="최근 5일 평균. 아직 5일이 안 모인 날은 있는 날만 가지고 평균.">
+<title>전 유저 결제 요약 (NULL 처리) — SQL 문제 풀이와 함정 | SQL 드릴</title>
+<meta name="description" content="전교생 명단에 성적을 붙이는데, 시험 안 본 애도 명단에 남아야 한다. 점수 칸은 0 으로, 시험 날짜 칸은 빈칸으로.">
 <link rel="canonical" href="https://haweee47.github.io/sql-drill/q/11.html">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="SQL 드릴">
-<meta property="og:title" content="5일 이동평균 (부분 구간) — SQL 풀이">
-<meta property="og:description" content="최근 5일 평균. 아직 5일이 안 모인 날은 있는 날만 가지고 평균.">
+<meta property="og:title" content="전 유저 결제 요약 (NULL 처리) — SQL 풀이">
+<meta property="og:description" content="전교생 명단에 성적을 붙이는데, 시험 안 본 애도 명단에 남아야 한다. 점수 칸은 0 으로, 시험 날짜 칸은 빈칸으로.">
 <meta property="og:url" content="https://haweee47.github.io/sql-drill/q/11.html">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary">
@@ -68,25 +68,32 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
 footer a{color:var(--accent)}
 </style>
 </head><body><div class="wrap">
-<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q11</nav><h1>5일 이동평균 (부분 구간)</h1><div class="meta">난이도 보통 · 권장 8분 · 출력 컬럼 <code>trade_date, close_price, ma5</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q11">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">종목코드 &#x27;005930&#x27;의 일별 종가에 대해 5일 이동평균을 구하세요.
+<nav class="bc"><a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> › <a href="./">문항 해설</a> › Q11</nav><h1>전 유저 결제 요약 (NULL 처리)</h1><div class="meta">난이도 보통 · 권장 10분 · 출력 컬럼 <code>user_id, channel, pay_count, total_amount, last_paid</code></div><a class="cta" href="https://haweee47.github.io/sql-drill/#q11">이 문제 직접 풀어보기 →</a><h2>문제</h2><div class="box">모든 유저에 대해 결제 요약을 만드세요. 결제 이력이 없는 유저도
+빠짐없이 포함해야 합니다.
 
-· 직전 5거래일이 아직 쌓이지 않은 날은, 그날까지 있는 데이터만으로 평균을 냅니다.
-  (1일차는 1개, 2일차는 2개 ... 5일차부터 5개)
-· 이동평균은 소수점 둘째 자리까지 반올림합니다.
-· 날짜 오름차순으로 정렬하세요.</div><div class="spec">정렬 <code>trade_date ASC</code></div><h2>쉽게 설명하면</h2><p class="oneline"><b>최근 5일 평균</b>. 아직 5일이 안 모인 날은 있는 날만 가지고 평균.</p><table class="e">
-<tr><th>날</th><th>종가</th><th>평균에 쓰는 개수</th><th>ma5</th></tr>
-<tr><td>1일차</td><td>100</td><td>1개</td><td>100.00</td></tr>
-<tr><td>2일차</td><td>200</td><td>2개</td><td>150.00</td></tr>
-<tr><td>5일차</td><td>…</td><td>5개</td><td>…</td></tr>
-<tr><td>6일차</td><td>…</td><td>5개 (1일차는 빠짐)</td><td>…</td></tr>
-</table>
-<p class="note">창문이 5칸이고, 날짜가 가면 창문도 같이 미끄러진다.
-시작할 때는 창문이 아직 다 안 찼다.</p><h3>이렇게 푼다</h3><ol><li><code>AVG(close_price) OVER (ORDER BY trade_date ROWS BETWEEN 4 PRECEDING AND CURRENT ROW)</code> — 이 한 줄이 전부다.</li><li>소수점 둘째 자리까지 반올림.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b><code>ROWS BETWEEN …</code> 을 빼면 전혀 다른 값이 나온다.</b> 안 쓰면 기본값이 '처음부터 이번 줄까지' 라서 <b>누적 평균</b>이 되어 버린다. 이게 이동평균 문제에서 가장 많이 틀리는 부분이다.</li><li><b><code>4 PRECEDING</code> 이다. 5 가 아니다.</b> 오늘을 포함해서 5개니까 앞으로 4칸이다.</li><li><b>날짜를 빼서 구하면 안 된다.</b> 주말에는 데이터가 없어서 '5일 전' 자리가 비어 있다. <b>줄 개수</b>로 세야 한다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · 프레임을 쓸 줄 아는가. 날짜가 아니라 행으로 세는가.</p><h3>풀이 순서</h3><ol><li><code>AVG(x) OVER (ORDER BY 날짜 ROWS BETWEEN 4 PRECEDING AND CURRENT ROW)</code>.</li><li>끝.</li></ol><h3>정답 (MySQL)</h3><pre><code>SELECT trade_date, close_price,
-       ROUND(AVG(close_price) OVER (ORDER BY trade_date
-             ROWS BETWEEN 4 PRECEDING AND CURRENT ROW), 2) AS ma5
-FROM prices
-WHERE stock_code = &#x27;005930&#x27;
-ORDER BY trade_date;</code></pre><h3>함정</h3><div class="trap"><ul><li><b><code>ROWS</code> 누락</b> — 기본 프레임이 <code>RANGE UNBOUNDED PRECEDING</code> 이라 <b>누적평균</b>이 된다. 가장 흔한 실수.</li><li><code>5 PRECEDING</code> 으로 쓰면 6일 평균. 당일이 포함되므로 <code>4 PRECEDING</code>.</li><li><b>날짜 조인으로 풀려고 하면 안 된다.</b> <code>INTERVAL 4 DAY</code> 는 달력 4일이라 주말이 끼면 거래일 수가 맞지 않는다.</li><li>부분 구간 처리는 <b>따로 할 필요가 없다</b>. 앞 행이 모자라면 윈도우가 알아서 줄어든다. CASE 분기는 오히려 틀린다.</li><li>반대로 “초반 4일은 NULL” 이라는 문제면 <code>CASE WHEN ROW_NUMBER() OVER (...) >= 5 THEN ... END</code> 를 덧붙인다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“최근 7일 합계”, “최근 3건 평균” 전부 같은 프레임.</p><div class="pager"><a href="./10.html">← Q10. 채널별 ARPPU와 순위 변동</a><a class="r" href="./12.html">Q12. 종목별 5일·20일 이동평균 →</a></div>
+  user_id       유저 ID
+  channel       유입 채널
+  pay_count     결제 건수 (없으면 0)
+  total_amount  결제 금액 합계 (없으면 0)
+  last_paid     마지막 결제일 (없으면 NULL 그대로 둘 것)
+
+· total_amount 는 숫자여야 합니다. 문자로 바꾸지 마세요.
+· 결제가 있는 유저를 먼저, 없는 유저를 뒤로 보내세요.
+· 그 안에서는 total_amount 내림차순, 같으면 user_id 오름차순입니다.
+· 상위 20행만 출력하세요.</div><div class="spec">정렬 <code>결제없음 뒤로, total_amount DESC, user_id ASC / LIMIT 20</code></div><h2>쉽게 설명하면</h2><p class="oneline">전교생 명단에 성적을 붙이는데, <b>시험 안 본 애도 명단에 남아야</b> 한다. 점수 칸은 0 으로, 시험 날짜 칸은 빈칸으로.</p><p class="note"><b>더할 게 하나도 없을 때 뭐가 나오나</b> — 이걸 알아야 풀린다.</p>
+<table class="e">
+<tr><th>함수</th><th>아무것도 없을 때</th></tr>
+<tr><td>COUNT(*) · COUNT(칸)</td><td><b>0</b></td></tr>
+<tr><td>SUM · AVG · MAX · MIN</td><td class="x"><b>NULL</b> (0 이 아니다!)</td></tr>
+</table><h3>이렇게 푼다</h3><ol><li>유저 명단을 <b>왼쪽에 두고</b> 결제를 붙인다 (LEFT JOIN).</li><li>건수는 <code>COUNT</code> — 결제가 없으면 자동으로 0 이 된다.</li><li>금액은 <code>COALESCE(SUM(금액), 0)</code> — <b>SUM 밖에</b> 씌운다.</li><li>마지막 결제일은 <b>NULL 그대로</b> 둔다.</li><li>결제 없는 사람을 뒤로 보내고, 금액 많은 순, 상위 20명만.</li></ol><h3>이것만 피하면 된다</h3><div class="wt"><ul><li><b><code>SUM</code> 은 더할 게 없으면 0 이 아니라 NULL 이다.</b> 그래서 <code>COALESCE(…, 0)</code> 이 필요하다. 이것 때문에 금액 칸이 빈칸으로 나오는 실수가 가장 흔하다.</li><li><b>결제 없는 사람을 뒤로 보내는 요령:</b> <code>ORDER BY (마지막결제일 IS NULL), 금액 DESC, user_id ASC</code> — <code>IS NULL</code> 은 0 또는 1 이라서, 결제 있는 사람(0)이 먼저 온다.</li><li><code>LIMIT 20</code> 빼먹지 마라. 안 쓰면 3,000줄이 다 나온다.</li></ul></div><h2>자세히</h2><p><b>묻는 것</b> · LEFT JOIN 후 NULL 을 어떻게 다루는가. 그리고 NULL 정렬.</p><h3>풀이 순서</h3><ol><li>users 기준 LEFT JOIN.</li><li>건수는 <code>COUNT(p.user_id)</code> — NULL 을 안 세므로 0 이 된다.</li><li>합계는 <code>COALESCE(SUM(...), 0)</code> — SUM 은 대상이 없으면 NULL 을 반환한다.</li><li>마지막 결제일은 NULL 그대로 두되, 정렬에서 뒤로 보낸다.</li></ol><h3>정답 (MySQL)</h3><pre><code>SELECT u.user_id, u.channel,
+       COUNT(p.user_id)           AS pay_count,
+       COALESCE(SUM(p.amount), 0) AS total_amount,
+       MAX(p.paid_date)           AS last_paid
+FROM users u
+LEFT JOIN payments p ON p.user_id = u.user_id
+GROUP BY u.user_id, u.channel
+ORDER BY (MAX(p.paid_date) IS NULL), COALESCE(SUM(p.amount),0) DESC, u.user_id
+LIMIT 20;</code></pre><h3>함정</h3><div class="trap"><ul><li><code>COUNT(*)</code> 를 쓰면 결제 없는 유저도 <b>1</b> 이 된다. LEFT JOIN 으로 행은 하나 생기기 때문. <code>COUNT(p.user_id)</code> 여야 0.</li><li><code>SUM</code> 은 대상 행이 없으면 0 이 아니라 <b>NULL</b>. COALESCE 로 감싼다.</li><li>MySQL 에 <code>NULLS LAST</code> 가 없다. <code>ORDER BY (컬럼 IS NULL), 컬럼</code> 로 쓴다. 조건식이 0/1 이 되어 NULL 이 뒤로 간다.</li><li><code>COALESCE(total, '없음')</code> 처럼 <b>문자 기본값을 넣으면 컬럼 전체가 문자열</b>이 되어 정렬이 사전순으로 깨진다.</li></ul></div><h3>이렇게 변형된다</h3><p class="var">“주문 없는 고객 포함 요약”, “미거래 종목 포함” 전부 동일.</p><div class="pager"><a href="./10.html">← Q10. 채널별 ARPPU와 순위 변동</a><a class="r" href="./12.html">Q12. 채널별 pro 비중 (0 나누기) →</a></div>
 <footer>
   <a href="https://haweee47.github.io/sql-drill/">SQL 드릴</a> — 브라우저에서 바로 돌아가는 SQL 쿼리 테스트 연습.
   서버도 회원가입도 없습니다. ·

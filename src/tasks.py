@@ -229,74 +229,7 @@ SELECT strftime(mm,'%Y-%m') AS month, channel, arppu, rnk,
 FROM r ORDER BY mm, rnk"""),
 
     dict(
-        id=11, title="5일 이동평균 (부분 구간 포함)", level="보통", minutes=8,
-        prompt="""종목코드 '005930'의 일별 종가에 대해 5일 이동평균을 구하세요.
-
-· 직전 5거래일이 아직 쌓이지 않은 날은, 그날까지 있는 데이터만으로 평균을 냅니다.
-  (1일차는 1개, 2일차는 2개 ... 5일차부터 5개)
-· 이동평균은 소수점 둘째 자리까지 반올림합니다.
-· 날짜 오름차순으로 정렬하세요.""",
-        columns="trade_date, close_price, ma5",
-        order_note="trade_date ASC",
-        ref="""
-SELECT trade_date, close_price,
-       ROUND(AVG(close_price) OVER (ORDER BY trade_date
-             ROWS BETWEEN 4 PRECEDING AND CURRENT ROW), 2) AS ma5
-FROM prices
-WHERE stock_code = '005930'
-ORDER BY trade_date"""),
-
-    dict(
-        id=12, title="종목별 5일·20일 이동평균", level="보통", minutes=10,
-        prompt="""모든 종목에 대해 5일 이동평균과 20일 이동평균을 함께 구하세요.
-
-· 각 종목의 이동평균은 그 종목 안에서만 계산합니다.
-· 구간이 모자라는 날은 있는 만큼만 평균을 냅니다.
-· 소수점 둘째 자리까지 반올림합니다.
-· 종목코드 오름차순, 그 안에서 날짜 오름차순으로 정렬하세요.""",
-        columns="stock_code, trade_date, close_price, ma5, ma20",
-        order_note="stock_code ASC, trade_date ASC",
-        ref="""
-SELECT stock_code, trade_date, close_price,
-       ROUND(AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-             ROWS BETWEEN 4 PRECEDING AND CURRENT ROW), 2) AS ma5,
-       ROUND(AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-             ROWS BETWEEN 19 PRECEDING AND CURRENT ROW), 2) AS ma20
-FROM prices
-ORDER BY stock_code, trade_date"""),
-
-    dict(
-        id=13, title="골든크로스 발생일 찾기", level="어려움", minutes=18,
-        prompt="""종목별로 5일 이동평균이 20일 이동평균을 아래에서 위로 뚫고 올라간 날
-(골든크로스)을 모두 찾으세요.
-
-· 골든크로스 = 전일에는 ma5 <= ma20 이었는데 당일 ma5 > ma20 이 된 날
-· 이동평균은 구간이 모자라면 있는 만큼만 계산합니다.
-· 출력하는 ma5, ma20 은 소수점 둘째 자리까지 반올림합니다.
-  (교차 여부 판정은 반올림 전 값으로 합니다)
-· 비교할 전일이 없는 첫 거래일은 제외합니다.
-· 종목코드 오름차순, 날짜 오름차순으로 정렬하세요.""",
-        columns="stock_code, trade_date, ma5, ma20",
-        order_note="stock_code ASC, trade_date ASC",
-        ref="""
-WITH m AS (
-  SELECT stock_code, trade_date,
-         AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-               ROWS BETWEEN 4 PRECEDING AND CURRENT ROW) AS ma5,
-         AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-               ROWS BETWEEN 19 PRECEDING AND CURRENT ROW) AS ma20
-  FROM prices),
-d AS (
-  SELECT *, LAG(ma5) OVER (PARTITION BY stock_code ORDER BY trade_date) AS p5,
-            LAG(ma20) OVER (PARTITION BY stock_code ORDER BY trade_date) AS p20
-  FROM m)
-SELECT stock_code, trade_date, ROUND(ma5,2) AS ma5, ROUND(ma20,2) AS ma20
-FROM d
-WHERE p5 IS NOT NULL AND p5 <= p20 AND ma5 > ma20
-ORDER BY stock_code, trade_date"""),
-
-    dict(
-        id=14, title="전 유저 결제 요약 (NULL 처리)", level="보통", minutes=10,
+        id=11, title="전 유저 결제 요약 (NULL 처리)", level="보통", minutes=10,
         prompt="""모든 유저에 대해 결제 요약을 만드세요. 결제 이력이 없는 유저도
 빠짐없이 포함해야 합니다.
 
@@ -324,7 +257,7 @@ ORDER BY (MAX(p.paid_date) IS NULL), COALESCE(SUM(p.amount),0) DESC, u.user_id
 LIMIT 20"""),
 
     dict(
-        id=15, title="채널별 pro 비중 (0 나누기 방어)", level="보통", minutes=9,
+        id=12, title="채널별 pro 비중 (0 나누기 방어)", level="보통", minutes=9,
         prompt="""채널별로 결제 유저 가운데 pro 플랜을 쓴 적 있는 유저의 비중을
 구하세요.
 
@@ -349,10 +282,10 @@ LEFT JOIN payments p ON p.user_id = u.user_id
 GROUP BY u.channel
 ORDER BY pro_ratio DESC, u.channel"""),
 
-    # ── Gemini 출제 5문항 (Q16~Q20) ──────────────────────────────────
+    # ── Gemini 출제 5문항 (Q13~Q17) ──────────────────────────────────
     # 테이블 이름을 문제에 적힌 그대로 쓴다. 낯선 스키마를 읽는 연습이 필요하다.
     dict(
-        id=16, title="퍼널 단계별 유저 수와 단계 전환율", level="쉬움", minutes=8,
+        id=13, title="퍼널 단계별 유저 수와 단계 전환율", level="쉬움", minutes=8,
         prompt="""user_event_logs 로 아래를 한 행으로 구하세요.
 
   app_open_users           app_open 을 남긴 순 유저 수
@@ -387,7 +320,7 @@ SELECT a AS app_open_users, v AS item_view_users, k AS cart_users, p AS purchase
 FROM c"""),
 
     dict(
-        id=17, title="코호트별 D7 리텐션율", level="보통", minutes=12,
+        id=14, title="코호트별 D7 리텐션율", level="보통", minutes=12,
         prompt="""first_trade_date 가 2026-02-01 ~ 2026-02-07 인 유저를 코호트로 봅니다.
 첫 거래일자별로 아래를 구하세요.
 
@@ -417,7 +350,7 @@ GROUP BY f.first_trade_date
 ORDER BY f.first_trade_date"""),
 
     dict(
-        id=18, title="유저별 최장 연속 거래일수", level="어려움", minutes=18,
+        id=15, title="유저별 최장 연속 거래일수", level="어려움", minutes=18,
         prompt="""stock_orders 에서 유저별 '가장 길게 연속으로 거래한 일수' 를 구하고,
 그 값이 3 이상인 유저만 뽑으세요.
 
@@ -445,7 +378,7 @@ HAVING MAX(run) >= 3
 ORDER BY max_streak_days DESC, user_id ASC"""),
 
     dict(
-        id=19, title="A/B 테스트 그룹 집계 (상위 1% 제외)", level="보통", minutes=14,
+        id=16, title="A/B 테스트 그룹 집계 (상위 1% 제외)", level="보통", minutes=14,
         prompt="""experiment_users 의 모든 참가자를 대상으로 그룹별 지표를 구하세요.
 
   group_name
@@ -477,7 +410,7 @@ FROM p WHERE pr <= 0.99
 GROUP BY group_name ORDER BY group_name"""),
 
     dict(
-        id=20, title="3일 이상 연속 상승 구간 모두 찾기", level="어려움", minutes=22,
+        id=17, title="3일 이상 연속 상승 구간 모두 찾기", level="어려움", minutes=22,
         prompt="""stock_daily_prices 에서 종목별로 '3일 이상 연속 상승한 구간' 을
 모두 찾으세요.
 
@@ -512,10 +445,10 @@ FROM u GROUP BY stock_code, grp
 HAVING COUNT(*) >= 3
 ORDER BY stock_code, streak_start_date"""),
 
-    # ── NULL·COALESCE 집중 문항 (Q21~Q23) ───────────────────────────
+    # ── NULL·COALESCE 집중 문항 (Q18~Q20) ───────────────────────────
     # 토스 쿼리 테스트에 '데이터 타입과 NULL' 유형이 실제로 나왔다.
     dict(
-        id=21, title="채널별 ARPU 와 ARPPU", level="보통", minutes=11,
+        id=18, title="채널별 ARPU 와 ARPPU", level="보통", minutes=11,
         prompt="""채널별로 아래 네 가지를 구하세요.
 
   users   그 채널의 전체 가입자 수
@@ -542,7 +475,7 @@ GROUP BY u.channel
 ORDER BY arpu DESC, u.channel ASC"""),
 
     dict(
-        id=22, title="한 번도 결제하지 않은 유저 수", level="쉬움", minutes=7,
+        id=19, title="한 번도 결제하지 않은 유저 수", level="쉬움", minutes=7,
         prompt="""채널별로 '결제 이력이 한 건도 없는 유저 수' 를 구하세요.
 
   channel
@@ -564,7 +497,7 @@ GROUP BY u.channel
 ORDER BY never_paid DESC, u.channel ASC"""),
 
     dict(
-        id=23, title="유저별 결제 요약 (NULL 표시와 정렬 분리)", level="보통", minutes=12,
+        id=20, title="유저별 결제 요약 (NULL 표시와 정렬 분리)", level="보통", minutes=12,
         prompt="""유저별 결제 요약을 상위 20명만 출력하세요.
 
   user_id

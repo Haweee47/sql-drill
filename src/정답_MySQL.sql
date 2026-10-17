@@ -224,72 +224,12 @@ ORDER BY mm, rnk;
 -- 순위는 월로 파티션, 순위 변동은 채널로 파티션 — 파티션 기준이 서로 다른 게 핵심입니다.
 
 
--- ── Q11. 5일 이동평균 (부분 구간 포함) ────────────────────────────────
-SELECT trade_date,
-       close_price,
-       ROUND(AVG(close_price) OVER (ORDER BY trade_date
-             ROWS BETWEEN 4 PRECEDING AND CURRENT ROW), 2) AS ma5
-FROM prices
-WHERE stock_code = '005930'
-ORDER BY trade_date;
--- 핵심은 ROWS BETWEEN 4 PRECEDING AND CURRENT ROW 입니다.
--- 앞 행이 모자라면 윈도우가 알아서 줄어들기 때문에, 1일차는 1개 2일차는 2개로
--- 자동 처리됩니다. 별도 CASE 분기가 필요 없습니다.
---
--- 흔한 실수 셋
---   1) ROWS 를 빼먹으면 기본 프레임이 RANGE UNBOUNDED PRECEDING ~ CURRENT ROW 라
---      누적평균이 됩니다. 5일이 아니라 처음부터 전부의 평균이 나옵니다.
---   2) 5 PRECEDING 으로 쓰면 6일 평균이 됩니다. 당일을 포함하므로 4 PRECEDING.
---   3) 초반 4일을 NULL로 만들라는 문제도 있습니다. 그때는
---      CASE WHEN ROW_NUMBER() OVER (ORDER BY trade_date) >= 5 THEN ... END
---      를 덧붙입니다. 이 문제는 "있는 만큼" 이므로 그냥 둡니다.
-
-
--- ── Q12. 종목별 5일·20일 이동평균 ─────────────────────────────────────
-SELECT stock_code,
-       trade_date,
-       close_price,
-       ROUND(AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-             ROWS BETWEEN  4 PRECEDING AND CURRENT ROW), 2) AS ma5,
-       ROUND(AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-             ROWS BETWEEN 19 PRECEDING AND CURRENT ROW), 2) AS ma20
-FROM prices
-ORDER BY stock_code, trade_date;
--- PARTITION BY 를 빼면 종목 경계를 넘어 평균이 섞입니다.
--- 삼성전자 첫날 ma5 에 SK하이닉스 종가가 들어가 버립니다.
-
-
--- ── Q13. 골든크로스 발생일 찾기 ───────────────────────────────────────
-WITH m AS (
-  SELECT stock_code, trade_date,
-         AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-               ROWS BETWEEN  4 PRECEDING AND CURRENT ROW) AS ma5,
-         AVG(close_price) OVER (PARTITION BY stock_code ORDER BY trade_date
-               ROWS BETWEEN 19 PRECEDING AND CURRENT ROW) AS ma20
-  FROM prices
-),
-d AS (
-  SELECT m.*,
-         LAG(ma5)  OVER (PARTITION BY stock_code ORDER BY trade_date) AS prev_ma5,
-         LAG(ma20) OVER (PARTITION BY stock_code ORDER BY trade_date) AS prev_ma20
-  FROM m
-)
-SELECT stock_code, trade_date, ROUND(ma5, 2) AS ma5, ROUND(ma20, 2) AS ma20
-FROM d
-WHERE prev_ma5 IS NOT NULL
-  AND prev_ma5 <= prev_ma20
-  AND ma5 > ma20
-ORDER BY stock_code, trade_date;
--- 윈도우 함수 결과를 다시 LAG 에 넣어야 하므로 CTE 로 한 단계 감쌉니다.
--- '뚫고 올라간 날'이므로 전일 조건(<=)과 당일 조건(>)이 둘 다 필요합니다.
--- 당일 ma5 > ma20 만 보면 이미 올라가 있는 구간이 전부 걸립니다.
-
 -- ====================================================================
--- Q16 ~ Q20  (추가 출제분 · 새 테이블)
+-- Q13 ~ Q17  (추가 출제분 · 새 테이블)
 -- ====================================================================
 
 -- ------------------------------------------------------------------
--- Q16. 퍼널 단계별 유저 수와 단계 전환율
+-- Q13. 퍼널 단계별 유저 수와 단계 전환율
 -- ------------------------------------------------------------------
 SELECT a AS app_open_users, v AS item_view_users, k AS cart_users, p AS purchase_users,
        ROUND(100.0 * v / NULLIF(a, 0), 1) AS view_conversion_rate,
@@ -304,7 +244,7 @@ FROM (
 ) c;
 
 -- ------------------------------------------------------------------
--- Q17. 코호트별 D7 리텐션율
+-- Q14. 코호트별 D7 리텐션율
 -- ------------------------------------------------------------------
 SELECT f.first_trade_date,
        COUNT(DISTINCT f.user_id) AS cohort_size,
@@ -320,7 +260,7 @@ GROUP BY f.first_trade_date
 ORDER BY f.first_trade_date;
 
 -- ------------------------------------------------------------------
--- Q18. 유저별 최장 연속 거래일수
+-- Q15. 유저별 최장 연속 거래일수
 -- ------------------------------------------------------------------
 WITH d AS (
   SELECT DISTINCT user_id, order_date
@@ -341,7 +281,7 @@ HAVING MAX(run_len) >= 3
 ORDER BY max_streak_days DESC, user_id ASC;
 
 -- ------------------------------------------------------------------
--- Q19. A/B 테스트 그룹 집계 (상위 1% 제외)
+-- Q16. A/B 테스트 그룹 집계 (상위 1% 제외)
 -- ------------------------------------------------------------------
 WITH j AS (
   SELECT e.user_id, e.group_name,
@@ -364,7 +304,7 @@ GROUP BY group_name
 ORDER BY group_name;
 
 -- ------------------------------------------------------------------
--- Q20. 3일 이상 연속 상승 구간 모두 찾기
+-- Q17. 3일 이상 연속 상승 구간 모두 찾기
 -- ------------------------------------------------------------------
 WITH p AS (
   SELECT stock_code, trade_date, close_price,
@@ -388,7 +328,7 @@ HAVING COUNT(*) >= 3
 ORDER BY stock_code, streak_start_date;
 
 -- ────────────────────────────────────────────────────────────────────
--- Q21. 채널별 ARPU 와 ARPPU
+-- Q18. 채널별 ARPU 와 ARPPU
 -- ────────────────────────────────────────────────────────────────────
 SELECT u.channel,
        COUNT(DISTINCT u.user_id)                                   AS users,
@@ -405,7 +345,7 @@ ORDER BY arpu DESC, u.channel ASC;
 --       ARPU 는 COALESCE 를 SUM 밖에, ARPPU 는 ROUND 밖에 씌운다.
 
 -- ────────────────────────────────────────────────────────────────────
--- Q22. 한 번도 결제하지 않은 유저 수
+-- Q19. 한 번도 결제하지 않은 유저 수
 -- ────────────────────────────────────────────────────────────────────
 SELECT u.channel,
        SUM(CASE WHEN p.user_id IS NULL THEN 1 ELSE 0 END)          AS never_paid
@@ -418,7 +358,7 @@ ORDER BY never_paid DESC, u.channel ASC;
 --       있으면 0행을 돌려준다. NOT EXISTS 나 LEFT JOIN ... IS NULL 을 써라.
 
 -- ────────────────────────────────────────────────────────────────────
--- Q23. 유저별 결제 요약 (NULL 표시와 정렬 분리)
+-- Q20. 유저별 결제 요약 (NULL 표시와 정렬 분리)
 -- ────────────────────────────────────────────────────────────────────
 WITH s AS (
   SELECT u.user_id,
